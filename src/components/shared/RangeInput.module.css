@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.valueDisplay {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  background: var(--accent-blue-dim);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.inputWrapper {
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.range {
+  width: 100%;
+}
+
+/* Override default range track for custom progress */
+.range::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, var(--accent-blue) var(--value-percent, 0%), var(--bg-surface) var(--value-percent, 0%));
+}
+
+.range::-moz-range-track {
+  background: linear-gradient(to right, var(--accent-blue) var(--value-percent, 0%), var(--bg-surface) var(--value-percent, 0%));
+}

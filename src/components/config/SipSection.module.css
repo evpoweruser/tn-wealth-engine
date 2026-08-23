@@ -1,0 +1,94 @@
+.sectionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  align-items: end;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.formGroup input {
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 4px;
+  font-family: var(--font);
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.rangeWrapper {
+  margin-top: 4px;
+}
+
+.allocBox {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.allocHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.allocTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.allocExpected {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.highlight {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.allocSliders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.totalAlloc {
+  font-size: 11px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.totalAlloc.invalid {
+  color: var(--accent-red);
+  font-weight: 600;
+}

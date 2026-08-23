@@ -1,0 +1,79 @@
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--kpi-color);
+  opacity: 0.5;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.valueWrapper {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+}
+
+.animateValue {
+  animation: countUp 0.6s var(--ease) forwards;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.trend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.trend.up {
+  background: var(--accent-green-dim);
+  color: var(--accent-green);
+}
+
+.trend.down {
+  background: var(--accent-red-dim);
+  color: var(--accent-red);
+}

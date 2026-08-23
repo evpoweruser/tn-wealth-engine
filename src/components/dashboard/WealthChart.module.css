@@ -1,0 +1,49 @@
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  padding: 1.5rem;
+}
+
+.title {
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.chartContainer {
+  width: 100%;
+}
+
+.tooltip {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.75rem;
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 0.875rem;
+}
+
+.tooltipTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--accent-blue);
+}
+
+.mcNote {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+.loading {
+  color: var(--text-muted);
+  padding: 2rem;
+  text-align: center;
+}

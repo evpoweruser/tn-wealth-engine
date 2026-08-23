@@ -1,0 +1,91 @@
+.sectionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.infoNote {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(56, 189, 248, 0.1);
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 2px solid var(--accent-blue);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.formGroup input {
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 4px;
+  font-family: var(--font);
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voluntaryBlock {
+  background: rgba(0,0,0,0.2);
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.payCommissions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pcLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pcGrid {
+  display: flex;
+  gap: 12px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  accent-color: var(--accent-blue);
+}

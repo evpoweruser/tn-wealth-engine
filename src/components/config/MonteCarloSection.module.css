@@ -1,0 +1,87 @@
+.sectionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.checkbox {
+  accent-color: var(--accent-purple);
+  width: 14px;
+  height: 14px;
+}
+
+.mcSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0,0,0,0.2);
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.radioLabel input {
+  accent-color: var(--accent-purple);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.formGroup input {
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 4px;
+  font-family: var(--font);
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+}
+
+.disabledInput {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

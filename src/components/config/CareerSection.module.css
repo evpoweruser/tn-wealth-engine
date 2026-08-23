@@ -1,0 +1,81 @@
+.sectionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formGroup label {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.formGroup input {
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 4px;
+  font-family: var(--font);
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.statValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+
+.warning {
+  color: var(--accent-red);
+  font-size: 11px;
+  padding: 6px;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 4px;
+}

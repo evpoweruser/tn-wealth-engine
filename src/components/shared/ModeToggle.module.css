@@ -1,0 +1,91 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.button {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--duration) var(--ease);
+  outline: none;
+}
+
+.button:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-surface);
+}
+
+.button.active {
+  background: var(--accent-blue-dim);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 1px var(--accent-blue) inset;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--text-muted);
+  flex-shrink: 0;
+  transition: border-color var(--duration) var(--ease);
+}
+
+.active .radio {
+  border-color: var(--accent-blue);
+}
+
+.radioInner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  animation: scaleIn var(--duration) var(--ease);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.active .title {
+  color: var(--accent-blue);
+}
+
+.description {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  padding-left: 24px; /* Align with title text (16px radio + 8px gap) */
+  line-height: 1.4;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
