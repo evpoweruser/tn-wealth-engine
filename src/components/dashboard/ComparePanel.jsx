@@ -1,41 +1,87 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { useSimulation } from '../../hooks';
+import { runPath } from '../../engine';
 import { fmt, fmtCr } from '../../utils/format';
 import styles from './ComparePanel.module.css';
 
-const ComparePanel = () => {
-  const { state } = useEngine();
-  const { results, isLoading } = useSimulation();
+const ComparePanel = ({ results, isLoading }) => {
+  const { state, derivedState } = useEngine();
 
-  if (state.mode !== 'compare') return null;
-  if (isLoading || !results) return <div className={styles.loading}>Simulating...</div>;
+  const comparison = useMemo(() => {
+    if (state.retireMode !== 'compare' || !derivedState) return null;
 
-  const tapsData = results.taps || results.mid; 
-  const cpsData = results.cps || results.mid;
+    const { baseYear, retireYear, endYear, currentAge, lastPay, goals, inflationData } = derivedState;
+    const simParams = {
+      bYr: baseYear,
+      rYr: retireYear,
+      endYr: endYear,
+      currentAge,
+      pcs: Object.fromEntries(
+        Object.entries(state.payCommissions).filter(([_, v]) => v).map(([k, _]) => [Number(k), 0.25])
+      ),
+      cpsBal: state.cpsBal,
+      cpsAnn: state.cpsAnn,
+      cpsInc: state.cpsInc / 100,
+      cpsRate: state.cpsRate / 100,
+      annPct: state.annPct,
+      annYield: state.annYield / 100,
+      gratuity: state.gratuity,
+      postRetRate: state.postRetRate / 100,
+      retSpend: state.retSpend,
+      medShare: state.medShare / 100,
+      sipMo: state.sipMo,
+      sipXirr: state.sipXirr / 100,
+      sipStep: state.sipStep / 100,
+      mSurplus: state.mSurplus,
+      lastPay
+    };
+
+    const tapsRes = runPath(
+      simParams, 'taps', simParams.cpsRate, simParams.sipXirr,
+      inflationData.infLiving, inflationData.infMed, inflationData.infEdu, inflationData.infComposite, {}
+    );
+
+    const cpsRes = runPath(
+      simParams, 'cps', simParams.cpsRate, simParams.sipXirr,
+      inflationData.infLiving, inflationData.infMed, inflationData.infEdu, inflationData.infComposite, {}
+    );
+
+    return { tapsRes, cpsRes };
+  }, [state, derivedState]);
+
+  if (state.retireMode !== 'compare') return null;
+  if (isLoading || !comparison) return <div className={styles.loading}>Calculating comparison...</div>;
+
+  const { tapsRes, cpsRes } = comparison;
 
   return (
     <div className={styles.grid}>
       <div className={styles.card}>
         <h3 className={styles.title}>TAPS — Assured Pension</h3>
+        <div className={styles.subtitle}>50% of last Basic + DA</div>
         <div className={styles.bigNumber} style={{ color: 'var(--accent-green)' }}>
-          {fmt(tapsData.monthlyPension)}/mo
+          {fmt(tapsRes.monthlyPension || tapsRes.tapsPension)} /mo
         </div>
         <div className={styles.details}>
-          <p><span>Last Emoluments:</span> <span>{fmt(tapsData.lastEmol)}</span></p>
-          <p><span>CPS Corpus:</span> <span>{fmtCr(tapsData.annuityCorpus)}</span></p>
-          <p><span>Liquid (SIP + Grat):</span> <span>{fmtCr(tapsData.liquidStart)}</span></p>
+          <p><span>Last Emoluments:</span> <b>{fmt(tapsRes.lastEmol)}</b></p>
+          <p><span>CPS Corpus (funds pension):</span> <b>{fmtCr(tapsRes.finCPS)}</b></p>
+          <p><span>Liquid (SIP + Gratuity):</span> <b>{fmtCr(tapsRes.liquidStart)}</b></p>
         </div>
+        <div className={styles.note}>Corpus is not paid as lump-sum under TAPS.</div>
       </div>
+      
       <div className={styles.card}>
         <h3 className={styles.title}>Pure CPS — Lump-sum</h3>
+        <div className={styles.subtitle}>Full accumulation paid out</div>
         <div className={styles.bigNumber} style={{ color: 'var(--accent-blue)' }}>
-          {fmtCr(cpsData.annuityCorpus)}
+          {fmtCr(cpsRes.finCPS)}
         </div>
         <div className={styles.details}>
-          <p><span>Optional Annuity:</span> <span>{fmt(cpsData.monthlyPension)}/mo</span></p>
-          <p><span>Liquid at Retire:</span> <span>{fmtCr(cpsData.liquidStart)}</span></p>
+          <p><span>Optional Annuity:</span> <b>{fmt(cpsRes.monthlyPension)} /mo</b></p>
+          <p><span>Liquid at Retire:</span> <b>{fmtCr(cpsRes.liquidStart)}</b></p>
+          <p><span>Composition:</span> <b>CPS residual + SIP + Gratuity</b></p>
         </div>
+        <div className={styles.note}>No mandatory annuity rule.</div>
       </div>
     </div>
   );

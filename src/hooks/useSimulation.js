@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useDebounce } from './useDebounce.js';
-import { runPath, computeWithdrawals, computeDedicatedSIP } from '../engine/index.js';
+import { runPath, runMonteCarlo, computeWithdrawals, computeDedicatedSIP } from '../engine/index.js';
 
 export function useSimulation(state, derivedState) {
   const debouncedState = useDebounce(state, 300);
@@ -13,28 +13,37 @@ export function useSimulation(state, derivedState) {
   const workerRef = useRef(null);
 
   useEffect(() => {
-    workerRef.current = new Worker(new URL('../workers/mcWorker.js', import.meta.url), { type: 'module' });
+    try {
+      workerRef.current = new Worker(new URL('../workers/mcWorker.js', import.meta.url), { type: 'module' });
+    } catch (err) {
+      console.warn('Web Worker construction failed, falling back to main thread:', err);
+      workerRef.current = null;
+    }
+
     return () => {
       workerRef.current?.terminate();
     };
   }, []);
 
   const simulationInputs = useMemo(() => {
-    if (!debouncedDerived) return null;
+    if (!debouncedDerived || !debouncedState) return null;
     const {
       baseYear, retireYear, endYear, currentAge, lastPay, goals, inflationData
     } = debouncedDerived;
+
+    const pcBumps = {};
+    if (debouncedState.payCommissions) {
+      Object.entries(debouncedState.payCommissions).forEach(([yr, enabled]) => {
+        if (enabled) pcBumps[Number(yr)] = 0.25;
+      });
+    }
 
     const simParams = {
       bYr: baseYear,
       rYr: retireYear,
       endYr: endYear,
       currentAge,
-      pcs: Object.fromEntries(
-        Object.entries(debouncedState.payCommissions)
-          .filter(([_, v]) => v)
-          .map(([k, _]) => [Number(k), 0.25])
-      ),
+      pcs: pcBumps,
       cpsBal: debouncedState.cpsBal,
       cpsAnn: debouncedState.cpsAnn,
       cpsInc: debouncedState.cpsInc / 100,
@@ -55,7 +64,6 @@ export function useSimulation(state, derivedState) {
     const withdrawals = computeWithdrawals(goals, retireYear);
     const dedicatedSIP = computeDedicatedSIP(goals, baseYear, retireYear);
     
-    // feasibility data logic
     const feasibility = {
       years: [],
       baseSip: [],
@@ -72,7 +80,7 @@ export function useSimulation(state, derivedState) {
 
     return {
       params: simParams,
-      mode: debouncedState.retireMode,
+      mode: debouncedState.retireMode || 'taps',
       inflation: inflationData,
       withdrawals,
       dedicatedSIP,
@@ -118,9 +126,9 @@ export function useSimulation(state, derivedState) {
           low: { records: res.records },
           high: { records: res.records },
           survivePct: res.depletedYear ? 0 : 100,
-          retP10: 0,
-          retP90: 0,
-          retMed: 0,
+          retP10: null,
+          retP90: null,
+          retMed: null,
           feasibility,
           dedicatedSIP
         });
@@ -128,7 +136,7 @@ export function useSimulation(state, derivedState) {
       } catch (err) {
         setError(err);
       }
-    } else {
+    } else if (workerRef.current) {
       setIsLoading(true);
       setError(null);
       
@@ -138,7 +146,13 @@ export function useSimulation(state, derivedState) {
       };
       
       workerRef.current.onerror = (err) => {
-        setError(err);
+        console.warn('Worker execution error, calculating on main thread:', err);
+        try {
+          const res = runMonteCarlo(params, mode, inflation, withdrawals, mcConfig);
+          setResults({ ...res, feasibility, dedicatedSIP });
+        } catch (syncErr) {
+          setError(syncErr);
+        }
         setIsLoading(false);
       };
       
@@ -149,6 +163,18 @@ export function useSimulation(state, derivedState) {
         withdrawals,
         mcConfig
       });
+    } else {
+      // Synchronous fallback if Web Worker is unavailable
+      try {
+        setIsLoading(true);
+        const res = runMonteCarlo(params, mode, inflation, withdrawals, mcConfig);
+        setResults({ ...res, feasibility, dedicatedSIP });
+        setError(null);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }, [simulationInputs]);
 

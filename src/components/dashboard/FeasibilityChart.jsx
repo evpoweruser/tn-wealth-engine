@@ -1,7 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, ReferenceLine, XAxis, YAxis, Tooltip } from 'recharts';
 import { useEngine } from '../../context/EngineContext';
-import { useSimulation } from '../../hooks';
 import styles from './FeasibilityChart.module.css';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -9,19 +8,20 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <div className={styles.tooltip}>
         <p>Year: {label}</p>
-        <p>Base SIP: {payload[0]?.value?.toFixed(0) || 0}</p>
-        <p>Dedicated SIP: {payload[1]?.value?.toFixed(0) || 0}</p>
+        <p>Base SIP: ₹{Math.round(payload[0]?.value || 0).toLocaleString('en-IN')}</p>
+        <p>Dedicated Goal SIP: ₹{Math.round(payload[1]?.value || 0).toLocaleString('en-IN')}</p>
       </div>
     );
   }
   return null;
 };
 
-const FeasibilityChart = () => {
+const FeasibilityChart = ({ results, isLoading }) => {
   const { state } = useEngine();
-  const { results, isLoading } = useSimulation();
 
-  if (isLoading || !results || !results.feasibility) return <div className={styles.loading}>Loading...</div>;
+  if (isLoading || !results || !results.feasibility) {
+    return <div className={styles.card}><div className={styles.loading}>Loading feasibility...</div></div>;
+  }
 
   const chartData = results.feasibility.years.map((yr, i) => ({
     yr,

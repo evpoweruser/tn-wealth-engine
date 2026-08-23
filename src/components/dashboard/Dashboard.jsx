@@ -6,14 +6,14 @@ import GoalsTable from './GoalsTable';
 import ComparePanel from './ComparePanel';
 import styles from './Dashboard.module.css';
 
-const Dashboard = () => {
+const Dashboard = ({ results, isLoading }) => {
   return (
     <div className={styles.container}>
-      <ComparePanel />
-      <KpiGrid />
-      <WealthChart />
+      <ComparePanel results={results} isLoading={isLoading} />
+      <KpiGrid results={results} isLoading={isLoading} />
+      <WealthChart results={results} isLoading={isLoading} />
       <div className={styles.row}>
-        <FeasibilityChart />
+        <FeasibilityChart results={results} isLoading={isLoading} />
         <GoalsTable />
       </div>
     </div>

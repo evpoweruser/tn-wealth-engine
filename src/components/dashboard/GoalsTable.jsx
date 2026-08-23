@@ -12,7 +12,7 @@ const GoalsTable = () => {
     return (
       <div className={styles.card}>
         <h3 className={styles.title}>Milestone Goals</h3>
-        <p className={styles.empty}>No goals configured.</p>
+        <p className={styles.empty}>No child goals configured.</p>
       </div>
     );
   }
@@ -26,19 +26,25 @@ const GoalsTable = () => {
             <tr>
               <th>Goal</th>
               <th>Year</th>
-              <th>Target Cost</th>
-              <th>Gross FV</th>
+              <th>Target</th>
+              <th>Gross</th>
               <th>Fund</th>
+              <th>SIP</th>
             </tr>
           </thead>
           <tbody>
             {goals.map((g, i) => (
               <tr key={i}>
-                <td>{g.childName ? `${g.childName} - ${g.type}` : g.type}</td>
+                <td><b>{g.childName}</b> {g.label}</td>
                 <td>{g.year}</td>
-                <td>{fmt(g.targetCost)}</td>
-                <td>{fmt(g.grossFv)}</td>
-                <td><Badge text="SIP" /></td>
+                <td>{fmt(g.baseCost)}</td>
+                <td><b>{fmt(g.grossFV)}</b></td>
+                <td>
+                  <Badge variant={g.fund === 'corpus' ? 'danger' : 'success'}>
+                    {g.fund}
+                  </Badge>
+                </td>
+                <td>{g.fund === 'sip' ? `${fmt(g.sipRequired)}/mo` : '—'}</td>
               </tr>
             ))}
           </tbody>
