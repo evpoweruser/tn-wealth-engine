@@ -10,11 +10,12 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Immediate Next Tasks (from 2026-09-06 code review — highest priority first)
 
-- [ ] **PDF robustness/stress sections** (`src/utils/pdfReport.js`): `data-pdf="stress-panel"` /
-  `"sensitivity"` hooks exist in the UI but the PDF builder ignores them. Either wire
-  sections in or remove the hooks.
+- (All code review backlog items completed!)
 
 ## Completed Features
+
+- [x] **PDF robustness & stress resilience section** (`src/utils/pdfReport.js`) — Added dedicated
+  Plan Robustness & Stress Resilience vector table to Page 4 of exported PDF reports.
 
 - [x] **Drawdown-loop overlay invocation** (`src/engine/simulation.js`) — `yearlyOverlay(base, accYears + j)`
   invoked per drawdown year for windowed and all-years stress inflation regimes.
@@ -57,5 +58,5 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 ## Verification Commands
 
 - Unit tests: `npm test` (vitest; 48/48 passing as of 2026-09-06 — 40 existing + 8 wiring)
-- Lint: `npm run lint` (oxlint; 0 errors, 21 warnings as of 2026-09-06)
-- Build: `npm run build` (vite + PWA precache 10 entries, passing as of 2026-09-06)
+- Lint: `npm run lint` (oxlint; 0 errors, 14 warnings as of 2026-09-06)
+- Build: `npm run build` (vite + PWA precache 9 entries, passing as of 2026-09-06)

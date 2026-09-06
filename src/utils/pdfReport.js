@@ -403,9 +403,33 @@ export async function generateWealthReport({ state, derivedState, results, onSta
     doc.text(peak.tot <= state.mSurplus ? 'Status: feasible within surplus.' : 'Status: exceeds surplus - reduce goals or raise surplus.', MARGIN, y);
   }
 
-  // ---------- PAGE 4: assumptions ----------
+  // ---------- PAGE 4: robustness, stress & assumptions ----------
   doc.addPage();
-  y = sectionTitle(doc, 18, 'Assumptions & methodology', 'Transparent inputs behind every number');
+  y = 18;
+
+  if (state.mcOn && results.neverShortPct != null) {
+    y = sectionTitle(doc, y, 'Plan robustness & stress resilience', 'Probabilistic health metrics and market stress testing');
+    autoTable(doc, {
+      startY: y,
+      margin: { left: MARGIN, right: MARGIN },
+      theme: 'grid',
+      styles: { fontSize: 8.5, cellPadding: 2.2 },
+      headStyles: { fillColor: NAVY, textColor: 255 },
+      head: [['Metric / Stress Scenario', 'Condition / Shock Parameter', 'Value / Resilience']],
+      body: [
+        ['Never-Short Probability', 'Paths with zero liquid shortfall throughout drawdown', `${(results.neverShortPct ?? 0).toFixed(0)}%`],
+        ['Real Terminal Bequest (P50)', `Median legacy corpus at age ${state.lifeAge} (today's money)`, fmtCrRs(results.bequestP50 || 0)],
+        ['Real Terminal Bequest (P10)', `Downside 10th percentile legacy at age ${state.lifeAge}`, fmtCrRs(results.bequestP10 || 0)],
+        ['Lifetime Real Tax Burden', 'FY26-27 New Regime pension tax + goals LTCG (today\'s money)', fmtCrRs(results.taxRealP50 || 0)],
+        ['Stress: Early Market Crash', 'Years 0-1: SIP return -30%, Living inflation 8%', 'Windowed accumulation shock'],
+        ['Stress: Stagflation', 'Years 0-2: SIP return -4%, All inflation +3%', 'Windowed accumulation shock'],
+        ['Stress: Lost Decade', 'Years 0-9: SIP return -5%, Composite inflation +1%', 'Decade accumulation shock'],
+      ],
+    });
+    y = doc.lastAutoTable.finalY + 6;
+  }
+
+  y = sectionTitle(doc, y, 'Assumptions & methodology', 'Transparent inputs behind every number');
   const inf = state.inflation;
   autoTable(doc, {
     startY: y,

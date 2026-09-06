@@ -112,3 +112,31 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Git commit**: `7e96645` (wiring test), `246b5cd` (opencode install + `.gitignore`);
   HEAD `246b5cd`. Remaining uncommitted at write time: `docs/PROGRESS.md`,
   `docs/TASK_LOG.md` (this file).
+
+## [2026-09-06] Dead-code cleanup (assets, dumps, unused imports/vars)
+- **Goal**: Delete verifiably-dead files and remove oxlint-flagged unused imports/vars
+  from an external review; verify each claim before touching.
+- **Files deleted** (zero references confirmed by repo-wide grep + `index.html` /
+  `vite.config.js` check): `src/assets/react.svg`, `src/assets/vite.svg`,
+  `src/assets/hero.png`, `public/icons.svg`, `repomix-output.xml`,
+  `tn-wealth-engine-codebase.xml` (~370 KB total; XMLs were already `.gitignore`d).
+- **Files modified**: `src/hooks/useSimulation.js` (import trimmed to `useMemo`),
+  `src/components/config/SipSection.jsx` (drop `ASSET_RETURNS`, `derivedState`),
+  `src/components/dashboard/ComparePanel.jsx` (drop `results` prop, `goals` destructure),
+  `src/components/dashboard/Dashboard.jsx` (drop `results=` at call site),
+  `src/engine/goals.js` (drop unused `retireYear` param + JSDoc),
+  `src/context/EngineContext.jsx` (drop `retireYear` arg at sole call site),
+  `docs/PROGRESS.md` (cleanup entry, 14 warnings / precache 9).
+- **Scope notes**: `computeBlendedReturn`/`allocation.js` stay (used `SipSection.jsx:22`);
+  `yInfE` warning in `simulation.js` (from `6cd5674`) left untouched — out of scope.
+  Remaining 14 warnings all pre-existing in untouched files.
+- **Verification**: `npx vitest run` 48/48 passing; `npm run lint` 0 errors, 14 warnings
+  (down from 21); `npm run build` passing (PWA precache 9 entries — was 10, `icons.svg`
+  removed; `favicon.svg` retained).
+- **Git commit**: `f2957a4`
+
+## [2026-09-06] PDF report: Plan robustness & stress resilience section
+- **Goal**: Export Plan Robustness (Never-Short %, Bequest P50/P10, Real Tax) and Stress Regimes (Early Crash, Stagflation, Lost Decade) as a vector table on Page 4 of exported PDF reports.
+- **Files modified**: `src/utils/pdfReport.js`, `docs/PROGRESS.md`.
+- **Verification**: `npx vitest run` 48/48 passing; `npm run build` clean (PWA precache 9 entries).
+
