@@ -219,7 +219,7 @@ export const GoalOptimizerPanel = () => {
               const childShifts = tradeoffs[child.id] || {};
               return (
                 <div key={child.id} className={styles.childCard}>
-                  <div className={child.childName}>{child.name} ({child.birth})</div>
+                  <div className={styles.childName}>{child.name} ({child.birth})</div>
 
                   {/* Higher Secondary */}
                   <div className={styles.milestoneRow}>

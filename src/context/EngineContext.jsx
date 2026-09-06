@@ -159,27 +159,31 @@ export function EngineProvider({ children }) {
     const yearsToRetire = retireYear - baseYear;
     const endYear = baseYear + state.lifeAge - currentAge;
 
-    const inflationData = computeInflation(state.inflation.rates, state.inflation.weights);
-    const allocationData = computeBlendedReturn(state.allocation);
+    const inflationRates = state.inflation?.rates || initialState.inflation.rates;
+    const inflationWeights = state.inflation?.weights || initialState.inflation.weights;
+    const inflationData = computeInflation(inflationRates, inflationWeights);
+    const allocationData = computeBlendedReturn(state.allocation || initialState.allocation);
     
     // Convert boolean payCommissions to bump values for the engine
     const pcBumps = {};
-    Object.entries(state.payCommissions).forEach(([yr, enabled]) => {
-      if (enabled) pcBumps[Number(yr)] = 0.25;
-    });
+    if (state.payCommissions) {
+      Object.entries(state.payCommissions).forEach(([yr, enabled]) => {
+        if (enabled) pcBumps[Number(yr)] = 0.25;
+      });
+    }
 
     const lastPay = projectLastPay({
-      doj: state.doj,
-      dor: state.dor,
-      startBasic: state.startBasic,
-      daPct: state.daPct,
-      mdYear: state.mdYear,
-      mdIncr: state.mdIncr,
-      dacp: { 8: state.dacp8, 15: state.dacp15, 17: state.dacp17, 20: state.dacp20 },
+      doj: state.doj || '2019-11-01',
+      dor: state.dor || '2052-11-30',
+      startBasic: state.startBasic || 56100,
+      daPct: state.daPct ?? 60,
+      mdYear: state.mdYear || 2026,
+      mdIncr: state.mdIncr ?? 2,
+      dacp: { 8: state.dacp8 ?? 8, 15: state.dacp15 ?? 10, 17: state.dacp17 ?? 8, 20: state.dacp20 ?? 15 },
       payCommissions: pcBumps
     });
 
-    const goals = computeGoals(state.children, inflationData, state.sipXirr / 100, baseYear);
+    const goals = computeGoals(state.children || [], inflationData, (state.sipXirr || 10.8) / 100, baseYear);
 
     return {
       currentAge,
