@@ -203,5 +203,10 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   the prod path (state with children → buildSimParams → evaluateGoalTradeoff) returns
   `{base:100, mod:100, delta:0}` instead of crashing.
 - **Git commit**: hotfix commit (see `git log`; pushed + redeployed — see below).
+- **Deploy**: `npx vercel --prod` → Production READY:
+  `https://tn-wealth-engine-awa3xeti5-drsibiarasan-8376s-projects.vercel.app`;
+  apex serves new bundle `index-CSHo1nCE.js` containing the guard strings
+  ("zero records", "never raw context state", "Solver failed"); `pwa-192x192.png`
+  and `pwa-512x512.png` both return HTTP 200 — crash + icon 404 resolved.
 
 
