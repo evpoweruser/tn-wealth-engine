@@ -10,10 +10,37 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Immediate Next Tasks (from 2026-09-06 code review — highest priority first)
 
-- (All code review backlog items completed!)
+- (All engine and core features completed!)
+
+## 🎨 Future Visual Appeal & UI/UX Enhancement Roadmap
+
+### 1. Card & Dashboard Micro-Aesthetics
+- [ ] **Glassmorphism & Multi-Stop Border Glows**: Add floating CSS backdrop-blurs (`backdrop-filter: blur(12px)`) with subtle gradient borders (`linear-gradient(135deg, rgba(56,189,248,0.25), rgba(129,140,248,0.1))`) to KPI cards, Robustness Grid, and Narrative Card.
+- [ ] **Pulsing Status Badges**: Add subtle CSS pulse glow animations (`@keyframes pulseGlow`) to narrative status badges (Green pulse for High Resilience, Amber for Moderate, Red for High Depletion Risk).
+- [ ] **Animated KPI Number Transitions**: Add smooth count-up transitions for primary KPI values (Wealth at Retirement, Monthly Pension, Liquid Base) when slider inputs change.
+
+### 2. Chart Polish & Interactivity
+- [ ] **Gradient Fills for Monte Carlo Bands**: Replace solid P10–P90 confidence band colors in `WealthChart.jsx` with multi-stop SVG area gradients (`stopOpacity` 0.35 $\to$ 0.05).
+- [ ] **Interactive Hover Crosshair & Multi-Pill Tooltips**: Custom Recharts tooltip showing liquid vs pension vs total wealth breakdown pills with crisp glass background and active year crosshairs.
+- [ ] **Dynamic Stress Overlay Line**: Clicking a stress regime in `StressPanel.jsx` dynamically plots a dashed stress trajectory line over `WealthChart.jsx` for direct visual comparison.
+
+### 3. Config Sidebar & Goal Timeline Visuals
+- [ ] **Milestone Goal Visual Timeline**: Render an interactive horizontal SVG timeline node chart for child milestones (Higher Secondary $\to$ College $\to$ Marriage) showing target ages and funding badges (`Corpus` vs `SIP`).
+- [ ] **Segmented Tab Switcher**: Add sliding pill highlight tabs for switching sidebar sections (Career, Scheme, SIP, Children, Monte Carlo).
+- [ ] **Gradient Range Slider Fill**: Update range input sliders (`RangeInput.jsx`) with dynamic gradient track fills indicating active progress.
+
+### 4. Micro-Interactions & Motion
+- [ ] **Smooth Layout Transitions**: Add layout spring animations when toggling Compare mode (TAPS vs CPS side-by-side split view).
+- [ ] **Interactive Tornado Impact Cards**: Hovering over Tornado Chart bars shows a floating breakdown card with exact rupee impact and plan hold reduction.
+- [ ] **Toast Notifications**: Add subtle floating toast popups when exporting PDF reports or resetting inputs.
 
 ## Completed Features
 
+- [x] **Dead-code cleanup (2026-09-06)** — deleted unreferenced `src/assets/{react,vite}.svg`,
+  `src/assets/hero.png`, `public/icons.svg`, and local repomix dumps (~370 KB); removed unused
+  `useState/useEffect` (`useSimulation.js`), `ASSET_RETURNS` + `derivedState` (`SipSection.jsx`),
+  `results` prop + `goals` (`ComparePanel.jsx` + caller), `retireYear` param (`computeGoals`
+  + caller). Uncommitted in working tree; full record in TASK_LOG.
 - [x] **PDF robustness & stress resilience section** (`src/utils/pdfReport.js`) — Added dedicated
   Plan Robustness & Stress Resilience vector table to Page 4 of exported PDF reports.
 
