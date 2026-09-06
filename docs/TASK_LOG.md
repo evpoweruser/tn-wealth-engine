@@ -42,4 +42,4 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   `docs/DECISIONS.md` (4 ADRs). No code touched.
 - **Verification**: `npx vitest run` 40/40 passing (pre-change baseline); `git status`
   shows exactly these 4 new files.
-- **Git commit**: (uncommitted at time of writing)
+- **Git commit**: `5acfbc1`
