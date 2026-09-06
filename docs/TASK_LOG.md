@@ -239,5 +239,8 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 65/65 across 8 suites; `npm run lint` 0 errors,
   16 warnings (pre-existing class); `npm run build` clean, precache 22 entries.
 - **Git commit**: overnight batch commit (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY
+  (`tn-wealth-engine-r9h7y1z82-…`), aliased to apex; apex serves `index-B8W41KTe.js`
+  containing the new panels ("TN Wealth Score", "Retirement Bucket"), HTTP 200.
 
 
