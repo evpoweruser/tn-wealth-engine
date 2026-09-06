@@ -17,6 +17,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import { runPath } from '../engine/index.js';
+import { generateNarrative } from './narrative.js';
 
 // --- palette (print / light-first) ---
 const NAVY = [15, 23, 42];
@@ -267,6 +268,25 @@ export async function generateWealthReport({ state, derivedState, results, onSta
   coverHeader(doc, state, genDate);
   let y = 52;
   y = kpiCards(doc, kpis, y) + 4;
+
+  // Render Auto Narrative ("Reading the result")
+  const sentences = generateNarrative({ results, state, derivedState });
+  if (sentences.length) {
+    y = sectionTitle(doc, y, 'Executive summary', 'Reading the simulation results');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...NAVY);
+    
+    let textY = y + 1;
+    sentences.forEach((s) => {
+      const formattedText = s.replace(/₹/g, 'Rs. ');
+      const lines = doc.splitTextToSize(formattedText, CW - 6);
+      if (textY + lines.length * 3.5 > PH - 20) return; // safety boundary
+      doc.text(lines, MARGIN + 2, textY);
+      textY += lines.length * 3.6 + 1.5;
+    });
+    y = textY + 3;
+  }
 
   if (comparison) {
     y = sectionTitle(doc, y, 'TAPS vs CPS comparison', 'Side-by-side at retirement') ;

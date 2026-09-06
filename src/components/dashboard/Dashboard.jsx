@@ -2,6 +2,7 @@ import React from 'react';
 import { useEngine } from '../../context/EngineContext';
 import KpiGrid from './KpiGrid';
 import RobustnessGrid from './RobustnessGrid';
+import NarrativeCard from './NarrativeCard';
 import WealthChart from './WealthChart';
 import StressPanel from './StressPanel';
 import TornadoChart from './TornadoChart';
@@ -55,6 +56,12 @@ const Dashboard = ({ results, isLoading, stressResults, stressOn, sensitivityRes
       <SummaryStrip results={results} isLoading={isLoading} />
       <ComparePanel results={results} isLoading={isLoading} />
       <KpiGrid results={results} isLoading={isLoading} />
+      <NarrativeCard
+        results={results}
+        isLoading={isLoading}
+        stressResults={stressOn ? stressResults : null}
+        sensitivityResults={sensitivityOn ? sensitivityResults : null}
+      />
       <RobustnessGrid results={results} isLoading={isLoading} />
       <WealthChart results={results} isLoading={isLoading} />
       <StressPanel stressResults={stressResults} mcOn={mcOn} stressOn={stressOn} />
