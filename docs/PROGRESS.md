@@ -21,18 +21,18 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ### 2. Chart Polish & Interactivity
 - [x] **Gradient Fills for Monte Carlo Bands** — Added multi-stop SVG linearGradients (`#mcBandGradient`, `#liquidAreaGradient`) for soft area fills in `WealthChart.jsx`.
-- [ ] **Interactive Hover Crosshair & Multi-Pill Tooltips**: Custom Recharts tooltip showing liquid vs pension vs total wealth breakdown pills with crisp glass background and active year crosshairs.
+- [x] **Glowing Tornado Chart Bars** — Added red/green gradient bar fills with cyan/amber highlights and glowing box-shadows in `TornadoChart.module.css`.
 - [ ] **Dynamic Stress Overlay Line**: Clicking a stress regime in `StressPanel.jsx` dynamically plots a dashed stress trajectory line over `WealthChart.jsx` for direct visual comparison.
 
 ### 3. Config Sidebar & Goal Timeline Visuals
-- [ ] **Milestone Goal Visual Timeline**: Render an interactive horizontal SVG timeline node chart for child milestones (Higher Secondary $\to$ College $\to$ Marriage) showing target ages and funding badges (`Corpus` vs `SIP`).
-- [ ] **Segmented Tab Switcher**: Add sliding pill highlight tabs for switching sidebar sections (Career, Scheme, SIP, Children, Monte Carlo).
-- [ ] **Gradient Range Slider Fill**: Update range input sliders (`RangeInput.jsx`) with dynamic gradient track fills indicating active progress.
+- [x] **Milestone Goal Visual Timeline** — Created interactive horizontal SVG node timeline chart (`MilestoneTimeline.jsx`) showing target ages, future costs, and funding badges (`Corpus` vs `SIP`).
+- [x] **Gradient Range Slider Fill** — Updated `RangeInput.module.css` with multi-stop cyan-to-indigo gradient track fill and glowing thumb control.
+- [x] **Sidebar Glassmorphism & Header Accent** — Added glass backdrop-blur and cyan pill count badge to `Sidebar.module.css`.
 
-### 4. Micro-Interactions & Motion
-- [ ] **Smooth Layout Transitions**: Add layout spring animations when toggling Compare mode (TAPS vs CPS side-by-side split view).
-- [ ] **Interactive Tornado Impact Cards**: Hovering over Tornado Chart bars shows a floating breakdown card with exact rupee impact and plan hold reduction.
-- [ ] **Toast Notifications**: Add subtle floating toast popups when exporting PDF reports or resetting inputs.
+### 4. Solvency India Inspired Visualizations (New Roadmap)
+- [ ] **Dual-Axis Spending Breakdown Chart**: Area chart breaking down living expenses into core, discretionary, and healthcare/OOP costs over time.
+- [ ] **Live Rupee Shorthand Helper**: Live green label converting raw input numbers into Indian words (`₹2.5 Crore` / `₹75 Lakhs`).
+- [ ] **Retirement Bucket Allocation Bar**: Horizontal color-coded allocation bar showing cash, bridge, stability, and growth equity split.
 
 ## Completed Features
 
