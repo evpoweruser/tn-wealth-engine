@@ -2,7 +2,7 @@
 
 Last Updated: 2026-09-06
 Current Status: Active development — Phase 2 complete (commit `877bb36`); whole-project
-review baseline recorded 2026-09-06 (see TASK_LOG); HEAD `c678b91`.
+review baseline recorded 2026-09-06 (see TASK_LOG); HEAD `246b5cd`.
 
 This file is the single source of truth for project state. Deep technical specs live in
 `docs/WALKTHROUGH.md` and `docs/ROBUSTNESS_AND_STRESS_PANEL.md` — linked, not duplicated.
@@ -57,5 +57,5 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 ## Verification Commands
 
 - Unit tests: `npm test` (vitest; 48/48 passing as of 2026-09-06 — 40 existing + 8 wiring)
-- Lint: `npm run lint` (oxlint; 0 errors, 23 warnings as of 2026-09-06)
+- Lint: `npm run lint` (oxlint; 0 errors, 21 warnings as of 2026-09-06)
 - Build: `npm run build` (vite + PWA precache 10 entries, passing as of 2026-09-06)

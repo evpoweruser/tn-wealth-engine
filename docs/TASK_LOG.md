@@ -65,7 +65,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npm test` 40/40 passing (tax 9, narrative 4, stress 19, sensitivity 8);
   `npm run lint` 0 errors, 23 warnings (pre-existing, e.g. unused `useEffect`
   `src/hooks/useSimulation.js:1`); `npm run build` passing (PWA precache 10 entries).
-- **Git commit**: `c678b91`
+- **Git commit**: `246b5cd` (opencode install + `.gitignore` dump exclusions).
 
 ## [2026-09-06] Cumulative inflation indices & runPath overlay wiring test suite
 - **Goal**: Replaced closed-form `Math.pow(1+rate, t)` with running cumulative products (`cumInfL`, `cumInfM`, `cumInfC`) in `simulation.js` for 100% exact real-value deflation under variable stress inflation rates; added 8-test overlay wiring suite in `simulation-wiring.test.js`.
@@ -90,4 +90,25 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 48/48 passing (tax 9, narrative 4, stress 19,
   sensitivity 8, wiring 8); `npm run lint` 0 errors, 23 warnings (unchanged count,
   new files warning-free); `npm run build` passing (PWA precache 10 entries).
-- **Git commit**: none (uncommitted; HEAD `c678b91`).
+- **Git commit**: `7e96645` (test file; session `simulation.js` edits superseded by `6cd5674`).
+
+## [2026-09-06] Reconciliation: commit 6cd5674 superseded session engine edits
+- **What happened**: Commit `6cd5674` (23:17, same day) implemented drawdown-loop overlay
+  invocation AND cumulative inflation indices (`cumInfL/M/C`, pension ratio
+  `cumInfC/cumInfCAtRetire`) in `src/engine/simulation.js`, superseding this session's
+  pre-commit `simulation.js` edits (working tree file == committed version).
+- **Working tree now**: `simulation.js` = committed engine (overlay + cum products, verified
+  by grep: `cumInf*` acc/drawdown loops, overlay call with `elapsed` index, pension ratio).
+  `src/engine/__tests__/simulation-wiring.test.js` remains UNTRACKED (this session's file);
+  it validates the committed engine — re-run 48/48 passing post-commit.
+- **Docs accuracy notes**: the two preceding TASK_LOG entries overlap (both describe the
+  wiring suite; the session-TDD entry's `simulation.js` description matches pre-commit code,
+  not the committed cum-product implementation). Left intact per append-only rule; this
+  entry is the correction. PROGRESS.md completed entries for tasks 1+2 are substantively
+  accurate against committed code.
+- **Verification** (just re-run): `npx vitest run` 48/48 passing (tax 9, wiring 8,
+  narrative 4, stress 19, sensitivity 8); `npm run lint` 0 errors, 21 warnings (down from
+  23 — committed engine cleanup); build not re-run (last pass pre-commit, PWA 10 entries).
+- **Git commit**: `7e96645` (wiring test), `246b5cd` (opencode install + `.gitignore`);
+  HEAD `246b5cd`. Remaining uncommitted at write time: `docs/PROGRESS.md`,
+  `docs/TASK_LOG.md` (this file).
