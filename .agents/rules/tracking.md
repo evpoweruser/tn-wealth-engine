@@ -15,6 +15,7 @@ Whenever doing a complex multi-step task or modifying project code:
    actual runs, and deploy URLs only when a deploy actually happened. Never invent.
 5. **Don't duplicate specs**: deep technical specs live in `docs/WALKTHROUGH.md` and
    `docs/ROBUSTNESS_AND_STRESS_PANEL.md` — link to them, don't copy them here.
+6. **Local-first session workflow**: Keep progress local during active session (`git commit`), do not `git push` or `npx vercel --prod` until user signals session wrap-up (`.agents/rules/deployment_workflow.md`).
 
 Verification commands:
 
