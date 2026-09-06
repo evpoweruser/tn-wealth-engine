@@ -17,6 +17,13 @@
   font-weight: 500;
 }
 
+.valueGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
 .valueDisplay {
   font-size: 13px;
   font-weight: 700;
@@ -27,6 +34,16 @@
   border: 1px solid transparent;
   padding: 2px 8px;
   border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.rupeeWords {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  color: #34d399;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
   white-space: nowrap;
 }
 

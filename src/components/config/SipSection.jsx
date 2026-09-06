@@ -2,6 +2,7 @@ import React from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { CollapsibleSection, RangeInput } from '../shared';
 import { computeBlendedReturn } from '../../engine';
+import { formatIndianRupeeWords } from '../../utils/format';
 import styles from './SipSection.module.css';
 
 export const SipSection = () => {
@@ -28,6 +29,9 @@ export const SipSection = () => {
           <div className={styles.formGroup}>
             <label>Monthly SIP (₹)</label>
             <input type="number" value={state.sipMo || 0} onChange={handleFieldChange('sipMo')} step={500} />
+            {state.sipMo > 0 && (
+              <span className="rupeeHint">{formatIndianRupeeWords(state.sipMo)}</span>
+            )}
           </div>
           <div className={styles.rangeWrapper}>
             <RangeInput 

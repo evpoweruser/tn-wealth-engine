@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { buildDetailedCPS } from '../../engine';
-import { fmt } from '../../utils/format';
+import { fmt, formatIndianRupeeWords } from '../../utils/format';
 import styles from './CareerBuilder.module.css';
 
 export const CareerBuilder = () => {
@@ -56,6 +56,7 @@ export const CareerBuilder = () => {
             <div className={styles.formGroup}>
               <label>Starting Basic (₹)</label>
               <input type="number" value={state.startBasic || 56100} onChange={handleFieldChange('startBasic')} />
+              {state.startBasic > 0 && <span className="rupeeHint">{formatIndianRupeeWords(state.startBasic)}</span>}
             </div>
             <div className={styles.formGroup}>
               <label>MD Year</label>

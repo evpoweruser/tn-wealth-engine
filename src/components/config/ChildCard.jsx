@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
+import { formatIndianRupeeWords } from '../../utils/format';
 import styles from './ChildCard.module.css';
 
 export const ChildCard = ({ child }) => {
@@ -37,7 +38,10 @@ export const ChildCard = ({ child }) => {
         <div className={styles.row}>
           <div className={styles.label}>Higher Sec</div>
           <input type="number" value={child.hAge ?? 15} onChange={handleUpdate('hAge')} className={styles.input} />
-          <input type="number" value={child.hCost ?? 200000} onChange={handleUpdate('hCost')} className={styles.input} />
+          <div>
+            <input type="number" value={child.hCost ?? 200000} onChange={handleUpdate('hCost')} className={styles.input} />
+            {child.hCost > 0 && <span className="rupeeHint">{formatIndianRupeeWords(child.hCost)}</span>}
+          </div>
           <select value={child.hFund ?? 'sip'} onChange={handleUpdate('hFund')} className={styles.select}>
             <option value="corpus">Corpus</option>
             <option value="sip">SIP</option>
@@ -48,7 +52,10 @@ export const ChildCard = ({ child }) => {
         <div className={styles.row}>
           <div className={styles.label}>College</div>
           <input type="number" value={child.cAge ?? 18} onChange={handleUpdate('cAge')} className={styles.input} />
-          <input type="number" value={child.cCost ?? 2000000} onChange={handleUpdate('cCost')} className={styles.input} />
+          <div>
+            <input type="number" value={child.cCost ?? 2000000} onChange={handleUpdate('cCost')} className={styles.input} />
+            {child.cCost > 0 && <span className="rupeeHint">{formatIndianRupeeWords(child.cCost)}</span>}
+          </div>
           <select value={child.cFund ?? 'corpus'} onChange={handleUpdate('cFund')} className={styles.select}>
             <option value="corpus">Corpus</option>
             <option value="sip">SIP</option>
@@ -59,7 +66,10 @@ export const ChildCard = ({ child }) => {
         <div className={styles.row}>
           <div className={styles.label}>Marriage</div>
           <input type="number" value={child.mAge ?? 25} onChange={handleUpdate('mAge')} className={styles.input} />
-          <input type="number" value={child.mCost ?? 1000000} onChange={handleUpdate('mCost')} className={styles.input} />
+          <div>
+            <input type="number" value={child.mCost ?? 1000000} onChange={handleUpdate('mCost')} className={styles.input} />
+            {child.mCost > 0 && <span className="rupeeHint">{formatIndianRupeeWords(child.mCost)}</span>}
+          </div>
           <select value={child.mFund ?? 'corpus'} onChange={handleUpdate('mFund')} className={styles.select}>
             <option value="corpus">Corpus</option>
             <option value="sip">SIP</option>

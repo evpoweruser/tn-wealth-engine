@@ -2,6 +2,7 @@ import React from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { CollapsibleSection, ModeToggle, RangeInput } from '../shared';
 import { CareerBuilder } from './CareerBuilder';
+import { formatIndianRupeeWords } from '../../utils/format';
 import styles from './SchemeSection.module.css';
 
 export const SchemeSection = () => {
@@ -41,10 +42,12 @@ export const SchemeSection = () => {
           <div className={styles.formGroup}>
             <label>CPS Balance (₹)</label>
             <input type="number" value={state.cpsBal || 0} onChange={handleFieldChange('cpsBal')} />
+            {state.cpsBal > 0 && <span className="rupeeHint">{formatIndianRupeeWords(state.cpsBal)}</span>}
           </div>
           <div className={styles.formGroup}>
             <label>CPS Annual (₹)</label>
             <input type="number" value={state.cpsAnn || 0} onChange={handleFieldChange('cpsAnn')} />
+            {state.cpsAnn > 0 && <span className="rupeeHint">{formatIndianRupeeWords(state.cpsAnn)}</span>}
           </div>
         </div>
 

@@ -56,3 +56,27 @@ export function ageFromDob(dobStr) {
   if (m < 0 || (m === 0 && n.getDate() < d.getDate())) a--;
   return Math.max(0, a);
 }
+
+/**
+ * Format a number into human-readable Indian shorthand words (e.g. ₹2.5 Crore, ₹75 Lakh, ₹25k)
+ * @param {number} x - Value in rupees
+ * @returns {string}
+ */
+export function formatIndianRupeeWords(x) {
+  const a = Math.abs(Number(x) || 0);
+  if (a === 0) return '₹0';
+  const prefix = Number(x) < 0 ? '-' : '';
+  if (a >= 1e7) {
+    const val = (a / 1e7).toFixed(2).replace(/\.00$/, '');
+    return `${prefix}₹${val} Crore`;
+  }
+  if (a >= 1e5) {
+    const val = (a / 1e5).toFixed(2).replace(/\.00$/, '');
+    return `${prefix}₹${val} Lakh`;
+  }
+  if (a >= 1e3) {
+    const val = (a / 1e3).toFixed(1).replace(/\.0$/, '');
+    return `${prefix}₹${val}k`;
+  }
+  return `${prefix}₹${Math.round(a)}`;
+}

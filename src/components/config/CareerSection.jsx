@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { CollapsibleSection } from '../shared';
+import { formatIndianRupeeWords } from '../../utils/format';
 import styles from './CareerSection.module.css';
 
 export const CareerSection = () => {
@@ -56,10 +57,12 @@ export const CareerSection = () => {
           <div className={styles.formGroup}>
             <label>Monthly Surplus (₹)</label>
             <input type="number" value={state.mSurplus || 0} onChange={handleChange('mSurplus')} />
+            {state.mSurplus > 0 && <span className="rupeeHint">{formatIndianRupeeWords(state.mSurplus)}</span>}
           </div>
           <div className={styles.formGroup}>
             <label>Retire Expense (₹)</label>
             <input type="number" value={state.retSpend || 0} onChange={handleChange('retSpend')} />
+            {state.retSpend > 0 && <span className="rupeeHint">{formatIndianRupeeWords(state.retSpend)}</span>}
           </div>
         </div>
 
@@ -71,6 +74,7 @@ export const CareerSection = () => {
           <div className={styles.formGroup}>
             <label>Gratuity (₹)</label>
             <input type="number" value={state.gratuity || 0} onChange={handleChange('gratuity')} />
+            {state.gratuity > 0 && <span className="rupeeHint">{formatIndianRupeeWords(state.gratuity)}</span>}
           </div>
         </div>
 
