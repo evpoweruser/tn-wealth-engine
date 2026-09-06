@@ -208,5 +208,9 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   apex serves new bundle `index-CSHo1nCE.js` containing the guard strings
   ("zero records", "never raw context state", "Solver failed"); `pwa-192x192.png`
   and `pwa-512x512.png` both return HTTP 200 — crash + icon 404 resolved.
+- **Follow-up**: user first retested the stale immutable deployment URL (`qwedivu81`,
+  still serving old bundle `index-Dg_K4Qvh.js`) — hard refresh can never fix that.
+  Confirmed fix working on apex `https://tn-wealth-engine.vercel.app` (fresh profile,
+  new bundle + icons 200). No code change needed.
 
 
