@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEngine } from '../../context/EngineContext';
 import { CareerSection } from './CareerSection';
 import { SchemeSection } from './SchemeSection';
 import { SipSection } from './SipSection';
@@ -6,17 +7,22 @@ import { InflationSection } from './InflationSection';
 import { MonteCarloSection } from './MonteCarloSection';
 import { ChildrenSection } from './ChildrenSection';
 import styles from './Sidebar.module.css';
+import { SlidersHorizontal } from 'lucide-react';
 
 export const Sidebar = () => {
+  const { derivedState } = useEngine();
+  const goalCount = derivedState?.goals?.length ?? 0;
+
   return (
-    <aside className={styles.sidebar}>
+    <aside className={styles.sidebar} aria-label="Configuration">
       <div className={styles.header}>
-        <h2 className={styles.title}>Configuration</h2>
-        <div className={styles.actions}>
-          {/* Export buttons placeholder */}
-          <button className={styles.exportBtn} title="Export Settings">↓</button>
-          <button className={styles.exportBtn} title="Import Settings">↑</button>
-        </div>
+        <h2 className={styles.title}>
+          <SlidersHorizontal size={14} aria-hidden="true" />
+          Configuration
+        </h2>
+        <span className={styles.meta} title="Configured milestone goals">
+          {goalCount > 0 ? `${goalCount} goal${goalCount > 1 ? 's' : ''}` : '6 sections'}
+        </span>
       </div>
       
       <div className={styles.scrollArea}>

@@ -44,6 +44,8 @@ const initialState = {
   mcOn: true,
   mcMode: 'A',
   mcRuns: 1000,
+  stressOn: true,
+  sensitivityOn: true,
   children: [
     {
       id: 1,

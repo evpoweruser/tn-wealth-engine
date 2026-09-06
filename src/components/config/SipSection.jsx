@@ -5,7 +5,7 @@ import { computeBlendedReturn, ASSET_RETURNS } from '../../engine';
 import styles from './SipSection.module.css';
 
 export const SipSection = () => {
-  const { state, dispatch } = useEngine();
+  const { state, dispatch, derivedState } = useEngine();
 
   const handleFieldChange = (field) => (e) => {
     dispatch({ type: 'SET_FIELD', field, value: Number(e.target.value) });
@@ -15,11 +15,11 @@ export const SipSection = () => {
     dispatch({ type: 'SET_ALLOCATION', key, value: val });
   };
 
-  const totalAlloc = Object.values(state.allocations).reduce((a, b) => a + b, 0);
+  const allocation = state.allocation || { indianEq: 35, usEq: 15, debt: 40, gold: 10 };
+  const totalAlloc = (allocation.indianEq || 0) + (allocation.usEq || 0) + (allocation.debt || 0) + (allocation.gold || 0);
   const isAllocValid = totalAlloc === 100;
   
-  // Note: the original used to show this inside a note, but now we'll show it directly
-  const computedReturn = computeBlendedReturn(state.allocations).toFixed(1);
+  const computedReturn = (computeBlendedReturn(allocation).blendedReturn * 100).toFixed(1);
 
   return (
     <CollapsibleSection title="Equity SIP & Allocation" number={3} defaultOpen={false}>
@@ -27,14 +27,14 @@ export const SipSection = () => {
         <div className={styles.grid2}>
           <div className={styles.formGroup}>
             <label>Monthly SIP (₹)</label>
-            <input type="number" value={state.sipMo} onChange={handleFieldChange('sipMo')} />
+            <input type="number" value={state.sipMo || 0} onChange={handleFieldChange('sipMo')} step={500} />
           </div>
           <div className={styles.rangeWrapper}>
             <RangeInput 
               label="Step-Up %" 
-              value={state.stepUp} 
-              onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'stepUp', value: v })}
-              min={0} max={20} step={1} suffix="%" 
+              value={state.sipStep || 3.0} 
+              onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'sipStep', value: v })}
+              min={0} max={20} step={0.5} suffix="%" 
             />
           </div>
         </div>
@@ -42,9 +42,9 @@ export const SipSection = () => {
         <div className={styles.rangeWrapper}>
           <RangeInput 
             label="Blended XIRR %" 
-            value={state.blendedXirr} 
-            onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'blendedXirr', value: v })}
-            min={5} max={20} step={0.1} suffix="%" 
+            value={state.sipXirr || 10.8} 
+            onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'sipXirr', value: v })}
+            min={5} max={25} step={0.1} suffix="%" 
           />
         </div>
 
@@ -57,10 +57,10 @@ export const SipSection = () => {
           </div>
           
           <div className={styles.allocSliders}>
-            <RangeInput label={`Indian Eq (${ASSET_RETURNS.indianEq}%)`} value={state.allocations.indianEq} onChange={handleAllocation('indianEq')} min={0} max={100} step={5} suffix="%" />
-            <RangeInput label={`US Eq (${ASSET_RETURNS.usEq}%)`} value={state.allocations.usEq} onChange={handleAllocation('usEq')} min={0} max={100} step={5} suffix="%" />
-            <RangeInput label={`Debt (${ASSET_RETURNS.debt}%)`} value={state.allocations.debt} onChange={handleAllocation('debt')} min={0} max={100} step={5} suffix="%" />
-            <RangeInput label={`Gold (${ASSET_RETURNS.gold}%)`} value={state.allocations.gold} onChange={handleAllocation('gold')} min={0} max={100} step={5} suffix="%" />
+            <RangeInput label="Indian Eq" value={allocation.indianEq || 0} onChange={handleAllocation('indianEq')} min={0} max={100} step={5} suffix="%" />
+            <RangeInput label="US Eq" value={allocation.usEq || 0} onChange={handleAllocation('usEq')} min={0} max={100} step={5} suffix="%" />
+            <RangeInput label="Debt" value={allocation.debt || 0} onChange={handleAllocation('debt')} min={0} max={100} step={5} suffix="%" />
+            <RangeInput label="Gold" value={allocation.gold || 0} onChange={handleAllocation('gold')} min={0} max={100} step={5} suffix="%" />
           </div>
           
           <div className={`${styles.totalAlloc} ${!isAllocValid ? styles.invalid : ''}`}>

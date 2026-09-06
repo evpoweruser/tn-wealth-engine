@@ -14,7 +14,10 @@ export const InflationSection = () => {
     dispatch({ type: 'SET_INFLATION_WEIGHT', key, value: Number(e.target.value) });
   };
 
-  const totalWeight = Object.values(state.inflationWeights).reduce((a, b) => a + b, 0);
+  const rates = state.inflation?.rates || { consumer: 4.5, food: 5.5, medical: 7.0, education: 8.0 };
+  const weights = state.inflation?.weights || { consumer: 55, food: 15, medical: 20, education: 10 };
+
+  const totalWeight = (weights.consumer || 0) + (weights.food || 0) + (weights.medical || 0) + (weights.education || 0);
   const isValid = totalWeight === 100;
 
   const categories = [
@@ -39,14 +42,14 @@ export const InflationSection = () => {
               <div className={styles.catLabel}>{label}</div>
               <input 
                 type="number" 
-                value={state.inflationRates[key]} 
+                value={rates[key] ?? 0} 
                 onChange={handleRate(key)} 
                 step={0.1}
                 className={styles.numInput}
               />
               <input 
                 type="number" 
-                value={state.inflationWeights[key]} 
+                value={weights[key] ?? 0} 
                 onChange={handleWeight(key)} 
                 className={styles.numInput}
               />
@@ -59,7 +62,7 @@ export const InflationSection = () => {
         </div>
 
         <div className={styles.note}>
-          Inflation is weighted differently during work life vs retirement. E.g. Education weight drops to 0% after children graduate.
+          Medical & Healthcare inflates medical share of retirement spend. Education inflates child education goals.
         </div>
       </div>
     </CollapsibleSection>

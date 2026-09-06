@@ -1,16 +1,22 @@
 import React from 'react';
 import styles from './RangeInput.module.css';
 
-const RangeInput = ({ label, value, onChange, min, max, step = 1, suffix = '%', id }) => {
-  // Calculate percentage for background gradient
-  const percentage = ((value - min) / (max - min)) * 100;
+const RangeInput = ({ label, value = 0, onChange, min = 0, max = 100, step = 1, suffix = '%', id }) => {
+  const numValue = Number(value) || 0;
+  const percentage = Math.max(0, Math.min(100, ((numValue - min) / (max - min || 1)) * 100));
   
+  const handleChange = (e) => {
+    if (onChange) {
+      onChange(Number(e.target.value));
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <label htmlFor={id} className={styles.label}>{label}</label>
         <div className={styles.valueDisplay}>
-          {value}{suffix}
+          {numValue}{suffix}
         </div>
       </div>
       <div className={styles.inputWrapper}>
@@ -21,8 +27,8 @@ const RangeInput = ({ label, value, onChange, min, max, step = 1, suffix = '%', 
           min={min}
           max={max}
           step={step}
-          value={value}
-          onChange={onChange}
+          value={numValue}
+          onChange={handleChange}
           style={{
             '--value-percent': `${percentage}%`
           }}

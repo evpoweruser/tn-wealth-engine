@@ -6,6 +6,13 @@
 export const fmtCr = (x) => '₹' + (x / 1e7).toFixed(2) + ' Cr';
 
 /**
+ * Format a number as Indian Rupees in Lakhs
+ * @param {number} x - Value in rupees
+ * @returns {string}
+ */
+export const fmtLakh = (x) => '₹' + (x / 1e5).toFixed(1) + ' L';
+
+/**
  * Format a number as Indian Rupees with locale formatting
  * @param {number} x - Value in rupees
  * @returns {string}
@@ -19,6 +26,13 @@ export const fmt = (x) => '₹' + Math.round(x).toLocaleString('en-IN');
  * @returns {string}
  */
 export const fmtPct = (x, decimals = 1) => (x * 100).toFixed(decimals) + '%';
+
+/**
+ * Format a plain percentage value (already 0-100) with 0 decimal places.
+ * @param {number} x - Value already in percent (e.g. 83.4 → "83%")
+ * @returns {string}
+ */
+export const fmtPct0 = (x) => Math.round(Number(x) || 0) + '%';
 
 /**
  * Clamp a value between min and max

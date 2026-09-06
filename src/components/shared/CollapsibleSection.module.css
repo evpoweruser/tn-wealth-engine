@@ -1,10 +1,15 @@
 .container {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: var(--bg-card-solid);
   overflow: hidden;
   margin-bottom: var(--space-md);
-  transition: border-color var(--duration) var(--ease), background-color var(--duration) var(--ease);
+  box-shadow: var(--shadow-1);
+  transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+}
+
+.container:last-child {
+  margin-bottom: 0;
 }
 
 .container:hover {
@@ -13,7 +18,8 @@
 
 .container.open {
   background: var(--bg-card-solid);
-  border-color: var(--border-active);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-2);
 }
 
 .header {

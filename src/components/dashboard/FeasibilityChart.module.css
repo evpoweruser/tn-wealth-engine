@@ -1,18 +1,56 @@
 .card {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  background: var(--bg-card-solid);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md, 8px);
-  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  padding: 20px;
   flex: 1;
+  min-width: 0;
+  box-shadow: var(--shadow-1);
 }
 
 .title {
   color: var(--text-primary);
   font-family: var(--font);
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 2px 0 10px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendItem i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.surplusLine {
+  width: 14px !important;
+  height: 2px !important;
+  border-radius: 2px !important;
+  background: var(--accent-green) !important;
 }
 
 .chartContainer {
@@ -20,12 +58,34 @@
 }
 
 .tooltip {
-  background: var(--bg-card);
+  background: var(--chart-tooltip-bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
   color: var(--text-primary);
-  font-size: 0.75rem;
+  font-size: 12px;
+  box-shadow: var(--shadow-3);
+  min-width: 190px;
+}
+
+.tooltipTitle {
+  font-weight: 700;
+  color: var(--accent-blue);
+  margin: 0 0 4px;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 2px 0;
+  color: var(--text-secondary);
+}
+
+.tooltipRow b {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .loading {

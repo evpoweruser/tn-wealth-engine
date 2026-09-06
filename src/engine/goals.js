@@ -86,10 +86,10 @@ export function computeGoals(children, inflation, sipXirr, baseYear, retireYear)
  * @param {number} retireYear - Retirement year
  * @returns {Object<number, number>} Year -> total withdrawal amount
  */
-export function computeWithdrawals(goals, retireYear) {
+export function computeWithdrawals(goals) {
   const withdrawals = {};
-  goals.forEach(g => {
-    if (g.fund === 'corpus' && g.year <= retireYear) {
+  (goals || []).forEach(g => {
+    if (g.fund === 'corpus') {
       withdrawals[g.year] = (withdrawals[g.year] || 0) + g.grossFV;
     }
   });

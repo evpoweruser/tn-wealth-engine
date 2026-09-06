@@ -18,12 +18,16 @@
 }
 
 .valueDisplay {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--accent-blue);
   background: var(--accent-blue-dim);
+  border: 1px solid transparent;
   padding: 2px 8px;
   border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .inputWrapper {

@@ -1,17 +1,57 @@
 .card {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  background: var(--bg-card-solid);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md, 8px);
-  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-1);
+  min-width: 0;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .title {
   color: var(--text-primary);
   font-family: var(--font);
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 2px 0 0;
+}
+
+.legendBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .chartContainer {
@@ -19,20 +59,48 @@
 }
 
 .tooltip {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  background: var(--chart-tooltip-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm, 6px);
-  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
   color: var(--text-primary);
   font-family: var(--font);
-  font-size: 0.875rem;
+  font-size: 12.5px;
+  box-shadow: var(--shadow-3);
+  min-width: 210px;
 }
 
 .tooltipTitle {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
   color: var(--accent-blue);
+  font-size: 12.5px;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 2px 0;
+  color: var(--text-secondary);
+}
+
+.tooltipRow b {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.goalTag {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-hover);
+  font-size: 12px;
+  color: var(--accent-amber);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .mcNote {

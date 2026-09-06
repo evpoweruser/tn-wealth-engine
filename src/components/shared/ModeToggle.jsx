@@ -1,34 +1,35 @@
 import React from 'react';
 import styles from './ModeToggle.module.css';
 
-const ModeToggle = ({ value, onChange }) => {
-  const options = [
-    {
-      id: 'taps',
-      title: 'TAPS — Assured Pension',
-      description: '50% of last Basic + DA. CPS corpus funds the pension.',
-    },
-    {
-      id: 'cps',
-      title: 'Pure CPS — Lump-sum',
-      description: 'Full corpus paid out. Annuity optional.',
-    },
-    {
-      id: 'compare',
-      title: 'Compare both',
-      description: 'Side-by-side TAPS pension vs CPS lump-sum.',
-    }
-  ];
+const defaultOptions = [
+  {
+    value: 'taps',
+    label: 'TAPS — Assured Pension',
+    sub: '50% of last Basic + DA. CPS corpus funds pension.',
+  },
+  {
+    value: 'cps',
+    label: 'Pure CPS — Lump-sum',
+    sub: 'Full corpus paid out. Annuity optional.',
+  },
+  {
+    value: 'compare',
+    label: 'Compare both',
+    sub: 'Side-by-side TAPS pension vs CPS lump-sum.',
+  }
+];
 
+const ModeToggle = ({ value, onChange, options = defaultOptions }) => {
   return (
     <div className={styles.container}>
       {options.map((option) => {
-        const isActive = value === option.id;
+        const optionVal = option.value || option.id;
+        const isActive = value === optionVal;
         return (
           <button
-            key={option.id}
+            key={optionVal}
             className={`${styles.button} ${isActive ? styles.active : ''}`}
-            onClick={() => onChange(option.id)}
+            onClick={() => onChange && onChange(optionVal)}
             type="button"
           >
             <div className={styles.content}>
@@ -36,9 +37,9 @@ const ModeToggle = ({ value, onChange }) => {
                 <div className={styles.radio}>
                   {isActive && <div className={styles.radioInner} />}
                 </div>
-                <span className={styles.title}>{option.title}</span>
+                <span className={styles.title}>{option.label || option.title}</span>
               </div>
-              <p className={styles.description}>{option.description}</p>
+              <p className={styles.description}>{option.sub || option.description}</p>
             </div>
           </button>
         );

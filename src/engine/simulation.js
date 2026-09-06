@@ -5,24 +5,38 @@
  */
 
 import { shockInflation } from './inflation.js';
+import { pensionTaxForYear } from './tax.js';
 
-/**
- * Box-Muller transform to generate standard normal random deviates.
- * @returns {number} A sample from N(0,1)
- */
-export function randn() {
-  let u = 0, v = 0;
-  while (!u) u = Math.random();
-  while (!v) v = Math.random();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+// ---------------------------------------------------------------------------
+// Seedable RNG — mulberry32 (fast, good statistical quality, ~20 lines)
+// Default seed 42 gives stable Never-short % between keystrokes.
+// ---------------------------------------------------------------------------
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s += 0x6d2b79f5;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) >>> 0;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 /**
- * Compute a percentile from a sorted array.
- * @param {number[]} sorted - Sorted array of values
- * @param {number} q - Quantile (0-1)
- * @returns {number}
+ * Box-Muller normal variate using a supplied uniform RNG.
+ * @param {() => number} rng - uniform [0,1) generator
  */
+function randnWith(rng) {
+  let u = 0, v = 0;
+  while (!u) u = rng();
+  while (!v) v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+/** Legacy unseeded export (kept for any external callers). */
+export function randn() {
+  return randnWith(Math.random);
+}
+
 export function percentile(sorted, q) {
   if (!sorted.length) return 0;
   const i = (sorted.length - 1) * q;
@@ -36,38 +50,26 @@ function clamp(x, a, b) {
   return Math.max(a, Math.min(b, x));
 }
 
+// ---------------------------------------------------------------------------
+// runPath
+// ---------------------------------------------------------------------------
 /**
- * Run a single deterministic simulation path.
+ * Run a single deterministic retirement path.
  *
- * @param {Object} params - Simulation parameters (all rates as decimals)
- * @param {number} params.bYr - Base year (current year)
- * @param {number} params.rYr - Retirement year
- * @param {number} params.endYr - End year (life expectancy)
- * @param {number} params.currentAge - Current age
- * @param {Object<number, number>} params.pcs - Pay commission years and bumps
- * @param {number} params.cpsBal - Current CPS balance
- * @param {number} params.cpsAnn - Current annual CPS contribution
- * @param {number} params.cpsInc - Annual increment rate (decimal, e.g., 0.03)
- * @param {number} params.annPct - Annuity percentage (0-100)
- * @param {number} params.annYield - Annuity yield rate (decimal, e.g., 0.065)
- * @param {number} params.gratuity - Gratuity amount
- * @param {number} params.postRetRate - Post-retirement return (decimal, e.g., 0.075)
- * @param {number} params.retSpend - Monthly retirement spend
- * @param {number} params.medShare - Medical share (decimal, e.g., 0.2)
- * @param {number} params.sipMo - Monthly SIP amount
- * @param {number} params.sipStep - SIP step-up rate (decimal, e.g., 0.03)
- * @param {Object} params.lastPay - { basic, da, emoluments, tapsPension }
- * @param {string} mode - 'taps' or 'cps'
- * @param {number} cRate - CPS return rate (decimal)
- * @param {number} sXirr - SIP XIRR (decimal)
- * @param {number} infL - Living inflation rate (decimal)
- * @param {number} infM - Medical inflation rate (decimal)
- * @param {number} infE - Education inflation rate (decimal)
- * @param {number} infC - Composite inflation rate (decimal)
- * @param {Object<number, number>} wDraws - Withdrawal schedule by year
- * @returns {Object} Simulation results
+ * @param {object} params        Simulation parameters
+ * @param {string} mode          'taps' | 'cps' | 'compare'
+ * @param {number} cRate         CPS annual crediting rate (decimal)
+ * @param {number} sXirr         SIP annual XIRR (decimal)
+ * @param {number} infL          Living inflation (decimal)
+ * @param {number} infM          Medical inflation (decimal)
+ * @param {number} infE          Education inflation (decimal)
+ * @param {number} infC          Composite inflation (decimal)
+ * @param {object} [wDraws]      Year-keyed goal withdrawal map
+ * @param {Function} [yearlyOverlay]  Optional per-year rate modifier:
+ *   (rates: {sXirr, cRate, infL, infM, infE, infC}, yearIdx: number) => same shape.
+ *   Called at the start of each accumulation year. Return rates are used for that year only.
  */
-export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDraws) {
+export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, yearlyOverlay) {
   let cpsAnn = params.cpsAnn;
   let sipMo = params.sipMo;
   let cpsBal = params.cpsBal;
@@ -75,33 +77,58 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
 
   const accYears = Math.max(0, params.rYr - params.bYr);
   const records = [];
-  const monthlyR = Math.pow(1 + cRate, 1 / 12) - 1;
 
   // === ACCUMULATION PHASE ===
   for (let i = 0; i <= accYears; i++) {
     const yr = params.bYr + i;
 
+    // Apply per-year overlay (stress regimes with time-limited windows).
+    // Base rates are unchanged for subsequent years — the overlay is stateless per year.
+    let ySXirr = sXirr;
+    let yCRate = cRate;
+    let yInfL = infL;
+    let yInfM = infM;
+    let yInfE = infE;
+    let yInfC = infC;
+    if (yearlyOverlay && i > 0) {
+      const ov = yearlyOverlay({ sXirr, cRate, infL, infM, infE, infC }, i);
+      ySXirr = ov.sXirr; yCRate = ov.cRate;
+      yInfL  = ov.infL;  yInfM  = ov.infM;
+      yInfE  = ov.infE;  yInfC  = ov.infC;
+    } else if (yearlyOverlay && i === 0) {
+      // Year 0 overlay — applied to the first accumulation year
+      const ov = yearlyOverlay({ sXirr, cRate, infL, infM, infE, infC }, 0);
+      ySXirr = ov.sXirr; yCRate = ov.cRate;
+      yInfL  = ov.infL;  yInfM  = ov.infM;
+      yInfE  = ov.infE;  yInfC  = ov.infC;
+    }
+
+    // Monthly CPS rate from possibly-overlaid cRate
+    const yMonthlyR = Math.pow(1 + yCRate, 1 / 12) - 1;
+
     if (i > 0) {
       cpsAnn *= 1 + params.cpsInc;
-      if (params.pcs[yr]) cpsAnn *= 1 + params.pcs[yr];
+      if (params.pcs && params.pcs[yr]) cpsAnn *= 1 + params.pcs[yr];
       sipMo *= 1 + params.sipStep;
     }
 
-    // CPS: compound monthly for 12 months
+    // CPS: compound monthly for 12 months at this year's crediting rate
     for (let mm = 0; mm < 12; mm++) {
-      cpsBal = cpsBal * (1 + monthlyR) + (cpsAnn / 12);
+      cpsBal = cpsBal * (1 + yMonthlyR) + (cpsAnn / 12);
     }
 
-    // SIP: compound monthly for 12 months
+    // SIP: compound monthly for 12 months at this year's XIRR
     for (let mm = 0; mm < 12; mm++) {
-      sipBal = (sipBal + sipMo) * (1 + sXirr / 12);
+      sipBal = (sipBal + sipMo) * (1 + ySXirr / 12);
     }
 
     // Withdraw for goals funded from SIP corpus
-    if (wDraws[yr] && wDraws[yr] > 0) {
+    if (wDraws && wDraws[yr] && wDraws[yr] > 0) {
       sipBal = Math.max(0, sipBal - wDraws[yr]);
     }
 
+    // Use composite inflation for this year's real-value calculation
+    const realInfC = yInfC;
     const total = cpsBal + sipBal;
     records.push({
       yr,
@@ -111,15 +138,18 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       sip: sipBal / 1e7,
       liquid: total / 1e7,
       tot: total / 1e7,
-      real: (total / Math.pow(1 + infC, i)) / 1e7,
+      real: (total / Math.pow(1 + realInfC, i)) / 1e7,
       pension: 0,
     });
   }
 
   // === RETIREMENT TRANSITION ===
   const finCPS = cpsBal;
+  const finSIP = sipBal;
   const lp = params.lastPay || { tapsPension: 0, emoluments: 0 };
   const tapsP = lp.tapsPension || 0;
+  const totalWealthAtRetire = finCPS + finSIP + params.gratuity;
+  const realWealthAtRetire = totalWealthAtRetire / Math.pow(1 + infC, accYears);
 
   let annuityCorpus = 0;
   let cpsPension = 0;
@@ -129,8 +159,8 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   }
 
   const monthlyPension = mode === 'taps' ? tapsP : cpsPension;
-  const residual = mode === 'taps' ? 0 : Math.max(0, finCPS - annuityCorpus);
-  let liquid = residual + sipBal + params.gratuity;
+  const residualCPS = mode === 'taps' ? 0 : Math.max(0, finCPS - annuityCorpus);
+  let liquid = residualCPS + finSIP + params.gratuity;
   const liquidStart = liquid;
 
   // === DRAWDOWN PHASE ===
@@ -138,24 +168,35 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   let depletedYear = null;
   let pension = monthlyPension;
 
+  // --- Robustness accumulators ---
+  let shortYears = 0;          // count of years where liquid hits 0
+  let firstShortYear = null;   // first such year
+  let taxNominal = 0;          // Σ annual pension tax (nominal ₹)
+  let taxReal    = 0;          // Σ annual pension tax deflated to today's ₹ (per-year, exact)
+  let lifetimeMedSpendNominal = 0; // stub – medical spend (future feature)
+
   for (let j = 1; j <= drawdownYears; j++) {
     const yr = params.rYr + j;
     const elapsed = accYears + j;
 
-    // TAPS pension grows with composite inflation (DA parity approximation)
     if (mode === 'taps') {
       pension = tapsP * Math.pow(1 + infC, j);
     }
 
-    // Monthly expenses: medical + living portions inflate separately
     const medExp = params.retSpend * params.medShare * Math.pow(1 + infM, elapsed);
     const livExp = params.retSpend * (1 - params.medShare) * Math.pow(1 + infL, elapsed);
     const monthlyExp = medExp + livExp;
+    lifetimeMedSpendNominal += medExp * 12;
 
-    // Net drawdown after pension
     const netDrawdown = Math.max(0, monthlyExp - pension);
 
-    // Monthly drawdown with returns
+    // Simplified pension tax: annualise monthly pension for slab lookup
+    const annualPension = pension * 12;
+    const yearTaxNominal = pensionTaxForYear(annualPension);
+    taxNominal += yearTaxNominal;
+    // Per-year deflation (exact): discount each year's tax by its own elapsed factor
+    taxReal += yearTaxNominal / Math.pow(1 + infC, elapsed);
+
     for (let mm = 0; mm < 12; mm++) {
       liquid = liquid * (1 + params.postRetRate / 12) - netDrawdown;
       if (liquid <= 0) {
@@ -163,6 +204,20 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
         if (!depletedYear) depletedYear = yr;
         break;
       }
+    }
+
+    // Deduct post-retirement lump-sum milestone goal if due this year
+    if (wDraws && wDraws[yr] && wDraws[yr] > 0) {
+      liquid = Math.max(0, liquid - wDraws[yr]);
+      if (liquid === 0 && !depletedYear) {
+        depletedYear = yr;
+      }
+    }
+
+    const isDepleted = liquid === 0;
+    if (isDepleted) {
+      shortYears++;
+      if (!firstShortYear) firstShortYear = yr;
     }
 
     const totalValue = liquid + (mode === 'taps' ? 0 : annuityCorpus);
@@ -176,13 +231,28 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       tot: totalValue / 1e7,
       real: (totalValue / Math.pow(1 + infC, elapsed)) / 1e7,
       pension,
-      depleted: liquid === 0,
+      depleted: isDepleted,
     });
   }
+
+  // Bequest: terminal record values
+  const termRec = records[records.length - 1];
+  const bequestNominal = termRec ? termRec.tot * 1e7 : 0;
+  const bequestReal    = termRec ? termRec.real * 1e7 : 0;
+
+  // Add goals LTCG to real tax (informational — goal tax is already embedded in
+  // grossFV withdrawals, so this is display-only, not a double-deduction).
+  const goalsLtcgNominal = params.goalsLtcgNominal || 0;
+  // Goals LTCG is spread across accumulation years; discount at midpoint
+  const goalsLtcgReal = goalsLtcgNominal / Math.pow(1 + infC, accYears / 2);
+  taxReal += goalsLtcgReal;
 
   return {
     records,
     finCPS,
+    finSIP,
+    totalWealthAtRetire,
+    realWealthAtRetire,
     annuityCorpus,
     monthlyPension,
     tapsPension: tapsP,
@@ -190,24 +260,32 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     depletedYear,
     mode,
     lastEmol: lp.emoluments || 0,
+    // Robustness fields
+    shortYears,
+    firstShortYear,
+    taxNominal,
+    taxReal,
+    lifetimeMedSpendNominal,
+    bequestNominal,
+    bequestReal,
   };
 }
 
-/**
- * Run Monte Carlo simulation.
- * @param {Object} params - Simulation parameters
- * @param {string} mode - 'taps' or 'cps'
- * @param {Object} inflation - Full inflation data from computeInflation()
- * @param {Object} withdrawals - Withdrawal schedule
- * @param {Object} mcConfig - { runs: number, mcMode: 'A'|'B'|'C' }
- * @returns {Object} MC results with percentile bands
- */
+// ---------------------------------------------------------------------------
+// runMonteCarlo
+// ---------------------------------------------------------------------------
 export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
-  const { runs = 1000, mcMode = 'A' } = mcConfig;
+  const { runs = 1000, mcMode = 'A', rngSeed = 42 } = mcConfig;
   const paths = [];
   let survive = 0;
 
+  // Each run gets its own deterministic sub-seed derived from the master seed
+  const masterRng = mulberry32(rngSeed);
+
   for (let r = 0; r < runs; r++) {
+    // Fresh seeded RNG per run (stable across re-renders)
+    const runRng = mulberry32(Math.floor(masterRng() * 2 ** 32));
+
     let sXirr = params.sipXirr;
     let cRate = params.cpsRate;
     let infL = inflation.infLiving;
@@ -215,12 +293,10 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
     let infE = inflation.infEdu;
     let infC = inflation.infComposite;
 
-    // Mode A: SIP XIRR shock
-    sXirr = clamp(params.sipXirr + randn() * 0.035, 0.02, 0.22);
+    sXirr = clamp(params.sipXirr + randnWith(runRng) * 0.035, 0.02, 0.22);
 
-    // Mode B: + Inflation shock
     if (mcMode === 'B' || mcMode === 'C') {
-      const shock = randn() * 0.012;
+      const shock = randnWith(runRng) * 0.012;
       const shocked = shockInflation(inflation, shock);
       infL = shocked.infLiving;
       infM = shocked.infMed;
@@ -228,9 +304,8 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
       infC = shocked.infComposite;
     }
 
-    // Mode C: + CPS rate shock
     if (mcMode === 'C') {
-      cRate = clamp(params.cpsRate + randn() * 0.008, 0.04, 0.12);
+      cRate = clamp(params.cpsRate + randnWith(runRng) * 0.008, 0.04, 0.12);
     }
 
     const res = runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, withdrawals);
@@ -238,7 +313,6 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
     if (!res.depletedYear) survive++;
   }
 
-  // Extract percentile bands
   const nY = paths[0].records.length;
   const low = [], mid = [], high = [];
 
@@ -253,9 +327,36 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
   }
 
   const ri = paths[0].records.findIndex(r => r.yr === params.rYr);
-  const retTots = paths.map(x => x.records[ri >= 0 ? ri : x.records.length - 1].tot).sort((a, b) => a - b);
+  const riIdx = ri >= 0 ? ri : paths[0].records.length - 1;
+  const retTots = paths.map(x => x.records[riIdx].tot).sort((a, b) => a - b);
   const liquidStarts = paths.map(x => x.liquidStart).sort((a, b) => a - b);
-  const medFinCPS = paths.map(x => x.finCPS).sort((a, b) => a - b)[Math.floor(runs / 2)] || 0;
+  const totalWealths = paths.map(x => x.totalWealthAtRetire).sort((a, b) => a - b);
+  const realWealths  = paths.map(x => x.realWealthAtRetire).sort((a, b) => a - b);
+  const medFinCPS    = paths.map(x => x.finCPS).sort((a, b) => a - b)[Math.floor(runs / 2)] || 0;
+
+  // --- Robustness aggregations ---
+  const neverShortPct = (paths.filter(p => p.shortYears === 0).length / runs) * 100;
+  const exhaustPct    = 100 - (survive / runs) * 100;
+
+  // Median depletion year among exhausted runs
+  const depYears = paths.filter(p => p.depletedYear !== null).map(p => p.depletedYear).sort((a, b) => a - b);
+  const deplYearMed = depYears.length ? depYears[Math.floor(depYears.length / 2)] : null;
+
+  // Bequest (terminal real value)
+  const bqReals = paths.map(p => p.bequestReal).sort((a, b) => a - b);
+  const bequestP10 = percentile(bqReals, 0.1);
+  const bequestP50 = percentile(bqReals, 0.5);
+
+  // Tax
+  const taxReals = paths.map(p => p.taxReal).sort((a, b) => a - b);
+  const taxP50 = percentile(taxReals, 0.5);
+
+  // Short years
+  const shortYrArr = paths.map(p => p.shortYears).sort((a, b) => a - b);
+  const shortYrsP50 = percentile(shortYrArr, 0.5);
+
+  const fstShortArr = paths.filter(p => p.firstShortYear).map(p => p.firstShortYear).sort((a, b) => a - b);
+  const firstShortP50 = fstShortArr.length ? fstShortArr[Math.floor(fstShortArr.length / 2)] : null;
 
   return {
     low: { records: low },
@@ -263,11 +364,13 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
     mid: {
       records: mid,
       finCPS: medFinCPS,
+      totalWealthAtRetire: percentile(totalWealths, 0.5),
+      realWealthAtRetire: percentile(realWealths, 0.5),
       annuityCorpus: paths[0].annuityCorpus,
       monthlyPension: paths[0].monthlyPension,
       tapsPension: paths[0].tapsPension,
       liquidStart: percentile(liquidStarts, 0.5),
-      depletedYear: null,
+      depletedYear: deplYearMed,   // fixed: was hardcoded null
       mode,
       lastEmol: paths[0].lastEmol,
     },
@@ -275,5 +378,14 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
     retP10: percentile(retTots, 0.1) * 1e7,
     retP90: percentile(retTots, 0.9) * 1e7,
     retMed: percentile(retTots, 0.5) * 1e7,
+    // Robustness stats
+    neverShortPct,
+    exhaustPct,
+    deplYearMed,
+    bequestP10,
+    bequestP50,
+    taxP50,
+    shortYrsP50,
+    firstShortP50,
   };
 }

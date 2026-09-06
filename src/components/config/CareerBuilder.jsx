@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { buildDetailedCPS } from '../../engine';
+import { fmt } from '../../utils/format';
 import styles from './CareerBuilder.module.css';
 
 export const CareerBuilder = () => {
@@ -13,16 +14,29 @@ export const CareerBuilder = () => {
   };
 
   const handleBuild = () => {
-    const { balance, currentAnnual, finalBasic, finalDA } = buildDetailedCPS(state);
-    
-    dispatch({ type: 'SET_FIELD', field: 'cpsBalance', value: Math.round(balance) });
-    dispatch({ type: 'SET_FIELD', field: 'cpsAnnual', value: Math.round(currentAnnual) });
-    
-    setLastPayResults({
-      finalBasic: Math.round(finalBasic),
-      finalDA: Math.round(finalDA),
-      totalLastPay: Math.round(finalBasic + finalDA)
+    const pcBumps = {};
+    if (state.payCommissions) {
+      Object.entries(state.payCommissions).forEach(([yr, enabled]) => {
+        if (enabled) pcBumps[Number(yr)] = 0.25;
+      });
+    }
+
+    const { corpus, annualContribution, lastPay } = buildDetailedCPS({
+      doj: state.doj,
+      dor: state.dor,
+      startBasic: state.startBasic,
+      daPct: state.daPct,
+      cpsRate: state.cpsRate,
+      mdYear: state.mdYear,
+      mdIncr: state.mdIncr,
+      dacp: { 8: state.dacp8, 15: state.dacp15, 17: state.dacp17, 20: state.dacp20 },
+      payCommissions: pcBumps
     });
+    
+    dispatch({ type: 'SET_FIELD', field: 'cpsBal', value: corpus });
+    dispatch({ type: 'SET_FIELD', field: 'cpsAnn', value: annualContribution });
+    
+    setLastPayResults(lastPay);
   };
 
   return (
@@ -40,43 +54,43 @@ export const CareerBuilder = () => {
         <div className={styles.builderContent}>
           <div className={styles.grid3}>
             <div className={styles.formGroup}>
-              <label>Starting Basic</label>
-              <input type="number" value={state.startBasic} onChange={handleFieldChange('startBasic')} />
+              <label>Starting Basic (₹)</label>
+              <input type="number" value={state.startBasic || 56100} onChange={handleFieldChange('startBasic')} />
             </div>
             <div className={styles.formGroup}>
               <label>MD Year</label>
-              <input type="number" value={state.mdYear} onChange={handleFieldChange('mdYear')} />
+              <input type="number" value={state.mdYear || 2026} onChange={handleFieldChange('mdYear')} />
             </div>
             <div className={styles.formGroup}>
               <label>MD Extra Incr</label>
-              <input type="number" value={state.mdIncr} onChange={handleFieldChange('mdIncr')} />
+              <input type="number" value={state.mdIncr || 2} onChange={handleFieldChange('mdIncr')} />
             </div>
           </div>
 
-          <div className={styles.dacpLabel}>DACP Years:</div>
+          <div className={styles.dacpLabel}>DACP Progression %:</div>
           <div className={styles.grid4}>
             <div className={styles.formGroup}>
-              <label>@8%</label>
-              <input type="number" value={state.dacp8} onChange={handleFieldChange('dacp8')} />
+              <label>@8 yrs %</label>
+              <input type="number" value={state.dacp8 || 8} onChange={handleFieldChange('dacp8')} />
             </div>
             <div className={styles.formGroup}>
-              <label>@15%</label>
-              <input type="number" value={state.dacp15} onChange={handleFieldChange('dacp15')} />
+              <label>@15 yrs %</label>
+              <input type="number" value={state.dacp15 || 10} onChange={handleFieldChange('dacp15')} />
             </div>
             <div className={styles.formGroup}>
-              <label>@17%</label>
-              <input type="number" value={state.dacp17} onChange={handleFieldChange('dacp17')} />
+              <label>@17 yrs %</label>
+              <input type="number" value={state.dacp17 || 8} onChange={handleFieldChange('dacp17')} />
             </div>
             <div className={styles.formGroup}>
-              <label>@20%</label>
-              <input type="number" value={state.dacp20} onChange={handleFieldChange('dacp20')} />
+              <label>@20 yrs %</label>
+              <input type="number" value={state.dacp20 || 15} onChange={handleFieldChange('dacp20')} />
             </div>
           </div>
 
           <div className={styles.grid2}>
             <div className={styles.formGroup}>
               <label>Current DA %</label>
-              <input type="number" value={state.currentDA} onChange={handleFieldChange('currentDA')} />
+              <input type="number" value={state.daPct || 60} onChange={handleFieldChange('daPct')} />
             </div>
           </div>
 
@@ -87,16 +101,16 @@ export const CareerBuilder = () => {
           {lastPayResults && (
             <div className={styles.resultsBox}>
               <div className={styles.resultRow}>
-                <span>Estimated Last Basic:</span>
-                <span>₹{lastPayResults.finalBasic.toLocaleString('en-IN')}</span>
+                <span>Last Basic:</span>
+                <span><b>{fmt(lastPayResults.basic)}</b></span>
               </div>
               <div className={styles.resultRow}>
-                <span>Estimated Last DA:</span>
-                <span>₹{lastPayResults.finalDA.toLocaleString('en-IN')}</span>
+                <span>DA %:</span>
+                <span><b>{(lastPayResults.da * 100).toFixed(0)}%</b></span>
               </div>
               <div className={styles.resultRowTotal}>
-                <span>Estimated Last Pay:</span>
-                <span>₹{lastPayResults.totalLastPay.toLocaleString('en-IN')}</span>
+                <span>TAPS Pension (50%):</span>
+                <span><b>{fmt(lastPayResults.tapsPension)}/mo</b></span>
               </div>
             </div>
           )}

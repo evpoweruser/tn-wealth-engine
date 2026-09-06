@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './PdfOverlay.module.css';
 
-const PdfOverlay = ({ visible }) => {
+const PdfOverlay = ({ visible, message }) => {
   const [shouldRender, setShouldRender] = useState(visible);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const PdfOverlay = ({ visible }) => {
             />
           </svg>
         </div>
-        <div className={styles.text}>Generating PDF...</div>
+        <div className={styles.text}>{message || 'Generating PDF...'}</div>
       </div>
     </div>
   );

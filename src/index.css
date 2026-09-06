@@ -1,17 +1,20 @@
 /* === DESIGN TOKENS === */
-:root {
+:root,
+:root[data-theme='dark'] {
   /* Background layers */
   --bg-primary: #030712;
   --bg-card: rgba(15, 23, 42, 0.8);
   --bg-card-solid: #0f172a;
   --bg-surface: #1e293b;
   --bg-input: #091120;
-  
+  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-overlay: rgba(3, 7, 18, 0.8);
+
   /* Border */
   --border: rgba(148, 163, 184, 0.12);
   --border-hover: rgba(148, 163, 184, 0.25);
   --border-active: rgba(56, 189, 248, 0.5);
-  
+
   /* Accent colors */
   --accent-blue: #38bdf8;
   --accent-blue-dim: rgba(56, 189, 248, 0.08);
@@ -23,30 +26,78 @@
   --accent-amber-dim: rgba(251, 191, 36, 0.08);
   --accent-red: #f87171;
   --accent-red-dim: rgba(248, 113, 113, 0.08);
-  
+
   /* Text */
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  
+
+  /* Chart */
+  --chart-grid: rgba(148, 163, 184, 0.12);
+  --chart-tick: #94a3b8;
+  --chart-tooltip-bg: rgba(15, 23, 42, 0.96);
+
   /* Typography */
   --font: 'Inter', system-ui, -apple-system, sans-serif;
-  
-  /* Spacing */
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Spacing (8pt) */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
   --space-lg: 16px;
   --space-xl: 24px;
-  
+
   /* Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
-  
+
+  /* Elevation */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 4px 20px rgba(0, 0, 0, 0.25);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.4);
+
   /* Transitions */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --duration: 200ms;
+}
+
+:root[data-theme='light'] {
+  --bg-primary: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-solid: #ffffff;
+  --bg-surface: #e2e8f0;
+  --bg-input: #ffffff;
+  --bg-hover: rgba(15, 23, 42, 0.04);
+  --bg-overlay: rgba(15, 23, 42, 0.45);
+
+  --border: rgba(15, 23, 42, 0.1);
+  --border-hover: rgba(15, 23, 42, 0.22);
+  --border-active: rgba(2, 132, 199, 0.5);
+
+  --accent-blue: #0284c7;
+  --accent-blue-dim: rgba(2, 132, 199, 0.08);
+  --accent-green: #059669;
+  --accent-green-dim: rgba(5, 150, 105, 0.08);
+  --accent-purple: #7c3aed;
+  --accent-purple-dim: rgba(124, 58, 237, 0.08);
+  --accent-amber: #b45309;
+  --accent-amber-dim: rgba(180, 83, 9, 0.1);
+  --accent-red: #dc2626;
+  --accent-red-dim: rgba(220, 38, 38, 0.08);
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
+  --chart-grid: rgba(15, 23, 42, 0.1);
+  --chart-tick: #64748b;
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.98);
+
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-2: 0 4px 16px rgba(15, 23, 42, 0.1);
+  --shadow-3: 0 12px 32px rgba(15, 23, 42, 0.16);
 }
 
 /* === RESET === */
@@ -71,7 +122,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Subtle gradient background */
 body::before {
   content: '';
   position: fixed;
@@ -79,11 +129,54 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.06), transparent),
     radial-gradient(ellipse 60% 40% at 80% 50%, rgba(167, 139, 250, 0.04), transparent);
   pointer-events: none;
   z-index: 0;
+}
+
+:root[data-theme='light'] body::before,
+:root[data-theme='light']::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(2, 132, 199, 0.07), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(124, 58, 237, 0.05), transparent);
+}
+
+::selection {
+  background: var(--accent-blue-dim);
+}
+
+/* Numeric figures: use tabular-nums for ₹ values */
+.num,
+input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Skeleton shimmer for loading cards */
+@keyframes skeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface) 25%,
+    var(--bg-hover) 50%,
+    var(--bg-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease infinite;
 }
 
 #root {

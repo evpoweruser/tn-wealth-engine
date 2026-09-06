@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 import styles from './CollapsibleSection.module.css';
 
 const CollapsibleSection = ({ title, number, defaultOpen = false, children }) => {
@@ -41,9 +42,7 @@ const CollapsibleSection = ({ title, number, defaultOpen = false, children }) =>
           <h3 className={styles.title}>{title}</h3>
         </div>
         <div className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <ChevronDown size={16} aria-hidden="true" />
         </div>
       </button>
       <div 
