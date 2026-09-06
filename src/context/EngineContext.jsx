@@ -179,7 +179,7 @@ export function EngineProvider({ children }) {
       payCommissions: pcBumps
     });
 
-    const goals = computeGoals(state.children, inflationData, state.sipXirr / 100, baseYear, retireYear);
+    const goals = computeGoals(state.children, inflationData, state.sipXirr / 100, baseYear);
 
     return {
       currentAge,

@@ -32,10 +32,9 @@ export function getSipRequired(fv, annualRate, months) {
  * @param {Object} inflation - Inflation data from computeInflation()
  * @param {number} sipXirr - SIP return rate as decimal
  * @param {number} baseYear - Current year
- * @param {number} retireYear - Retirement year
  * @returns {Array<Object>} Array of goal objects
  */
-export function computeGoals(children, inflation, sipXirr, baseYear, retireYear) {
+export function computeGoals(children, inflation, sipXirr, baseYear) {
   const goals = [];
 
   children.forEach(child => {

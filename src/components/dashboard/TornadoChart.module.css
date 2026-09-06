@@ -1,9 +1,12 @@
 .panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--bg-card, rgba(15, 23, 42, 0.85));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border, rgba(30, 41, 59, 0.8));
+  border-radius: 12px;
   padding: 18px 20px;
   margin-top: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 .header {
@@ -31,12 +34,12 @@
 
 .badge {
   font-size: 0.72rem;
-  color: var(--text-muted);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 3px 8px;
-  font-weight: 500;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 9999px;
+  padding: 3px 10px;
+  font-weight: 600;
 }
 
 .callout {
@@ -59,12 +62,13 @@
   align-items: center;
   gap: 14px;
   padding: 8px 10px;
-  border-radius: 6px;
-  transition: background 0.15s ease;
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .row:hover {
-  background: var(--bg-secondary);
+  background: rgba(30, 41, 59, 0.7);
+  transform: translateX(2px);
 }
 
 .factorMeta {
@@ -87,9 +91,9 @@
 .barTrack {
   position: relative;
   height: 22px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px dashed var(--border);
-  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px dashed rgba(51, 65, 85, 0.8);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -107,8 +111,8 @@
 
 .barFill {
   height: 100%;
-  border-radius: 3px;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -117,12 +121,22 @@
 }
 
 .barNegative {
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.85), rgba(220, 38, 38, 0.95));
+  background: linear-gradient(90deg, #f87171, #ef4444);
   margin-left: auto;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.barNegative:hover {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
 }
 
 .barPositive {
-  background: linear-gradient(90deg, rgba(16, 185, 129, 0.85), rgba(5, 150, 105, 0.95));
+  background: linear-gradient(90deg, #34d399, #10b981);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.barPositive:hover {
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
 }
 
 .deltaPill {

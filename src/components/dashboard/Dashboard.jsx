@@ -6,6 +6,7 @@ import NarrativeCard from './NarrativeCard';
 import WealthChart from './WealthChart';
 import StressPanel from './StressPanel';
 import TornadoChart from './TornadoChart';
+import MilestoneTimeline from './MilestoneTimeline';
 import FeasibilityChart from './FeasibilityChart';
 import GoalsTable from './GoalsTable';
 import ComparePanel from './ComparePanel';
@@ -54,7 +55,7 @@ const Dashboard = ({ results, isLoading, stressResults, stressOn, sensitivityRes
   return (
     <div className={styles.container}>
       <SummaryStrip results={results} isLoading={isLoading} />
-      <ComparePanel results={results} isLoading={isLoading} />
+      <ComparePanel isLoading={isLoading} />
       <KpiGrid results={results} isLoading={isLoading} />
       <NarrativeCard
         results={results}
@@ -64,6 +65,7 @@ const Dashboard = ({ results, isLoading, stressResults, stressOn, sensitivityRes
       />
       <RobustnessGrid results={results} isLoading={isLoading} />
       <WealthChart results={results} isLoading={isLoading} />
+      <MilestoneTimeline />
       <StressPanel stressResults={stressResults} mcOn={mcOn} stressOn={stressOn} />
       <TornadoChart sensitivityResults={sensitivityResults} mcOn={mcOn} sensitivityOn={sensitivityOn} />
       <div className={styles.row}>

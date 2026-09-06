@@ -1,11 +1,11 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { CollapsibleSection, RangeInput } from '../shared';
-import { computeBlendedReturn, ASSET_RETURNS } from '../../engine';
+import { computeBlendedReturn } from '../../engine';
 import styles from './SipSection.module.css';
 
 export const SipSection = () => {
-  const { state, dispatch, derivedState } = useEngine();
+  const { state, dispatch } = useEngine();
 
   const handleFieldChange = (field) => (e) => {
     dispatch({ type: 'SET_FIELD', field, value: Number(e.target.value) });

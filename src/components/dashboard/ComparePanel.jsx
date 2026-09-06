@@ -4,13 +4,13 @@ import { runPath } from '../../engine';
 import { fmt, fmtCr } from '../../utils/format';
 import styles from './ComparePanel.module.css';
 
-const ComparePanel = ({ results, isLoading }) => {
+const ComparePanel = ({ isLoading }) => {
   const { state, derivedState } = useEngine();
 
   const comparison = useMemo(() => {
     if (state.retireMode !== 'compare' || !derivedState) return null;
 
-    const { baseYear, retireYear, endYear, currentAge, lastPay, goals, inflationData } = derivedState;
+    const { baseYear, retireYear, endYear, currentAge, lastPay, inflationData } = derivedState;
     const simParams = {
       bYr: baseYear,
       rYr: retireYear,
