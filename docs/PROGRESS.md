@@ -31,7 +31,7 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ### 4. Solvency India Inspired Visualizations (New Roadmap)
 - [ ] **Dual-Axis Spending Breakdown Chart**: Area chart breaking down living expenses into core, discretionary, and healthcare/OOP costs over time.
-- [ ] **Live Rupee Shorthand Helper**: Live green label converting raw input numbers into Indian words (`₹2.5 Crore` / `₹75 Lakhs`).
+- [x] **Live Rupee Shorthand Helper**: Live green label converting raw input numbers into Indian words (`₹2.5 Crore` / `₹75 Lakhs` / `₹25k`) across all sidebar inputs and RangeInput components.
 - [ ] **Retirement Bucket Allocation Bar**: Horizontal color-coded allocation bar showing cash, bridge, stability, and growth equity split.
 
 ## Completed Features
