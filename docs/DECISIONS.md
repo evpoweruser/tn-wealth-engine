@@ -38,3 +38,21 @@
   inert. Time-limited windows self-disable past their window by existing
   `applyRegimeOverlay` semantics, so extending invocation to drawdown years is safe.
 - **Do not**: assume any stress result reflects drawdown-phase inflation until this is fixed.
+
+## ADR-005: Engine takes engine-unit params via `buildSimParams`, never raw context state
+- **Context**: Production crashed on load for users with saved children —
+  `TypeError: Cannot read properties of undefined (reading 'tot')` from
+  `runMonteCarlo` (`simulation.js:356`, `x.records[riIdx].tot` with `riIdx = -1`).
+  Root cause: `GoalOptimizerPanel` passed raw context `state` (no `bYr`/`rYr`/`endYr`,
+  percent-unit rates) into `evaluateGoalTradeoff` → `runMonteCarlo`, so
+  `Math.max(0, NaN)` loop bounds produced zero records. Unit tests missed it because
+  mocks spread engine-unit params. The solver also called `computeGoals` with a wrong
+  5-arg signature (doj/dor strings as the inflation object → NaN goals) and passed
+  `withdrawals: {}`.
+- **Decision**: `src/engine/params.js` `buildSimParams(state, derivedState)` is the single
+  params builder (used by `useSimulation`, `GoalOptimizerPanel`); solver functions take
+  engine-unit `simParams` + canonical `computeGoals`/`computeWithdrawals` calls with real
+  withdrawals; `runMonteCarlo` throws a descriptive error on zero records; engine call
+  sites in render-path `useMemo`s are try/catch-guarded to null.
+- **Do not**: pass context `state` directly to any `src/engine` function; always go
+  through `buildSimParams`. Mocks in engine tests must use engine-unit params.

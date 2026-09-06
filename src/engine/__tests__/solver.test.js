@@ -5,13 +5,14 @@ describe('solver module', () => {
   const mockParams = {
     bYr: 2026,
     rYr: 2050,
+    endYr: 2079,
     currentAge: 32,
     lifeAge: 85,
     cpsBal: 1000000,
     cpsAnn: 150000,
     cpsRate: 0.071,
     sipMo: 25000,
-    sipStep: 3.0,
+    sipStep: 0.03,
     sipXirr: 0.108,
     retSpend: 75000,
   };
@@ -71,8 +72,10 @@ describe('solver module', () => {
   describe('evaluateGoalTradeoff', () => {
     it('calculates survival rate delta when deferring milestone ages', () => {
       const result = evaluateGoalTradeoff({
-        state: mockState,
+        simParams: mockParams,
+        mode: 'taps',
         inflation: mockInflation,
+        children: mockState.children,
         goalModifications: [
           { childId: 'c1', cAgeShift: 2, mCostShift: -500000 }, // Defer college 2 yrs, reduce marriage by 5L
         ],
@@ -82,6 +85,11 @@ describe('solver module', () => {
       expect(typeof result.baselineSurvivePct).toBe('number');
       expect(typeof result.modifiedSurvivePct).toBe('number');
       expect(typeof result.deltaSurvivePct).toBe('number');
+      // Regression: raw-state plumbing used to yield NaN goals / empty records.
+      expect(Number.isFinite(result.baselineSurvivePct)).toBe(true);
+      expect(Number.isFinite(result.modifiedSurvivePct)).toBe(true);
+      expect(result.baselineSurvivePct).toBeGreaterThanOrEqual(0);
+      expect(result.baselineSurvivePct).toBeLessThanOrEqual(100);
       expect(result.modifiedChildren[0].cAge).toBe(20);
       expect(result.modifiedChildren[0].mCost).toBe(1000000);
     });

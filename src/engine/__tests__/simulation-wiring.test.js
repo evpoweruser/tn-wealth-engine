@@ -115,3 +115,14 @@ describe('runPath overlay wiring — window reconvergence', () => {
     expect(out.infM).toBeCloseTo(infM + 0.02, 10);
   });
 });
+
+describe('runMonteCarlo malformed-params guard (prod .tot crash regression)', () => {
+  it('throws a descriptive error — not a cryptic .tot TypeError — on raw state without bYr/rYr', async () => {
+    const { runMonteCarlo } = await import('../simulation.js');
+    // Raw context state shape: no bYr/rYr/endYr (those live in derivedState).
+    const rawState = { sipMo: 25000, sipXirr: 10.8, retireMode: 'taps', children: [] };
+    const inflation = { infLiving: 0.05, infMed: 0.07, infEdu: 0.08, infComposite: 0.055 };
+    expect(() => runMonteCarlo(rawState, 'taps', inflation, {}, { runs: 10, mcMode: 'A', rngSeed: 42 }))
+      .toThrow(/zero records|buildSimParams/);
+  });
+});

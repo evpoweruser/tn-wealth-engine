@@ -339,6 +339,13 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
   }
 
   const nY = paths[0].records.length;
+  if (!nY) {
+    throw new Error(
+      'runMonteCarlo: runPath produced zero records — sim params are malformed ' +
+      '(check bYr/rYr/endYr are defined numbers and rYr > bYr). ' +
+      'Pass engine-unit params via buildSimParams(), never raw context state.'
+    );
+  }
   const low = [], mid = [], high = [];
 
   for (let i = 0; i < nY; i++) {

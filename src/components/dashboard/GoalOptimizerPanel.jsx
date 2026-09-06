@@ -1,44 +1,59 @@
 import React, { useState, useMemo } from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { solveTargetSurvival, evaluateGoalTradeoff } from '../../engine';
+import { solveTargetSurvival, evaluateGoalTradeoff, buildSimParams, computeWithdrawals } from '../../engine';
 import { formatIndianRupeeWords } from '../../utils/format';
 import styles from './GoalOptimizerPanel.module.css';
 
 export const GoalOptimizerPanel = () => {
-  const { state, dispatch } = useEngine();
+  const { state, derivedState, dispatch } = useEngine();
   const [activeTab, setActiveTab] = useState('solver');
 
   // Solver local controls
   const [targetSurvivePct, setTargetSurvivePct] = useState(99);
   const [solveField, setSolveField] = useState('sipStep');
   const [solverResult, setSolverResult] = useState(null);
+  const [solverError, setSolverError] = useState(null);
   const [isSolving, setIsSolving] = useState(false);
 
   // Tradeoff local state: map of childId -> { hAgeShift, cAgeShift, mAgeShift, hCostShift, cCostShift, mCostShift }
   const [tradeoffs, setTradeoffs] = useState({});
 
-  const inflation = state.inflation?.rates ? {
-    infLiving: (state.inflation.rates.consumer || 4.5) / 100,
-    infMed: (state.inflation.rates.medical || 7.0) / 100,
-    infEdu: (state.inflation.rates.education || 8.0) / 100,
-    infComposite: 0.055,
-  } : { infLiving: 0.045, infMed: 0.07, infEdu: 0.08, infComposite: 0.055 };
+  // Engine-unit sim params (never pass raw context state into the engine —
+  // it lacks bYr/rYr/endYr and uses percent units, which crashes runMonteCarlo).
+  const simParams = useMemo(
+    () => buildSimParams(state, derivedState),
+    [state, derivedState]
+  );
+  const inflation = derivedState?.inflationData || null;
+  const mode = state.retireMode || 'taps';
 
   // Handle Reverse Solver Run
   const handleSolve = () => {
+    if (!simParams || !inflation) {
+      setSolverError('Plan data is still loading — try again in a moment.');
+      return;
+    }
     setIsSolving(true);
+    setSolverError(null);
     setTimeout(() => {
-      const res = solveTargetSurvival({
-        params: state,
-        mode: state.retireMode || 'taps',
-        inflation,
-        withdrawals: {},
-        targetSurvivePct,
-        solveField,
-        mcRuns: 250,
-      });
-      setSolverResult(res);
-      setIsSolving(false);
+      try {
+        const res = solveTargetSurvival({
+          params: simParams,
+          mode,
+          inflation,
+          withdrawals: computeWithdrawals(derivedState.goals || []),
+          targetSurvivePct,
+          solveField,
+          mcRuns: 250,
+        });
+        setSolverResult(res);
+      } catch (err) {
+        console.error('Solver error:', err);
+        setSolverError('Solver failed — check plan inputs and try again.');
+        setSolverResult(null);
+      } finally {
+        setIsSolving(false);
+      }
     }, 50);
   };
 
@@ -61,13 +76,20 @@ export const GoalOptimizerPanel = () => {
   }, [tradeoffs]);
 
   const tradeoffResult = useMemo(() => {
-    if (!state.children?.length) return null;
-    return evaluateGoalTradeoff({
-      state,
-      inflation,
-      goalModifications: tradeoffModifications,
-    });
-  }, [state, inflation, tradeoffModifications]);
+    if (!state.children?.length || !simParams || !inflation) return null;
+    try {
+      return evaluateGoalTradeoff({
+        simParams,
+        mode,
+        inflation,
+        children: state.children,
+        goalModifications: tradeoffModifications,
+      });
+    } catch (err) {
+      console.error('Tradeoff evaluation error:', err);
+      return null;
+    }
+  }, [state.children, simParams, mode, inflation, tradeoffModifications]);
 
   // Handle Tradeoff Steppers
   const updateTradeoff = (childId, key, delta) => {
@@ -184,6 +206,12 @@ export const GoalOptimizerPanel = () => {
               {isSolving ? 'Solving Math...' : `⚡ Calculate Required ${getFieldLabel(solveField)}`}
             </button>
           </div>
+
+          {solverError && (
+            <div className={styles.resultCard}>
+              <div className={styles.resultSubText}>{solverError}</div>
+            </div>
+          )}
 
           {solverResult && (
             <div className={styles.resultCard}>

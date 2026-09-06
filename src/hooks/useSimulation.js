@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useDebounce } from './useDebounce.js';
-import { runPath, runMonteCarlo, computeWithdrawals, computeDedicatedSIP } from '../engine/index.js';
+import { runPath, runMonteCarlo, computeWithdrawals, computeDedicatedSIP, buildSimParams } from '../engine/index.js';
 
 export function useSimulation(state, derivedState) {
   const debouncedState = useDebounce(state, 150);
@@ -10,44 +10,14 @@ export function useSimulation(state, derivedState) {
     if (!debouncedDerived || !debouncedState) return null;
 
     try {
-      const { baseYear, retireYear, endYear, currentAge, lastPay, goals, inflationData } = debouncedDerived;
+      const { goals, inflationData } = debouncedDerived;
 
-      const pcBumps = {};
-      if (debouncedState.payCommissions) {
-        Object.entries(debouncedState.payCommissions).forEach(([yr, enabled]) => {
-          if (enabled) pcBumps[Number(yr)] = 0.25;
-        });
-      }
-
-      const simParams = {
-        bYr: baseYear || new Date().getFullYear(),
-        rYr: retireYear || 2052,
-        endYr: endYear || (baseYear + 50),
-        currentAge: currentAge || 30,
-        pcs: pcBumps,
-        cpsBal: Number(debouncedState.cpsBal) || 0,
-        cpsAnn: Number(debouncedState.cpsAnn) || 0,
-        cpsInc: (Number(debouncedState.cpsInc) || 0) / 100,
-        cpsRate: (Number(debouncedState.cpsRate) || 0) / 100,
-        annPct: Number(debouncedState.annPct) || 0,
-        annYield: (Number(debouncedState.annYield) || 0) / 100,
-        gratuity: Number(debouncedState.gratuity) || 0,
-        postRetRate: (Number(debouncedState.postRetRate) || 0) / 100,
-        retSpend: Number(debouncedState.retSpend) || 0,
-        medShare: (Number(debouncedState.medShare) || 0) / 100,
-        sipMo: Number(debouncedState.sipMo) || 0,
-        sipXirr: (Number(debouncedState.sipXirr) || 0) / 100,
-        sipStep: (Number(debouncedState.sipStep) || 0) / 100,
-        mSurplus: Number(debouncedState.mSurplus) || 0,
-        lastPay: lastPay || { tapsPension: 0, emoluments: 0 }
-      };
+      const simParams = buildSimParams(debouncedState, debouncedDerived);
+      if (!simParams) return null;
 
       const mode = debouncedState.retireMode || 'taps';
       const withdrawals = computeWithdrawals(goals || []);
       const dedicatedSIP = computeDedicatedSIP(goals || [], simParams.bYr, simParams.rYr);
-
-      // Sum goals LTCG tax for lifetime-tax display (informational; already embedded in grossFV withdrawals)
-      simParams.goalsLtcgNominal = (goals || []).reduce((sum, g) => sum + (g.tax || 0), 0);
 
       const feasibility = {
         years: [],

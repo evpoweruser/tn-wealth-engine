@@ -12,10 +12,11 @@ import { computeGoals, computeWithdrawals } from './goals.js';
  * Solve for the parameter value required to achieve target Monte Carlo survival %
  *
  * @param {object} options
- * @param {object} options.params - Base engine params
+ * @param {object} options.params - Engine-unit sim params (see buildSimParams):
+ *   bYr/rYr/endYr present, rates as decimals. NEVER raw context state.
  * @param {string} [options.mode='taps'] - 'taps' | 'cps' | 'compare'
  * @param {object} options.inflation - Inflation rates object
- * @param {object} [options.withdrawals={}] - Base goal withdrawals object
+ * @param {object} [options.withdrawals={}] - Year-keyed goal withdrawals map
  * @param {number} [options.targetSurvivePct=99] - Target plan survival percentage (e.g. 99)
  * @param {string} [options.solveField='sipStep'] - Field to solve for: 'sipStep' | 'sipMo' | 'retSpend'
  * @param {number} [options.mcRuns=250] - Number of runs per solver iteration
@@ -32,12 +33,16 @@ export function solveTargetSurvival({
 }) {
   const mcConfig = { runs: mcRuns, mcMode: 'A', rngSeed: 42 };
 
+  // sipStep is solved in PERCENT units for display; the engine field is decimal.
+  const toEngine = (field, val) => (field === 'sipStep' ? val / 100 : val);
+  const toDisplay = (field, val) => (field === 'sipStep' ? val * 100 : val);
+
   let minVal = 0;
   let maxVal = 100;
   let currentValue = 0;
 
   if (solveField === 'sipStep') {
-    currentValue = params.sipStep ?? 3.0;
+    currentValue = toDisplay('sipStep', params.sipStep ?? 0.03);
     minVal = 0;
     maxVal = 30; // Max 30% step-up
   } else if (solveField === 'sipMo') {
@@ -51,7 +56,7 @@ export function solveTargetSurvival({
   }
 
   const evalSurvive = (testVal) => {
-    const testParams = { ...params, [solveField]: testVal };
+    const testParams = { ...params, [solveField]: toEngine(solveField, testVal) };
     const res = runMonteCarlo(testParams, mode, inflation, withdrawals, mcConfig);
     return res.survivePct;
   };
@@ -90,7 +95,7 @@ export function solveTargetSurvival({
   }
 
   // Final verification with 1,000 runs
-  const finalParams = { ...params, [solveField]: bestVal };
+  const finalParams = { ...params, [solveField]: toEngine(solveField, bestVal) };
   const finalMC = runMonteCarlo(finalParams, mode, inflation, withdrawals, { runs: 1000, mcMode: 'A', rngSeed: 42 });
 
   return {
@@ -109,21 +114,25 @@ export function solveTargetSurvival({
  * Evaluate goal tradeoff scenario modifications.
  *
  * @param {object} options
- * @param {object} options.state - Current engine context state
- * @param {object} options.inflation - Inflation rates object
+ * @param {object} options.simParams - Engine-unit sim params (see buildSimParams).
+ *   NEVER raw context state (it lacks bYr/rYr/endYr and uses percent units).
+ * @param {string} [options.mode='taps'] - 'taps' | 'cps'
+ * @param {object} options.inflation - Inflation rates object ({ infLiving, infMed,
+ *   infEdu, infComposite } decimals)
+ * @param {Array<object>} [options.children=[]] - Child goal records
  * @param {Array<object>} [options.goalModifications=[]] - List of modifications [{ childId, hAgeShift, cAgeShift, mAgeShift, hCostShift, cCostShift, mCostShift }]
  * @returns {object} { baselineSurvivePct, modifiedSurvivePct, deltaSurvivePct, baselineBequestP50, modifiedBequestP50, modifiedChildren }
  */
-export function evaluateGoalTradeoff({ state, inflation, goalModifications = [] }) {
+export function evaluateGoalTradeoff({ simParams, mode = 'taps', inflation, children = [], goalModifications = [] }) {
   const mcConfig = { runs: 500, mcMode: 'A', rngSeed: 42 };
 
-  // Baseline withdrawals & MC
-  const baseGoalData = computeGoals(state.children || [], state.doj, state.dor, state.sipXirr || 10.8, inflation?.infEdu || 8.0);
-  const baseWithdrawals = computeWithdrawals(baseGoalData, state.doj, state.dor, inflation?.infEdu || 8.0);
-  const baseMC = runMonteCarlo(state, state.retireMode || 'taps', inflation, baseWithdrawals, mcConfig);
+  // Baseline withdrawals & MC (goals computed with the canonical engine signature)
+  const baseGoalData = computeGoals(children, inflation, simParams.sipXirr, simParams.bYr);
+  const baseWithdrawals = computeWithdrawals(baseGoalData);
+  const baseMC = runMonteCarlo(simParams, mode, inflation, baseWithdrawals, mcConfig);
 
   // Apply goal modifications
-  const modifiedChildren = (state.children || []).map((child) => {
+  const modifiedChildren = (children || []).map((child) => {
     const mod = goalModifications.find((m) => m.childId === child.id);
     if (!mod) return child;
 
@@ -139,9 +148,9 @@ export function evaluateGoalTradeoff({ state, inflation, goalModifications = [] 
     return newChild;
   });
 
-  const modGoalData = computeGoals(modifiedChildren, state.doj, state.dor, state.sipXirr || 10.8, inflation?.infEdu || 8.0);
-  const modWithdrawals = computeWithdrawals(modGoalData, state.doj, state.dor, inflation?.infEdu || 8.0);
-  const modMC = runMonteCarlo(state, state.retireMode || 'taps', inflation, modWithdrawals, mcConfig);
+  const modGoalData = computeGoals(modifiedChildren, inflation, simParams.sipXirr, simParams.bYr);
+  const modWithdrawals = computeWithdrawals(modGoalData);
+  const modMC = runMonteCarlo(simParams, mode, inflation, modWithdrawals, mcConfig);
 
   return {
     baselineSurvivePct: Math.round(baseMC.survivePct),

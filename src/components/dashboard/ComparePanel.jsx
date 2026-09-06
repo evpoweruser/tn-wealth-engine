@@ -17,7 +17,7 @@ const ComparePanel = ({ isLoading }) => {
       endYr: endYear,
       currentAge,
       pcs: Object.fromEntries(
-        Object.entries(state.payCommissions).filter(([_, v]) => v).map(([k, _]) => [Number(k), 0.25])
+        Object.entries(state.payCommissions || {}).filter(([_, v]) => v).map(([k, _]) => [Number(k), 0.25])
       ),
       cpsBal: state.cpsBal,
       cpsAnn: state.cpsAnn,

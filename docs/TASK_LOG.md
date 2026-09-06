@@ -176,4 +176,32 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   (`index-Dg_K4Qvh.js`) — current, as expected with no code change since prior deploy.
 - **Git commit**: release-record docs commit (see `git log`; pushed to `origin/main`).
 
+## [2026-09-07] Hotfix: production `.tot` crash + missing PWA icons
+- **Goal**: Fix Vercel white-screen `TypeError: Cannot read properties of undefined
+  (reading 'tot')` (ErrorBoundary, on load for users with saved children) and the
+  `pwa-192x192.png` 404 from the manifest.
+- **Root cause**: `GoalOptimizerPanel` (always mounted) ran `evaluateGoalTradeoff` in
+  `useMemo` with RAW context state — no `bYr`/`rYr`/`endYr`, percent-unit rates — so
+  `runPath` loop bounds went `NaN`, records came back empty, and
+  `x.records[-1].tot` (`simulation.js:356`) threw inside `Array.map`. Solver also
+  called `computeGoals` with a wrong signature (doj/dor as inflation → NaN goals)
+  and `withdrawals: {}`. Mocks hid it (they spread engine-unit params).
+- **Files created**: `src/engine/params.js` (`buildSimParams`), `public/pwa-192x192.png`,
+  `public/pwa-512x512.png` (rsvg-convert from `favicon.svg`).
+- **Files modified**: `src/engine/index.js` (barrel), `src/hooks/useSimulation.js`
+  (uses helper, behavior identical), `src/engine/solver.js` (engine-unit `simParams`,
+  canonical goals/withdrawals calls, sipStep percent↔decimal at boundary),
+  `src/engine/simulation.js` (descriptive throw on zero records),
+  `src/components/dashboard/GoalOptimizerPanel.jsx` (simParams + real withdrawals +
+  try/catch + solver error UI), `src/components/dashboard/ComparePanel.jsx`
+  (`payCommissions || {}` guard), `src/engine/__tests__/solver.test.js` (new API,
+  engine-unit `sipStep: 0.03`, finite-number regression asserts),
+  `src/engine/__tests__/simulation-wiring.test.js` (raw-state guard regression test),
+  `docs/{PROGRESS.md,TASK_LOG.md,DECISIONS.md}` (ADR-005).
+- **Verification**: `npx vitest run` 52/52 passing (6 suites); `npm run lint` 0 errors,
+  15 warnings; `npm run build` clean, precache 14 entries; node end-to-end repro of
+  the prod path (state with children → buildSimParams → evaluateGoalTradeoff) returns
+  `{base:100, mod:100, delta:0}` instead of crashing.
+- **Git commit**: hotfix commit (see `git log`; pushed + redeployed — see below).
+
 
