@@ -162,4 +162,18 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Git commit**: docs-only verification refresh, kept local per local-first workflow
   (see `git log` for hash; not pushed, no redeploy — no code changed)
 
+## [2026-09-07] Session wrap-up release (verify + push + deploy)
+- **Goal**: End-of-session release per `.agents/rules/deployment_workflow.md` —
+  full check, push accumulated commits, deploy to Vercel production, record release.
+- **Files modified**: `docs/PROGRESS.md` (status line → 09-07 release), `docs/TASK_LOG.md`
+  (this entry). No code changed.
+- **Verification** (re-run pre-release): `npx vitest run` 51/51 passing; `npm run build`
+  clean, PWA precache 10 entries.
+- **Push**: `git push origin main` — `a3138e0..dd9e37a` accepted.
+- **Deploy**: `npx vercel --prod` → Production Ready in 8s:
+  `https://tn-wealth-engine-qwedivu81-drsibiarasan-8376s-projects.vercel.app`;
+  apex `https://tn-wealth-engine.vercel.app` serves identical bundle hash
+  (`index-Dg_K4Qvh.js`) — current, as expected with no code change since prior deploy.
+- **Git commit**: release-record docs commit (see `git log`; pushed to `origin/main`).
+
 
