@@ -1,0 +1,309 @@
+.panelContainer {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: var(--shadow-2);
+  transition: border-color var(--duration) var(--ease);
+}
+
+.panelContainer:hover {
+  border-color: var(--border-active);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  font-size: 18px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.subTitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tabGroup {
+  display: flex;
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.tabBtn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+}
+
+.tabBtn.active {
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  box-shadow: var(--shadow-1);
+}
+
+/* === REVERSE SOLVER TAB === */
+.solverGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.controlLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.pillGroup {
+  display: flex;
+  gap: 6px;
+}
+
+.pillBtn {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--duration) var(--ease);
+}
+
+.pillBtn.activePill {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+}
+
+.selectInput {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.solveActionBtn {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #0f172a;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+  transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+}
+
+.solveActionBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+}
+
+.resultCard {
+  background: rgba(52, 211, 153, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  animation: fadeIn 0.3s var(--ease);
+}
+
+.resultInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.resultHeadline {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.resultHighlight {
+  color: #34d399;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+}
+
+.resultSubText {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.applyBtn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  background: #34d399;
+  color: #064e3b;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform var(--duration) var(--ease);
+}
+
+.applyBtn:hover {
+  transform: scale(1.04);
+}
+
+/* === TRADEOFF MATRIX TAB === */
+.tradeoffContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.childCard {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.childName {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-purple);
+  margin-bottom: 8px;
+}
+
+.milestoneRow {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.milestoneRow:last-child {
+  border-bottom: none;
+}
+
+.mLabel {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.stepperGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stepBtn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stepVal {
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+  color: var(--accent-blue);
+  min-width: 45px;
+  text-align: center;
+}
+
+.impactBadgeCard {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.impactTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.impactDelta {
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.positiveDelta {
+  color: #34d399;
+}
+
+.negativeDelta {
+  color: #f87171;
+}
+
+.noChildrenNotice {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}

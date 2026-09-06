@@ -9,3 +9,4 @@ export { computeInflation, shockInflation, validateWeights } from './inflation.j
 export { projectLastPay, buildDetailedCPS } from './career.js';
 export { computeGoals, computeWithdrawals, computeDedicatedSIP, getSipRequired } from './goals.js';
 export { runPath, runMonteCarlo, randn, percentile } from './simulation.js';
+export { solveTargetSurvival, evaluateGoalTradeoff } from './solver.js';

@@ -7,6 +7,7 @@ import WealthChart from './WealthChart';
 import StressPanel from './StressPanel';
 import TornadoChart from './TornadoChart';
 import MilestoneTimeline from './MilestoneTimeline';
+import { GoalOptimizerPanel } from './GoalOptimizerPanel';
 import FeasibilityChart from './FeasibilityChart';
 import GoalsTable from './GoalsTable';
 import ComparePanel from './ComparePanel';
@@ -64,6 +65,7 @@ const Dashboard = ({ results, isLoading, stressResults, stressOn, sensitivityRes
         sensitivityResults={sensitivityOn ? sensitivityResults : null}
       />
       <RobustnessGrid results={results} isLoading={isLoading} />
+      <GoalOptimizerPanel />
       <WealthChart results={results} isLoading={isLoading} />
       <MilestoneTimeline />
       <StressPanel stressResults={stressResults} mcOn={mcOn} stressOn={stressOn} />
