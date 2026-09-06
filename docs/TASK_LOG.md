@@ -256,5 +256,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 65/65 across 8 suites; `npm run lint` 0 errors,
   16 warnings; `npm run build` clean, precache 22 entries.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`cbgptb1mi-…`), aliased to apex;
+  apex serves `index-DfImbPh4.js` containing `baseBequestP50` (tornado payload live).
 
 
