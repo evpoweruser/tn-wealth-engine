@@ -12,6 +12,19 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 - (All engine and core features completed!)
 
+## 🏢 Planned: Private-Sector Mode (EPF + NPS toggle)
+- [ ] **Scheme toggle (TN Govt vs Private)**: `retireMode: 'private'` alongside taps/cps/compare;
+  sidebar scheme switch showing EPF/NPS inputs instead of CPS/TAPS.
+- [ ] **EPF accumulation**: `epfBal`, employee + employer monthly contribution, EPF crediting
+  rate compounding (review yearly rate), fully withdrawable at retirement.
+- [ ] **NPS accumulation + mandatory annuity**: `npsMo` contributions, market-linked growth;
+  at retirement 60% lump-sum + **40% mandatory annuity purchase** → monthly pension via
+  annuity yield (vs CPS `annPct` which is optional).
+- [ ] **Engine integration**: `runPath`/`runMonteCarlo` private branch (EPF+NPS corpus,
+  NPS annuity pension, gratuity), robustness/tax/score/stress/sensitivity reuse as-is.
+- [ ] **Headline + PDF**: KpiGrid/ComparePanel private-mode cards, PDF private section,
+  narrative support, `buildSimParams` new fields, tests (accumulation math, 60/40 split).
+
 ## 🎨 Future Visual Appeal & UI/UX Enhancement Roadmap
 
 ### 1. Card & Dashboard Micro-Aesthetics
@@ -38,6 +51,11 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
   (Cash 2y spend / Bridge 3y / Stability 40% / Growth 60% of liquid remainder).
 
 ## Completed Features
+
+- [x] **Sensitivity tornado visualization upgrade (2026-09-07)** — true diverging
+  center-axis bars (damage left/red, benefit right/green, symmetric scale), rank
+  badges, hover impact cards (holds Δpp + median-bequest Δ₹), axis end labels;
+  engine adds `baseBequestP50`/`bequestP50` per shock (`sensitivity.js` + tests).
 
 - [x] **Smart Goal Optimizer & Reverse Solver (2026-09-07)** — `src/engine/solver.js` (bisection solver for 90/95/99% survival rate + goal tradeoff evaluator) + `GoalOptimizerPanel.jsx` (interactive solver UI & tradeoff matrix) + 3 unit tests (`solver.test.js`).
 - [x] **Dead-code cleanup (2026-09-06)** — deleted unreferenced `src/assets/{react,vite}.svg`,

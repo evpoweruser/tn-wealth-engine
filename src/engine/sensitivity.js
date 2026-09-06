@@ -82,7 +82,9 @@ export const SENSITIVITY_SHOCKS = [
  * @param {number} [opts.paths=400]   Reduced paths (300-500)
  * @param {string} [opts.mcMode='A']  MC mode
  * @param {number} [opts.rngSeed=77]  RNG seed for reproducibility
- * @returns {{ baseHolds: number, paths: number, shocks: Array }}
+ * @returns {{ baseHolds: number, baseBequestP50: number, paths: number, shocks: Array }}
+ *   Each shock: { id, label, desc, baseHolds, shockedHolds, delta,
+ *   baseBequestP50, bequestP50 } — bequests are median real ₹ (for ₹ impact cards).
  */
 export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) {
   const {
@@ -94,6 +96,7 @@ export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) 
   const baseConfig = { runs: paths, mcMode, rngSeed };
   const baseResult = runMonteCarlo(params, mode, inflation, withdrawals, baseConfig);
   const baseHolds = baseResult.survivePct;
+  const baseBequestP50 = baseResult.bequestP50 ?? 0;
 
   const shocks = SENSITIVITY_SHOCKS.map((shock, idx) => {
     const { params: shockedParams, inflation: shockedInflation } = shock.apply(params, inflation);
@@ -111,6 +114,8 @@ export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) 
       baseHolds,
       shockedHolds,
       delta, // in percentage points
+      baseBequestP50,
+      bequestP50: shockResult.bequestP50 ?? 0, // median real ₹
     };
   });
 
@@ -119,6 +124,7 @@ export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) 
 
   return {
     baseHolds,
+    baseBequestP50,
     paths,
     shocks,
   };

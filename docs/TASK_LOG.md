@@ -243,4 +243,18 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   (`tn-wealth-engine-r9h7y1z82-…`), aliased to apex; apex serves `index-B8W41KTe.js`
   containing the new panels ("TN Wealth Score", "Retirement Bucket"), HTTP 200.
 
+## [2026-09-07] Tornado visualization upgrade + private-sector (EPF/NPS) todo
+- **Goal**: True diverging tornado (center baseline, red-left/green-right), rank badges,
+  hover cards with exact holds + bequest-₹ impact; record EPF/NPS private-employee mode
+  as the next roadmap item.
+- **Files modified**: `src/engine/sensitivity.js` (`baseBequestP50` + per-shock
+  `bequestP50` median real ₹), `src/engine/__tests__/sensitivity.test.js` (bequest
+  payload asserts), `src/components/dashboard/TornadoChart.jsx` (diverging axis,
+  ranks, hover cards), `src/components/dashboard/TornadoChart.module.css` (new
+  diverge/impact styles), `docs/PROGRESS.md` (tornado completed entry + private-mode
+  todo section).
+- **Verification**: `npx vitest run` 65/65 across 8 suites; `npm run lint` 0 errors,
+  16 warnings; `npm run build` clean, precache 22 entries.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 

@@ -89,6 +89,13 @@ describe('sensitivity engine', () => {
       expect(s.delta).toBeCloseTo(s.shockedHolds - res.baseHolds, 4);
     });
 
+    // Bequest impact payload for tornado hover cards (median real ₹)
+    expect(Number.isFinite(res.baseBequestP50)).toBe(true);
+    res.shocks.forEach(s => {
+      expect(Number.isFinite(s.bequestP50)).toBe(true);
+      expect(s.baseBequestP50).toBe(res.baseBequestP50);
+    });
+
     // Check sorting: ascending order of delta (most negative first)
     for (let i = 0; i < res.shocks.length - 1; i++) {
       expect(res.shocks[i].delta).toBeLessThanOrEqual(res.shocks[i + 1].delta);
