@@ -93,6 +93,17 @@ const WealthChart = ({ results, isLoading }) => {
       <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height={340}>
           <ComposedChart data={chartData} margin={{ top: 25, right: 16, bottom: 8, left: 8 }}>
+            <defs>
+              <linearGradient id="mcBandGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.35}/>
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.04}/>
+              </linearGradient>
+              <linearGradient id="liquidAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.28}/>
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0.02}/>
+              </linearGradient>
+            </defs>
+
             <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="yr" stroke="var(--chart-grid)" tick={{ fill: 'var(--chart-tick)', fontSize: 11 }} minTickGap={36} tickLine={false} axisLine={{ stroke: 'var(--chart-grid)' }} />
             <YAxis stroke="var(--chart-grid)" tick={{ fill: 'var(--chart-tick)', fontSize: 11 }} tickFormatter={(val) => `₹${Number(val).toFixed(1)}Cr`} width={64} tickLine={false} axisLine={false} />
@@ -100,12 +111,12 @@ const WealthChart = ({ results, isLoading }) => {
 
             {state.mcOn && (
               <>
-                <Area type="monotone" dataKey="totHigh" stroke="none" fill="var(--accent-amber)" fillOpacity={0.16} />
+                <Area type="monotone" dataKey="totHigh" stroke="none" fill="url(#mcBandGradient)" />
                 <Area type="monotone" dataKey="totLow" stroke="none" fill="var(--bg-card-solid)" fillOpacity={1} />
               </>
             )}
 
-            <Area type="monotone" dataKey="liquid" stroke="none" fill="var(--accent-green)" fillOpacity={0.14} />
+            <Area type="monotone" dataKey="liquid" stroke="none" fill="url(#liquidAreaGradient)" />
             <Line type="monotone" dataKey="tot" stroke="var(--accent-green)" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
 
             {retireYear && (

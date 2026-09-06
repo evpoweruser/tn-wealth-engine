@@ -15,12 +15,12 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 ## 🎨 Future Visual Appeal & UI/UX Enhancement Roadmap
 
 ### 1. Card & Dashboard Micro-Aesthetics
-- [ ] **Glassmorphism & Multi-Stop Border Glows**: Add floating CSS backdrop-blurs (`backdrop-filter: blur(12px)`) with subtle gradient borders (`linear-gradient(135deg, rgba(56,189,248,0.25), rgba(129,140,248,0.1))`) to KPI cards, Robustness Grid, and Narrative Card.
-- [ ] **Pulsing Status Badges**: Add subtle CSS pulse glow animations (`@keyframes pulseGlow`) to narrative status badges (Green pulse for High Resilience, Amber for Moderate, Red for High Depletion Risk).
+- [x] **Glassmorphism & Multi-Stop Border Glows** — Added floating CSS backdrop-blurs (`backdrop-filter: blur(12px-16px)`) with gradient hover borders to KPI cards and Narrative Card (`KpiCard.module.css`, `NarrativeCard.module.css`).
+- [x] **Pulsing Status Badges** — Added CSS pulse glow keyframe animations (`@keyframes pulseGlowSuccess/Warning/Info`) to narrative status badges.
 - [ ] **Animated KPI Number Transitions**: Add smooth count-up transitions for primary KPI values (Wealth at Retirement, Monthly Pension, Liquid Base) when slider inputs change.
 
 ### 2. Chart Polish & Interactivity
-- [ ] **Gradient Fills for Monte Carlo Bands**: Replace solid P10–P90 confidence band colors in `WealthChart.jsx` with multi-stop SVG area gradients (`stopOpacity` 0.35 $\to$ 0.05).
+- [x] **Gradient Fills for Monte Carlo Bands** — Added multi-stop SVG linearGradients (`#mcBandGradient`, `#liquidAreaGradient`) for soft area fills in `WealthChart.jsx`.
 - [ ] **Interactive Hover Crosshair & Multi-Pill Tooltips**: Custom Recharts tooltip showing liquid vs pension vs total wealth breakdown pills with crisp glass background and active year crosshairs.
 - [ ] **Dynamic Stress Overlay Line**: Clicking a stress regime in `StressPanel.jsx` dynamically plots a dashed stress trajectory line over `WealthChart.jsx` for direct visual comparison.
 
