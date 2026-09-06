@@ -85,6 +85,9 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 48/48 passing as of 2026-09-06 — 40 existing + 8 wiring)
-- Lint: `npm run lint` (oxlint; 0 errors, 14 warnings as of 2026-09-06)
-- Build: `npm run build` (vite + PWA precache 9 entries, passing as of 2026-09-06)
+- Unit tests: `npm test` (vitest; 51/51 passing as of 2026-09-07 — 6 suites: tax 9,
+  narrative 4, wiring 8, stress 19, solver 3, sensitivity 8)
+- Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — 14 pre-existing
+  + 2 in new `GoalOptimizerPanel.jsx`)
+- Build: `npm run build` (vite + PWA precache 10 entries, passing as of 2026-09-07; local
+  bundle hash `index-Dg_K4Qvh.js` identical to production — deployed == HEAD `a3138e0`)

@@ -147,4 +147,19 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 51/51 passing across 6 test suites; `npm run build` clean.
 - **Session End Release**: All local commits pushed to GitHub main and deployed live to Vercel production.
 
+## [2026-09-07] Full verification pass (tests, lint, build, deployment match)
+- **Goal**: Re-verify the 09-07 session-end claims — test count, lint/build health, and that
+  production serves the current HEAD.
+- **Files modified**: `docs/PROGRESS.md` (verification lines refreshed; were stale at
+  48/48 + 14 warnings + precache 9 as of 09-06).
+- **Verification** (actual runs, this session): `npx vitest run` 51/51 passing across
+  6 suites (tax 9, narrative 4, wiring 8, stress 19, solver 3, sensitivity 8);
+  `npm run lint` 0 errors, 16 warnings (14 pre-existing + 2 in new
+  `GoalOptimizerPanel.jsx`); `npm run build` clean, PWA precache 10 entries.
+  Deployment: local `main` == `origin/main` at `a3138e0`; production
+  `https://tn-wealth-engine.vercel.app` serves bundle `index-Dg_K4Qvh.js`, byte-identical
+  hash to a fresh local build — deployed == HEAD. No code changes, so no redeploy needed.
+- **Git commit**: docs-only verification refresh, kept local per local-first workflow
+  (see `git log` for hash; not pushed, no redeploy — no code changed)
+
 
