@@ -65,18 +65,24 @@ function clamp(x, a, b) {
  * @param {number} infE          Education inflation (decimal)
  * @param {number} infC          Composite inflation (decimal)
  * @param {object} [wDraws]      Year-keyed goal withdrawal map
- * @param {Function} [yearlyOverlay]  Optional per-year rate modifier:
- *   (rates: {sXirr, cRate, infL, infM, infE, infC}, yearIdx: number) => same shape.
- *   Called at the start of each accumulation year. Return rates are used for that year only.
+  * @param {Function} [yearlyOverlay]  Optional per-year rate modifier:
+  *   (rates: {sXirr, cRate, infL, infM, infE, infC}, yearIdx: number) => same shape.
+  *   Called at the start of each accumulation and drawdown year. yearIdx is the
+  *   absolute year index (0-based from the base year): accumulation year i,
+  *   drawdown year accYears + j. Return rates are used for that year only.
  */
 export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, yearlyOverlay) {
   let cpsAnn = params.cpsAnn;
   let sipMo = params.sipMo;
   let cpsBal = params.cpsBal;
   let sipBal = 0;
-
   const accYears = Math.max(0, params.rYr - params.bYr);
   const records = [];
+
+  // Running cumulative inflation indices (1.0 = base year purchasing power)
+  let cumInfL = 1.0;
+  let cumInfM = 1.0;
+  let cumInfC = 1.0;
 
   // === ACCUMULATION PHASE ===
   for (let i = 0; i <= accYears; i++) {
@@ -103,14 +109,18 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       yInfE  = ov.infE;  yInfC  = ov.infC;
     }
 
-    // Monthly CPS rate from possibly-overlaid cRate
-    const yMonthlyR = Math.pow(1 + yCRate, 1 / 12) - 1;
-
     if (i > 0) {
+      cumInfL *= (1 + yInfL);
+      cumInfM *= (1 + yInfM);
+      cumInfC *= (1 + yInfC);
+
       cpsAnn *= 1 + params.cpsInc;
       if (params.pcs && params.pcs[yr]) cpsAnn *= 1 + params.pcs[yr];
       sipMo *= 1 + params.sipStep;
     }
+
+    // Monthly CPS rate from possibly-overlaid cRate
+    const yMonthlyR = Math.pow(1 + yCRate, 1 / 12) - 1;
 
     // CPS: compound monthly for 12 months at this year's crediting rate
     for (let mm = 0; mm < 12; mm++) {
@@ -127,8 +137,6 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       sipBal = Math.max(0, sipBal - wDraws[yr]);
     }
 
-    // Use composite inflation for this year's real-value calculation
-    const realInfC = yInfC;
     const total = cpsBal + sipBal;
     records.push({
       yr,
@@ -138,7 +146,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       sip: sipBal / 1e7,
       liquid: total / 1e7,
       tot: total / 1e7,
-      real: (total / Math.pow(1 + realInfC, i)) / 1e7,
+      real: (total / cumInfC) / 1e7,
       pension: 0,
     });
   }
@@ -149,7 +157,8 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   const lp = params.lastPay || { tapsPension: 0, emoluments: 0 };
   const tapsP = lp.tapsPension || 0;
   const totalWealthAtRetire = finCPS + finSIP + params.gratuity;
-  const realWealthAtRetire = totalWealthAtRetire / Math.pow(1 + infC, accYears);
+  const cumInfCAtRetire = cumInfC;
+  const realWealthAtRetire = totalWealthAtRetire / cumInfCAtRetire;
 
   let annuityCorpus = 0;
   let cpsPension = 0;
@@ -179,12 +188,28 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     const yr = params.rYr + j;
     const elapsed = accYears + j;
 
-    if (mode === 'taps') {
-      pension = tapsP * Math.pow(1 + infC, j);
+    // Apply per-year overlay (same absolute yearIdx timeline as accumulation:
+    // accYears + j). Windowed regimes self-disable past their window; all-years
+    // regimes (e.g. medical_shock) bite here. Only inflation components apply
+    // in drawdown — SIP/CPS balances are fixed at retirement.
+    let yInfL = infL;
+    let yInfM = infM;
+    let yInfC = infC;
+    if (yearlyOverlay) {
+      const ov = yearlyOverlay({ sXirr, cRate, infL, infM, infE, infC }, elapsed);
+      yInfL = ov.infL; yInfM = ov.infM; yInfC = ov.infC;
     }
 
-    const medExp = params.retSpend * params.medShare * Math.pow(1 + infM, elapsed);
-    const livExp = params.retSpend * (1 - params.medShare) * Math.pow(1 + infL, elapsed);
+    cumInfL *= (1 + yInfL);
+    cumInfM *= (1 + yInfM);
+    cumInfC *= (1 + yInfC);
+
+    if (mode === 'taps') {
+      pension = tapsP * (cumInfC / cumInfCAtRetire);
+    }
+
+    const medExp = params.retSpend * params.medShare * cumInfM;
+    const livExp = params.retSpend * (1 - params.medShare) * cumInfL;
     const monthlyExp = medExp + livExp;
     lifetimeMedSpendNominal += medExp * 12;
 
@@ -194,8 +219,8 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     const annualPension = pension * 12;
     const yearTaxNominal = pensionTaxForYear(annualPension);
     taxNominal += yearTaxNominal;
-    // Per-year deflation (exact): discount each year's tax by its own elapsed factor
-    taxReal += yearTaxNominal / Math.pow(1 + infC, elapsed);
+    // Per-year deflation (exact): discount each year's tax by exact cumulative inflation
+    taxReal += yearTaxNominal / cumInfC;
 
     for (let mm = 0; mm < 12; mm++) {
       liquid = liquid * (1 + params.postRetRate / 12) - netDrawdown;
@@ -229,7 +254,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       sip: 0,
       liquid: liquid / 1e7,
       tot: totalValue / 1e7,
-      real: (totalValue / Math.pow(1 + infC, elapsed)) / 1e7,
+      real: (totalValue / cumInfC) / 1e7,
       pension,
       depleted: isDepleted,
     });
