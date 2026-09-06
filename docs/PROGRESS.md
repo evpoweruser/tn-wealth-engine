@@ -36,6 +36,7 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Completed Features
 
+- [x] **Smart Goal Optimizer & Reverse Solver (2026-09-07)** — `src/engine/solver.js` (bisection solver for 90/95/99% survival rate + goal tradeoff evaluator) + `GoalOptimizerPanel.jsx` (interactive solver UI & tradeoff matrix) + 3 unit tests (`solver.test.js`).
 - [x] **Dead-code cleanup (2026-09-06)** — deleted unreferenced `src/assets/{react,vite}.svg`,
   `src/assets/hero.png`, `public/icons.svg`, and local repomix dumps (~370 KB); removed unused
   `useState/useEffect` (`useSimulation.js`), `ASSET_RETURNS` + `derivedState` (`SipSection.jsx`),

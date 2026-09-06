@@ -140,3 +140,11 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Files modified**: `src/utils/pdfReport.js`, `docs/PROGRESS.md`.
 - **Verification**: `npx vitest run` 48/48 passing; `npm run build` clean (PWA precache 9 entries).
 
+## [2026-09-07] Live Rupee Shorthand Inputs & Smart Goal Optimizer & Reverse Solver
+- **Goal**: Add live Indian rupee shorthand labels (`₹2.5 Crore` / `₹75 Lakh` / `₹25k`) across all sidebar inputs to prevent zero-counting errors; add automated bisection solver for 90%/95%/99% plan survival and drag-and-drop goal tradeoff matrix; formalize Local-First Session Workflow rule.
+- **Files created**: `.agents/rules/deployment_workflow.md`, `src/engine/solver.js`, `src/engine/__tests__/solver.test.js`, `src/components/dashboard/GoalOptimizerPanel.jsx`, `src/components/dashboard/GoalOptimizerPanel.module.css`.
+- **Files modified**: `src/utils/format.js`, `src/index.css`, `src/components/shared/RangeInput.jsx`, `src/components/shared/RangeInput.module.css`, `src/components/config/{SipSection,SchemeSection,CareerSection,CareerBuilder,ChildCard}.jsx`, `src/engine/index.js`, `src/components/dashboard/Dashboard.jsx`, `.agents/rules/tracking.md`, `docs/PROGRESS.md`.
+- **Verification**: `npx vitest run` 51/51 passing across 6 test suites; `npm run build` clean.
+- **Session End Release**: All local commits pushed to GitHub main and deployed live to Vercel production.
+
+
