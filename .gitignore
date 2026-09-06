@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Generated codebase dumps (local analysis artifacts, not source)
+repomix-output.xml
+tn-wealth-engine-codebase.xml

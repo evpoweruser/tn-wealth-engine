@@ -1,0 +1,59 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".agents/rules/tracking.md",
+    "docs/PROGRESS.md",
+    ".opencode/skills/tdd-workflow/SKILL.md",
+    ".opencode/skills/verification-loop/SKILL.md",
+    ".opencode/skills/security-review/SKILL.md",
+    ".opencode/skills/coding-standards/SKILL.md",
+    ".opencode/skills/frontend-patterns/SKILL.md",
+    ".opencode/skills/architecture-decision-records/SKILL.md"
+  ],
+  "agent": {
+    "build": {
+      "description": "Primary coding agent for tn-wealth-engine work",
+      "mode": "primary"
+    },
+    "planner": {
+      "description": "Implementation planning for engine/math/UI changes. Read-only.",
+      "mode": "subagent"
+    },
+    "code-reviewer": {
+      "description": "Whole-project reviewer: engine correctness (simulation, tax, stress, sensitivity, CRN, yearlyOverlay), React 19 + Recharts dashboard, PWA. Read-only.",
+      "mode": "subagent"
+    },
+    "tdd-guide": {
+      "description": "TDD enforcer: RED/GREEN/refactor, vitest, 80%+ coverage on src/engine.",
+      "mode": "subagent"
+    }
+  },
+  "command": {
+    "plan": {
+      "description": "Create implementation plan for next PROGRESS.md item",
+      "agent": "planner"
+    },
+    "tdd": {
+      "description": "TDD cycle with vitest (npm test). Use for engine fixes and new features.",
+      "agent": "tdd-guide"
+    },
+    "code-review": {
+      "description": "Review changed files for correctness, React patterns, and security",
+      "agent": "code-reviewer"
+    },
+    "security": {
+      "description": "Security checklist: secrets, input validation, log redaction, headers",
+      "agent": "code-reviewer"
+    },
+    "verify": {
+      "description": "Verification loop: npm test + npm run lint (oxlint) + npm run build (vite). Adapted from verification-loop skill (no tsc; JS-only)."
+    },
+    "checkpoint": {
+      "description": "Save progress: update docs/PROGRESS.md checkboxes and append docs/TASK_LOG.md entry with real vitest counts and git hash only."
+    },
+    "test-coverage": {
+      "description": "Coverage check on src/engine via vitest",
+      "agent": "tdd-guide"
+    }
+  }
+}
