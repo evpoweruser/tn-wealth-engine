@@ -84,23 +84,31 @@ const RobustnessGrid = ({ results, isLoading }) => {
         value={neverShortVal}
         subtitle={neverShortSub}
         valueColor={neverShortColor}
+        countTo={mcOn ? nsp : null}
+        countFormat={(v) => fmtPct0(v)}
       />
       <KpiCard
         title="Exhausts"
         value={exhaustsVal}
         subtitle={exhaustsSub}
         valueColor={exhaustsColor}
+        countTo={mcOn ? exPct : null}
+        countFormat={(v) => fmtPct0(v)}
       />
       <KpiCard
         title="Real Bequest"
         value={bqVal}
         subtitle={bqSub}
         valueColor="var(--accent-purple)"
+        countTo={bq50}
+        countFormat={(v) => fmtCr(v)}
       />
       <KpiCard
         title="Lifetime Tax"
         value={taxVal}
         subtitle={taxSub}
+        countTo={tax}
+        countFormat={(v) => fmtCr(v)}
       />
     </div>
   );

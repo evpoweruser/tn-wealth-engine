@@ -1,8 +1,8 @@
 # Project Progress & Roadmap
 
 Last Updated: 2026-09-07
-Current Status: Active development — Phase 2 complete + Smart Goal Optimizer shipped;
-session wrap-up released 2026-09-07 (pushed through `dd9e37a`, Vercel production Ready).
+Current Status: All roadmap UI + LTC + Wealth Score + hardening shipped 2026-09-07;
+see TASK_LOG. Open idea backlog: Dual-PAN tax, multi-currency NRI mode.
 
 This file is the single source of truth for project state. Deep technical specs live in
 `docs/WALKTHROUGH.md` and `docs/ROBUSTNESS_AND_STRESS_PANEL.md` — linked, not duplicated.
@@ -17,12 +17,13 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 ### 1. Card & Dashboard Micro-Aesthetics
 - [x] **Glassmorphism & Multi-Stop Border Glows** — Added floating CSS backdrop-blurs (`backdrop-filter: blur(12px-16px)`) with gradient hover borders to KPI cards and Narrative Card (`KpiCard.module.css`, `NarrativeCard.module.css`).
 - [x] **Pulsing Status Badges** — Added CSS pulse glow keyframe animations (`@keyframes pulseGlowSuccess/Warning/Info`) to narrative status badges.
-- [ ] **Animated KPI Number Transitions**: Add smooth count-up transitions for primary KPI values (Wealth at Retirement, Monthly Pension, Liquid Base) when slider inputs change.
+- [x] **Animated KPI Number Transitions** — `useCountUp` eased transitions wired via `KpiCard` (`countTo`/`countFormat`) across `KpiGrid` + `RobustnessGrid`.
 
 ### 2. Chart Polish & Interactivity
 - [x] **Gradient Fills for Monte Carlo Bands** — Added multi-stop SVG linearGradients (`#mcBandGradient`, `#liquidAreaGradient`) for soft area fills in `WealthChart.jsx`.
 - [x] **Glowing Tornado Chart Bars** — Added red/green gradient bar fills with cyan/amber highlights and glowing box-shadows in `TornadoChart.module.css`.
-- [ ] **Dynamic Stress Overlay Line**: Clicking a stress regime in `StressPanel.jsx` dynamically plots a dashed stress trajectory line over `WealthChart.jsx` for direct visual comparison.
+- [x] **Dynamic Stress Overlay Line** — Clicking a StressPanel row toggles a deterministic
+  stressed trajectory (dashed red line) over `WealthChart.jsx` (`App.jsx` overlay state).
 
 ### 3. Config Sidebar & Goal Timeline Visuals
 - [x] **Milestone Goal Visual Timeline** — Created interactive horizontal SVG node timeline chart (`MilestoneTimeline.jsx`) showing target ages, future costs, and funding badges (`Corpus` vs `SIP`).
@@ -30,9 +31,11 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 - [x] **Sidebar Glassmorphism & Header Accent** — Added glass backdrop-blur and cyan pill count badge to `Sidebar.module.css`.
 
 ### 4. Solvency India Inspired Visualizations (New Roadmap)
-- [ ] **Dual-Axis Spending Breakdown Chart**: Area chart breaking down living expenses into core, discretionary, and healthcare/OOP costs over time.
+- [x] **Dual-Axis Spending Breakdown Chart** — `SpendingChart.jsx` stacked living/healthcare
+  areas from median-path drawdown records (`expLiv`/`expMed` recorded by `runPath`).
 - [x] **Live Rupee Shorthand Helper**: Live green label converting raw input numbers into Indian words (`₹2.5 Crore` / `₹75 Lakhs` / `₹25k`) across all sidebar inputs and RangeInput components.
-- [ ] **Retirement Bucket Allocation Bar**: Horizontal color-coded allocation bar showing cash, bridge, stability, and growth equity split.
+- [x] **Retirement Bucket Allocation Bar** — `BucketBar.jsx` heuristic bar
+  (Cash 2y spend / Bridge 3y / Stability 40% / Growth 60% of liquid remainder).
 
 ## Completed Features
 
@@ -85,8 +88,8 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 52/52 passing as of 2026-09-07 — 6 suites: tax 9,
-  narrative 4, wiring 9, stress 19, solver 3, sensitivity 8)
-- Lint: `npm run lint` (oxlint; 0 errors, 15 warnings as of 2026-09-07)
-- Build: `npm run build` (vite + PWA precache 14 entries, passing as of 2026-09-07 —
-  includes generated `pwa-192x192.png` / `pwa-512x512.png`)
+- Unit tests: `npm test` (vitest; 65/65 passing as of 2026-09-07 — 8 suites: tax 9,
+  narrative 4, wiring 12, stress 19, solver 3, sensitivity 8, score 6, validation 4)
+- Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
+- Build: `npm run build` (vite + PWA precache 22 entries, passing as of 2026-09-07;
+  Recharts panels code-split — Wealth/Tornado/Feasibility lazy chunks, main ~1.29 MB)

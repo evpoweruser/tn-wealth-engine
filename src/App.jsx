@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useEngine } from './context/EngineContext';
 import { useTheme } from './context/ThemeContext';
 import { useSimulation } from './hooks/useSimulation';
 import { useStressPanel } from './hooks/useStressPanel';
 import { useSensitivity } from './hooks/useSensitivity';
+import { buildSimParams, computeWithdrawals, runPath, applyRegimeOverlay } from './engine/index.js';
 import { PdfOverlay, AboutModal } from './components/shared';
 import Sidebar from './components/config/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
@@ -16,39 +17,47 @@ function App() {
   const { theme, toggleTheme } = useTheme();
   const { results, isLoading } = useSimulation(state, derivedState);
 
-  // Build simParams shape for stress & sensitivity panel (mirrors useSimulation internal build)
-  const simParamsForStress = derivedState ? {
-    bYr: derivedState.baseYear || new Date().getFullYear(),
-    rYr: derivedState.retireYear || 2052,
-    endYr: derivedState.endYear || (derivedState.baseYear + 50),
-    currentAge: derivedState.currentAge || 30,
-    pcs: (() => {
-      const bumps = {};
-      Object.entries(state.payCommissions || {}).forEach(([yr, en]) => { if (en) bumps[Number(yr)] = 0.25; });
-      return bumps;
-    })(),
-    cpsBal: Number(state.cpsBal) || 0,
-    cpsAnn: Number(state.cpsAnn) || 0,
-    cpsInc: (Number(state.cpsInc) || 0) / 100,
-    cpsRate: (Number(state.cpsRate) || 0) / 100,
-    annPct: Number(state.annPct) || 0,
-    annYield: (Number(state.annYield) || 0) / 100,
-    gratuity: Number(state.gratuity) || 0,
-    postRetRate: (Number(state.postRetRate) || 0) / 100,
-    retSpend: Number(state.retSpend) || 0,
-    medShare: (Number(state.medShare) || 0) / 100,
-    sipMo: Number(state.sipMo) || 0,
-    sipXirr: (Number(state.sipXirr) || 0) / 100,
-    sipStep: (Number(state.sipStep) || 0) / 100,
-    mSurplus: Number(state.mSurplus) || 0,
-    lastPay: derivedState.lastPay || { tapsPension: 0, emoluments: 0 },
-  } : null;
+  // Engine-unit sim params, memoized (single builder — see buildSimParams).
+  const simParamsForStress = useMemo(
+    () => buildSimParams(state, derivedState),
+    [state, derivedState]
+  );
 
   const stressOn = state.stressOn ?? true;
   const stressResults = useStressPanel(state, derivedState, simParamsForStress, stressOn);
 
   const sensitivityOn = state.sensitivityOn ?? true;
   const sensitivityResults = useSensitivity(state, derivedState, simParamsForStress, sensitivityOn);
+
+  // Dynamic stress overlay: clicking a regime plots its deterministic stressed
+  // trajectory (base rates + regime overlay, no MC sampling) over WealthChart.
+  const [stressOverlayId, setStressOverlayId] = useState(null);
+  const stressOverlay = useMemo(() => {
+    if (!stressOverlayId || !simParamsForStress || !derivedState) return null;
+    try {
+      const { inflationData, goals } = derivedState;
+      const mode = state.retireMode || 'taps';
+      const res = runPath(
+        simParamsForStress,
+        mode,
+        simParamsForStress.cpsRate,
+        simParamsForStress.sipXirr,
+        inflationData.infLiving,
+        inflationData.infMed,
+        inflationData.infEdu,
+        inflationData.infComposite,
+        computeWithdrawals(goals || []),
+        (rates, yearIdx) => applyRegimeOverlay({ ...rates }, yearIdx, stressOverlayId)
+      );
+      return {
+        id: stressOverlayId,
+        series: res.records.map((r) => ({ yr: r.yr, stressTot: r.tot })),
+      };
+    } catch (err) {
+      console.error('Stress overlay error:', err);
+      return null;
+    }
+  }, [stressOverlayId, simParamsForStress, derivedState, state.retireMode]);
 
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfStage, setPdfStage] = useState('');
@@ -151,6 +160,9 @@ function App() {
             stressOn={stressOn}
             sensitivityResults={sensitivityResults}
             sensitivityOn={sensitivityOn}
+            stressOverlay={stressOverlay}
+            stressOverlayId={stressOverlayId}
+            onToggleStressOverlay={(id) => setStressOverlayId((prev) => (prev === id ? null : id))}
           />
         </div>
       </div>

@@ -177,6 +177,17 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   let depletedYear = null;
   let pension = monthlyPension;
 
+  // --- Long-term care (LTC) config — off unless params.ltcOn is true, so
+  // default results are bit-identical to pre-LTC runs. When on: medical
+  // inflation steps up from medStepAge (65: ~7% -> ~10%) and a one-time
+  // critical-illness shock is deducted at ltcShockAge (75).
+  const ltcOn = params.ltcOn === true;
+  const medStepAge = params.medStepAge ?? 65;
+  const medStepUp = params.medStepUp ?? 0.03;
+  const ltcShockAge = params.ltcShockAge ?? 75;
+  const ltcShockAmt = params.ltcShockAmt ?? 500000;
+  let ltcShockYear = null;
+
   // --- Robustness accumulators ---
   let shortYears = 0;          // count of years where liquid hits 0
   let firstShortYear = null;   // first such year
@@ -201,7 +212,10 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     }
 
     cumInfL *= (1 + yInfL);
-    cumInfM *= (1 + yInfM);
+    // LTC age-tiering: medical inflation accelerates from medStepAge.
+    const age = params.currentAge + elapsed;
+    const yInfMeff = (ltcOn && age >= medStepAge) ? yInfM + medStepUp : yInfM;
+    cumInfM *= (1 + yInfMeff);
     cumInfC *= (1 + yInfC);
 
     if (mode === 'taps') {
@@ -239,6 +253,17 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       }
     }
 
+    // LTC critical-illness shock: one-time out-of-pocket deduction at ltcShockAge.
+    let ltcShock = 0;
+    if (ltcOn && ltcShockAmt > 0 && age === ltcShockAge && liquid > 0) {
+      ltcShock = Math.min(liquid, ltcShockAmt);
+      liquid -= ltcShock;
+      if (!ltcShockYear) ltcShockYear = yr;
+      if (liquid === 0 && !depletedYear) {
+        depletedYear = yr;
+      }
+    }
+
     const isDepleted = liquid === 0;
     if (isDepleted) {
       shortYears++;
@@ -257,6 +282,11 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       real: (totalValue / cumInfC) / 1e7,
       pension,
       depleted: isDepleted,
+      // Monthly nominal retirement spend split (₹) — feeds the spending chart.
+      expLiv: livExp,
+      expMed: medExp,
+      expTot: monthlyExp,
+      ltcShock,
     });
   }
 
@@ -285,6 +315,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     depletedYear,
     mode,
     lastEmol: lp.emoluments || 0,
+    ltcShockYear,
     // Robustness fields
     shortYears,
     firstShortYear,

@@ -126,3 +126,36 @@ describe('runMonteCarlo malformed-params guard (prod .tot crash regression)', ()
       .toThrow(/zero records|buildSimParams/);
   });
 });
+
+describe('runPath long-term care (LTC) modeling', () => {
+  const ltcParams = { ...params, ltcOn: true };
+
+  it('is off by default: identical records with and without the flag absent', () => {
+    const a = runWithOverlay(null);
+    const b = runPath({ ...params, ltcOn: false }, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, null);
+    expect(b.records.length).toBe(a.records.length);
+    expect(b.records[b.records.length - 1].tot).toBeCloseTo(a.records[a.records.length - 1].tot, 10);
+  });
+
+  it('steps up medical spend growth from age 65', () => {
+    const off = runWithOverlay(null);
+    const on = runPath(ltcParams, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, null);
+    const drawOff = off.records.filter((r) => r.phase === 'draw');
+    const drawOn = on.records.filter((r) => r.phase === 'draw');
+    // Before 65: identical med spend; from 65: LTC path spends more per year.
+    const pre65 = drawOn.findIndex((r) => r.age >= 65);
+    expect(drawOn[0].expMed).toBeCloseTo(drawOff[0].expMed, 10);
+    expect(drawOn[pre65].expMed).toBeGreaterThan(drawOff[pre65].expMed);
+    // Drawdown records carry the spend split for the spending chart.
+    expect(drawOn[0]).toMatchObject({ expLiv: expect.any(Number), expMed: expect.any(Number), expTot: expect.any(Number) });
+  });
+
+  it('deducts the critical-illness shock once at age 75', () => {
+    const on = runPath(ltcParams, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, null);
+    expect(on.ltcShockYear).not.toBeNull();
+    const shockRec = on.records.find((r) => r.ltcShock > 0);
+    expect(shockRec.age).toBe(75);
+    expect(shockRec.ltcShock).toBeCloseTo(500000, 6);
+    expect(on.records.filter((r) => r.ltcShock > 0).length).toBe(1);
+  });
+});

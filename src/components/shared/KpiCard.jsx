@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useCountUp } from '../../hooks/useCountUp';
 import styles from './KpiCard.module.css';
 
-const KpiCard = ({ label, title, value, subtitle, color, valueColor, trend, loading = false }) => {
+const KpiCard = ({ label, title, value, subtitle, color, valueColor, trend, loading = false, countTo = null, countFormat = null }) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const animated = useCountUp(countTo);
+  const displayValue = countTo != null && countFormat && animated != null
+    ? countFormat(animated)
+    : value;
 
   const cardLabel = label || title;
   const cardColor = color || valueColor || 'var(--text-primary)';
@@ -32,9 +38,9 @@ const KpiCard = ({ label, title, value, subtitle, color, valueColor, trend, load
         <div
           className={`${styles.value} ${mounted ? styles.animateValue : ''}`}
           style={{ color: cardColor }}
-          title={typeof value === 'string' ? value : undefined}
+          title={typeof displayValue === 'string' ? displayValue : undefined}
         >
-          {value}
+          {displayValue}
         </div>
         {trend && (
           <div className={`${styles.trend} ${styles[trend]}`} aria-hidden="true">

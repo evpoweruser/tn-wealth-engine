@@ -39,11 +39,17 @@ const CustomTooltip = ({ active, payload, goals }) => {
   return null;
 };
 
-const WealthChart = ({ results, isLoading }) => {
+const WealthChart = ({ results, isLoading, stressOverlay }) => {
   const { state, derivedState } = useEngine();
 
   if (isLoading || !results || !results.mid) {
     return <div className={styles.card}><div className={styles.loading}>Simulating portfolio paths...</div></div>;
+  }
+
+  // Merge the selected deterministic stress trajectory (if any) by year.
+  const stressByYear = {};
+  if (stressOverlay?.series) {
+    stressOverlay.series.forEach((p) => { stressByYear[p.yr] = p.stressTot; });
   }
 
   const chartData = results.mid.records.map((m, i) => ({
@@ -55,6 +61,7 @@ const WealthChart = ({ results, isLoading }) => {
     real: m.real,
     totLow: results.low?.records?.[i]?.tot ?? m.tot,
     totHigh: results.high?.records?.[i]?.tot ?? m.tot,
+    ...(stressOverlay ? { stressTot: stressByYear[m.yr] ?? null } : {}),
   }));
 
   const retireYear = chartData.find(d => d.phase === 'draw')?.yr;
@@ -82,6 +89,11 @@ const WealthChart = ({ results, isLoading }) => {
           <span className={styles.badgeItem}>
             <span className={styles.dot} style={{ background: 'var(--accent-purple)' }}></span> Retirement
           </span>
+          {stressOverlay && (
+            <span className={styles.badgeItem}>
+              <span className={styles.dot} style={{ background: 'var(--accent-red)' }}></span> Stress: {stressOverlay.id}
+            </span>
+          )}
           {goals.length > 0 && (
             <span className={styles.badgeItem}>
               <span className={styles.dot} style={{ background: 'var(--accent-amber)' }}></span> Milestones
@@ -118,6 +130,18 @@ const WealthChart = ({ results, isLoading }) => {
 
             <Area type="monotone" dataKey="liquid" stroke="none" fill="url(#liquidAreaGradient)" />
             <Line type="monotone" dataKey="tot" stroke="var(--accent-green)" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+            {stressOverlay && (
+              <Line
+                type="monotone"
+                dataKey="stressTot"
+                name={`Stress: ${stressOverlay.id}`}
+                stroke="var(--accent-red)"
+                strokeWidth={1.75}
+                strokeDasharray="6 4"
+                dot={false}
+                connectNulls
+              />
+            )}
 
             {retireYear && (
               <ReferenceLine

@@ -61,3 +61,10 @@
     flex-direction: column;
   }
 }
+
+.chartFallback {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 24px 0;
+  text-align: center;
+}

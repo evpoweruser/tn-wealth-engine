@@ -18,6 +18,10 @@ export const MonteCarloSection = () => {
     dispatch({ type: 'SET_FIELD', field: 'sensitivityOn', value: e.target.checked });
   };
 
+  const handleLtcToggle = (e) => {
+    dispatch({ type: 'SET_FIELD', field: 'ltcOn', value: e.target.checked });
+  };
+
   const handleMode = (mode) => () => {
     dispatch({ type: 'SET_FIELD', field: 'mcMode', value: mode });
   };
@@ -31,6 +35,7 @@ export const MonteCarloSection = () => {
   const mcRuns        = state.mcRuns || 1000;
   const stressOn      = state.stressOn ?? true;
   const sensitivityOn = state.sensitivityOn ?? true;
+  const ltcOn         = state.ltcOn === true;
 
   return (
     <CollapsibleSection title="Monte Carlo" number={5} defaultOpen={false}>
@@ -91,6 +96,16 @@ export const MonteCarloSection = () => {
                 className={styles.checkbox}
               />
               Show sensitivity tornado
+            </label>
+
+            <label className={styles.toggleLabel} style={{ marginTop: 6 }} title="Medical inflation steps up from age 65 (≈7% → ≈10%) plus a one-time critical-illness shock at age 75">
+              <input
+                type="checkbox"
+                checked={ltcOn}
+                onChange={handleLtcToggle}
+                className={styles.checkbox}
+              />
+              Model long-term care costs (65+ step-up, age-75 shock)
             </label>
           </div>
         )}

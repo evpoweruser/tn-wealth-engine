@@ -213,4 +213,31 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   Confirmed fix working on apex `https://tn-wealth-engine.vercel.app` (fresh profile,
   new bundle + icons 200). No code change needed.
 
+## [2026-09-07] Overnight batch: finish UI, LTC engine, Wealth Score, hardening
+- **Goal**: Complete all 4 open UI roadmap items, ship Age-Tiered Healthcare
+  Inflation + LTC Buffer, TN Wealth Score gauge + 1-click recommendations, and the
+  carried-over review items (manifest, code-splitting, panel boundaries, validation).
+- **Engine**: `runPath` records yearly spend split (`expLiv/expMed/expTot`, monthly
+  nominal ₹) + LTC (`ltcOn`: med inflation +3pp from 65, one-time critical-illness
+  shock ₹5L at 75, `ltcShockYear` returned; off by default → existing results
+  bit-identical); new `src/engine/score.js` (0.40/0.25/0.20/0.15 weighting, SRR dip
+  metric, tax efficiency, weakest-part recommendations); `buildSimParams` threads
+  `ltcOn`; `runMonteCarlo` zero-record guard (prior hotfix).
+- **UI**: `useCountUp` + `KpiCard` count-ups (`KpiGrid`, `RobustnessGrid`); clickable
+  `StressPanel` rows → deterministic dashed overlay on `WealthChart`; new
+  `SpendingChart`, `BucketBar` (documented heuristic), `HealthScoreCard` (SVG gauge
+  + Apply-dispatch recommendations); LTC toggle in `MonteCarloSection`.
+- **Hardening**: `WealthChart`/`TornadoChart`/`FeasibilityChart` lazy-loaded
+  (main 1.33→1.29 MB + split chunks); `PanelErrorBoundary` per panel in
+  `Dashboard.jsx`; `src/utils/validation.js` ranges + clamping on SET_FIELD and
+  LOAD_STATE; manifest gains `id`, `categories`, `shortcuts`; `App.jsx`
+  `simParamsForStress` memoized via `buildSimParams` (kills per-render recompute P1).
+- **Files created**: `src/engine/score.js`, `src/engine/__tests__/score.test.js`,
+  `src/utils/validation.js`, `src/utils/__tests__/validation.test.js`,
+  `src/hooks/useCountUp.js`, `src/components/shared/PanelErrorBoundary.jsx`,
+  `src/components/dashboard/{SpendingChart,BucketBar,HealthScoreCard}.jsx` (+ CSS).
+- **Verification**: `npx vitest run` 65/65 across 8 suites; `npm run lint` 0 errors,
+  16 warnings (pre-existing class); `npm run build` clean, precache 22 entries.
+- **Git commit**: overnight batch commit (see `git log`; pushed + deployed).
+
 

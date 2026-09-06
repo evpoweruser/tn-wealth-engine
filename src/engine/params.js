@@ -52,6 +52,8 @@ export function buildSimParams(state, derivedState) {
     sipStep: (Number(state.sipStep) || 0) / 100,
     mSurplus: Number(state.mSurplus) || 0,
     lastPay: lastPay || { tapsPension: 0, emoluments: 0 },
+    // Long-term care modeling (engine defaults apply unless ltcOn is true).
+    ltcOn: state.ltcOn === true,
   };
 
   // Sum goals LTCG tax for lifetime-tax display (informational; already embedded

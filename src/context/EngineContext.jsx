@@ -6,6 +6,7 @@ import {
   computeGoals
 } from '../engine/index.js';
 import { ageFromDob } from '../utils/format.js';
+import { clampField, sanitizeLoadedState } from '../utils/validation.js';
 
 const initialState = {
   dob: '1993-05-15',
@@ -46,6 +47,7 @@ const initialState = {
   mcRuns: 1000,
   stressOn: true,
   sensitivityOn: true,
+  ltcOn: false,
   children: [
     {
       id: 1,
@@ -61,7 +63,7 @@ const initialState = {
 function engineReducer(state, action) {
   switch (action.type) {
     case 'SET_FIELD':
-      return { ...state, [action.field]: action.value };
+      return { ...state, [action.field]: clampField(action.field, action.value, state[action.field]) };
     case 'SET_ALLOCATION':
       return { ...state, allocation: { ...state.allocation, [action.key]: action.value } };
     case 'SET_INFLATION_RATE':
@@ -119,7 +121,7 @@ function engineReducer(state, action) {
     case 'RESET':
       return initialState;
     case 'LOAD_STATE':
-      return { ...initialState, ...action.state };
+      return { ...initialState, ...sanitizeLoadedState(action.state, initialState) };
     default:
       return state;
   }

@@ -56,3 +56,23 @@
   sites in render-path `useMemo`s are try/catch-guarded to null.
 - **Do not**: pass context `state` directly to any `src/engine` function; always go
   through `buildSimParams`. Mocks in engine tests must use engine-unit params.
+
+## ADR-006: LTC modeling is opt-in and off by default
+- **Context**: Age-tiered medical inflation (+3pp from 65) and the age-75
+  critical-illness shock change drawdown math materially. Enabling silently would
+  shift every existing user's survival/bequest numbers and break solver baselines.
+- **Decision**: `runPath` gates all LTC behavior on `params.ltcOn === true`
+  (engine defaults: step age 65, +3pp, shock age 75, ₹5L); `buildSimParams` maps
+  `state.ltcOn === true`; UI toggle lives in `MonteCarloSection`. Off → records
+  (plus new spend fields) are numerically identical to pre-LTC runs.
+- **Do not**: flip the default on without also re-baselining solver/test expectations
+  and announcing the change to users.
+
+## ADR-007: Dashboard panels fail independently
+- **Context**: The production `.tot` crash showed one panel error blanking the app
+  through a single top-level boundary.
+- **Decision**: Every dashboard panel is wrapped in `PanelErrorBoundary` (compact
+  inline fallback + console error). Shared shell (header/sidebar) stays outside so
+  the app remains usable when one panel fails.
+- **Do not**: add unguarded engine calls in render-path `useMemo`s; return null or
+  catch to the boundary.

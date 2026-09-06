@@ -7,8 +7,9 @@ import styles from './StressPanel.module.css';
  *
  * Rendered below WealthChart, above the feasibility row.
  * Hidden when MC is off or stressOn is false.
+ * Clicking a row toggles a deterministic stressed trajectory overlay on WealthChart.
  */
-const StressPanel = ({ stressResults, mcOn, stressOn }) => {
+const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverlay }) => {
   if (!mcOn) {
     return (
       <div className={styles.panel}>
@@ -66,7 +67,15 @@ const StressPanel = ({ stressResults, mcOn, stressOn }) => {
                 'var(--accent-green)';
 
               return (
-                <tr key={regime.id}>
+                <tr
+                  key={regime.id}
+                  onClick={onToggleOverlay ? () => onToggleOverlay(regime.id) : undefined}
+                  style={onToggleOverlay ? {
+                    cursor: 'pointer',
+                    background: selectedId === regime.id ? 'var(--bg-hover, rgba(56,189,248,0.08))' : undefined,
+                  } : undefined}
+                  title={onToggleOverlay ? 'Click to overlay this regime on the wealth chart' : undefined}
+                >
                   <td>
                     <div className={styles.regimeLabel}>{regime.label}</div>
                     <div className={styles.regimeBlurb}>{regime.blurb}</div>
@@ -88,7 +97,8 @@ const StressPanel = ({ stressResults, mcOn, stressOn }) => {
 
       <div className={styles.footnote}>
         Stress overlaid on selected MC mode · Reduced paths per regime ·
-        Holds = non-depleted share (funded-ratio deferred) · FY26-27 tax basis
+        Holds = non-depleted share (funded-ratio deferred) · FY26-27 tax basis ·
+        Click a row to overlay its path on the wealth chart{selectedId ? ' (click again to clear)' : ''}.
       </div>
     </div>
   );

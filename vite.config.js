@@ -9,6 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
+        id: '/',
         name: 'TN Pension & SIP Wealth Engine',
         short_name: 'TN Wealth',
         description: 'Retirement planning calculator for Tamil Nadu government employees',
@@ -16,6 +17,7 @@ export default defineConfig({
         background_color: '#030712',
         display: 'standalone',
         start_url: '/',
+        categories: ['finance', 'utilities'],
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -33,6 +35,13 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Open planner',
+            url: '/',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
           }
         ]
       },

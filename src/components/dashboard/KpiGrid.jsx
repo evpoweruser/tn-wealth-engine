@@ -54,11 +54,37 @@ const KpiGrid = ({ results, isLoading }) => {
 
   return (
     <div className={styles.grid}>
-      <KpiCard title="Wealth at Retire" value={wealthAtRetire} subtitle={retireSubtitle} />
-      <KpiCard title="Monthly Pension" value={monthlyPension} subtitle={pensionSubtitle} valueColor="var(--accent-blue)" />
-      <KpiCard title="Liquid Base" value={liquidBase} subtitle={liquidSubtitle} valueColor="var(--accent-green)" />
+      <KpiCard
+        title="Wealth at Retire"
+        value={wealthAtRetire}
+        subtitle={retireSubtitle}
+        countTo={mid.totalWealthAtRetire || mid.liquidStart || 0}
+        countFormat={(v) => fmtCr(v)}
+      />
+      <KpiCard
+        title="Monthly Pension"
+        value={monthlyPension}
+        subtitle={pensionSubtitle}
+        valueColor="var(--accent-blue)"
+        countTo={mid.monthlyPension > 0 ? mid.monthlyPension : null}
+        countFormat={(v) => `${fmt(v)} /mo`}
+      />
+      <KpiCard
+        title="Liquid Base"
+        value={liquidBase}
+        subtitle={liquidSubtitle}
+        valueColor="var(--accent-green)"
+        countTo={mid.liquidStart || 0}
+        countFormat={(v) => fmtCr(v)}
+      />
       <KpiCard title="Longevity" value={longevity} subtitle={longevitySubtitle} valueColor={longevityColor} />
-      <KpiCard title="Plan Success" value={surviveText} subtitle={surviveSubtitle} />
+      <KpiCard
+        title="Plan Success"
+        value={surviveText}
+        subtitle={surviveSubtitle}
+        countTo={state.mcOn ? (survivePct ?? 0) : null}
+        countFormat={(v) => `${Math.round(v)}%`}
+      />
     </div>
   );
 };
