@@ -363,5 +363,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 84/84 across 10 suites; `npm run lint` 0 errors
   (fixed hooks-order error in new modal), 16 warnings; `npm run build` clean.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`iqulgb988-…`), aliased to apex;
+  apex serves `index-DzR_HWin.js` (matches local build), HTTP 200.
 
 
