@@ -293,5 +293,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   16 warnings; `npm run build` clean. New drags move survival/bequest down slightly
   by construction (previously ignored bills now modeled) — reviewed, expected.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`apuxij5bo-…`), aliased to apex;
+  apex serves `index-DvbKPb4R.js` (matches local build), HTTP 200.
 
 
