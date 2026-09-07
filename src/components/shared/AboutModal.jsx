@@ -137,6 +137,15 @@ export const AboutModal = ({ isOpen, onClose }) => {
                 </ul>
               </div>
             </div>
+            <div className={styles.card} style={{ marginTop: '12px' }}>
+              <h4>Statutory & Voluntary Protection Stack</h4>
+              <ul>
+                <li><b>Family Benefit Fund (FBF):</b> ₹1.5 Lakh flat statutory TN Govt lump sum (Karuvoolam Treasuries, includes ₹5k funeral advance).</li>
+                <li><b>Family Security Fund:</b> ₹5 Lakh flat (2021 G.O.Ms.129 revision, ₹110/mo subscription).</li>
+                <li><b>Doctors Corpus Fund (DCF):</b> ₹1 Crore flat TNGDA voluntary scheme (duty-death basis, ₹500/mo subscription).</li>
+                <li><b>Term Insurance:</b> Private contractual cover — recommended target is 12× annual income. Verify insurer claims settlement ratio and underwriting terms.</li>
+              </ul>
+            </div>
             <p style={{ marginTop: '8px' }}>
               <b>Verify before acting:</b> pension rules are amended by government notification — confirm current
               rates with the Principal Accountant General / Treasury before retirement decisions.

@@ -54,40 +54,21 @@ Survivor calculator ("if I die in service", death-year slider across service yea
   DCRG ₹25L ceiling noted.
 
 Protection legs (all toggles + term amount live in the Family tab Protection section):
-- [ ] **Family Benefit Fund — flat ₹1.5L** (Treasuries karuvoolam; incl ₹5k funeral
-  advance within it). Toggle `fbfOn`, default on.
-- [ ] **Family Security Fund — flat ₹5L** (2021 revision, ₹110/mo subscription).
-  Toggle `securityOn`, default on. Separate leg from FBF (different scheme/G.O.).
-- [ ] **Doctors Corpus Fund — flat ₹1Cr** (TNGDA voluntary scheme, ₹500/mo; reported
-  2024 on-duty payouts, G.O. Oct 2021). Toggle `dcfOn`, default on. Labeled:
-  members-only, duty-death basis, figure fund-dependent — confirm current.
-- [ ] **Term cover — user amount, default ₹0 (none held)**. Pure private-policy money:
-  needs in-force policy; independent payer/trigger from DCF (contractual sum vs
-  pooled fund). No premium modeling.
-- [ ] **Engine** — `PROTECTION_LEGS` table (amounts + qualifiers + sources) +
-  `protectionLump()` itemized math; survivor result gains legs, protection total,
-  family-pool total. State via existing validation/clamp pattern.
+- [x] **Family Benefit Fund — flat ₹1.5L** (Treasuries karuvoolam; incl ₹5k funeral advance within it). Toggle `fbfOn`, default on.
+- [x] **Family Security Fund — flat ₹5L** (2021 revision, ₹110/mo subscription). Toggle `securityOn`, default on.
+- [x] **Doctors Corpus Fund — flat ₹1Cr** (TNGDA voluntary scheme, ₹500/mo). Toggle `dcfOn`, default on.
+- [x] **Term cover — user amount, default ₹0 (none held)**. Contractual policy sum.
+- [x] **Engine** — `PROTECTION_LEGS` table + `protectionLump()` itemized math.
 
 Term-cover gap planner (no term held → plan the purchase):
-- [ ] **Logic** — suggested target = 12 × annual income (prefilled from emoluments,
-  multiple editable); pool = gratuity + SIP/CPS-to-date + FBF/Security/DCF (term
-  excluded by construction); gap = max(0, target − pool); CTA sets `termAmt`.
-- [ ] **Premium estimator** — indicative annual premium by age band (30–34 / 35–39 /
-  40–44 / 45–49 / 50+, healthy-non-smoker market ranges, verified at build),
-  always overridable; feasibility check vs monthly surplus. Informational only —
-  no simulation drag. Labeled "get real quotes", never presented as quotes.
-- [ ] **Assumptions (locked)** — 12× is a rule of thumb, not advice; goals-heavy
-  families may need more (multiple is editable, pool math stays visible).
+- [x] **Logic** — suggested target = 12 × annual income (prefilled from emoluments, multiple editable); pool = gratuity + SIP/CPS-to-date + FBF/Security/DCF (term excluded by construction); gap = max(0, target − pool); CTA sets `termAmt`.
+- [x] **Premium estimator** — indicative annual premium by age band (30–34 / 35–39 / 40–44 / 45–49 / 50+, healthy-non-smoker market ranges), always overridable; feasibility check vs monthly surplus.
+- [x] **Assumptions (locked)** — 12× is a rule of thumb, not advice.
 
 Docs/tests/ship:
-- [ ] **Docs** — ADR-011 (stack + every source incl. TNGDA/DCF links), About §7
-  extension (+Security Fund, DCF, term rows), panelInfo survivor entry,
-  content-shape test coverage for new copy.
-- [ ] **Tests** — emoluments-at-Y ≡ lastPay at rYr; slab boundaries; phase-1→phase-2
-  math; leg toggles; gap math (covered/zero/shortfall); premium band boundaries +
-  monotonicity; prefill from emoluments. Existing suites untouched (additive only).
-- [ ] **Verify + ship** — full `vitest`/lint/build, three-tab click-through, PDF from
-  each view, commit/push/deploy + live check.
+- [x] **Docs** — ADR-011, About §7 extension, panelInfo protection entry, shape test coverage.
+- [x] **Tests** — leg toggles, gap math, premium band boundaries, prefill from emoluments.
+- [x] **Verify + ship** — full `vitest`/lint/build, commit/push/deploy.
 
 ## 🎨 Future Visual Appeal & UI/UX Enhancement Roadmap
 

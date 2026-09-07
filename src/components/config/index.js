@@ -7,3 +7,5 @@ export { InflationSection } from './InflationSection';
 export { MonteCarloSection } from './MonteCarloSection';
 export { ChildrenSection } from './ChildrenSection';
 export { ChildCard } from './ChildCard';
+export { ProtectionSection } from './ProtectionSection';
+

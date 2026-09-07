@@ -22,7 +22,7 @@ export const ChildrenSection = () => {
   };
 
   return (
-    <CollapsibleSection title="Children Planning" number={6} defaultOpen={false}>
+    <CollapsibleSection title="Children Planning" number={7} defaultOpen={false}>
       <div className={styles.sectionContent}>
         <div className={styles.addRow}>
           <input 

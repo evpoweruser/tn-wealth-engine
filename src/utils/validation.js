@@ -34,6 +34,9 @@ export const FIELD_RANGES = {
   sipStep: [0, 50],
   sipXirr: [0, 30],
   mcRuns: [100, 5000],
+  termAmt: [0, 500000000],
+  termTargetMultiple: [1, 30],
+  termPremium: [0, 1000000],
 };
 
 /**

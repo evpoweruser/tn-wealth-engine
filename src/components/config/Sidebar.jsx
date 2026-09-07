@@ -5,6 +5,7 @@ import { SchemeSection } from './SchemeSection';
 import { SipSection } from './SipSection';
 import { InflationSection } from './InflationSection';
 import { MonteCarloSection } from './MonteCarloSection';
+import { ProtectionSection } from './ProtectionSection';
 import { ChildrenSection } from './ChildrenSection';
 import styles from './Sidebar.module.css';
 import { SlidersHorizontal } from 'lucide-react';
@@ -21,7 +22,7 @@ export const Sidebar = () => {
           Configuration
         </h2>
         <span className={styles.meta} title="Configured milestone goals">
-          {goalCount > 0 ? `${goalCount} goal${goalCount > 1 ? 's' : ''}` : '6 sections'}
+          {goalCount > 0 ? `${goalCount} goal${goalCount > 1 ? 's' : ''}` : '7 sections'}
         </span>
       </div>
       
@@ -32,6 +33,7 @@ export const Sidebar = () => {
           <SipSection />
           <InflationSection />
           <MonteCarloSection />
+          <ProtectionSection />
           <ChildrenSection />
         </div>
       </div>

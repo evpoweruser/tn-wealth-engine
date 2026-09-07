@@ -48,6 +48,12 @@ const initialState = {
   stressOn: true,
   sensitivityOn: true,
   ltcOn: false,
+  fbfOn: true,
+  securityOn: true,
+  dcfOn: true,
+  termAmt: 0,
+  termTargetMultiple: 12,
+  termPremium: 0,
   children: [
     {
       id: 1,
@@ -64,6 +70,8 @@ function engineReducer(state, action) {
   switch (action.type) {
     case 'SET_FIELD':
       return { ...state, [action.field]: clampField(action.field, action.value, state[action.field]) };
+    case 'TOGGLE_PROTECTION_LEG':
+      return { ...state, [action.leg]: action.value !== undefined ? action.value : !state[action.leg] };
     case 'SET_ALLOCATION':
       return { ...state, allocation: { ...state.allocation, [action.key]: action.value } };
     case 'SET_INFLATION_RATE':

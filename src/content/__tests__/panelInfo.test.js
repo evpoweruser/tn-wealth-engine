@@ -18,6 +18,7 @@ const REFERENCED_IDS = [
   'what-if',
   'stress-regimes',
   'tornado',
+  'protection',
 ];
 
 describe('panel explainer content', () => {

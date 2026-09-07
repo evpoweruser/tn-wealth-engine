@@ -424,4 +424,11 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`918df68cx-…`), aliased to apex;
   apex serves `index-BqNduFn5.js` (matches local build), HTTP 200.
 
+## [2026-09-07] Family Protection Stack & Term-Cover Gap Planner
+- **Goal**: Statutory & voluntary protection legs (FBF ₹1.5L, Family Security Fund ₹5L, Doctors Corpus Fund ₹1Cr, Term cover) + 12× annual income term gap planner with age-band premium estimator & surplus feasibility check.
+- **Files created**: `src/engine/protection.js` (`PROTECTION_LEGS`, `protectionLump`, `suggestTermTarget`, `protectionGap`, `estimateTermPremium`, `premiumFeasible`), `src/engine/__tests__/protection.test.js` (14 tests), `src/components/config/ProtectionSection.jsx` (+ CSS module).
+- **Files modified**: `src/engine/index.js` (barrel export), `src/utils/validation.js` (`FIELD_RANGES`), `src/context/EngineContext.jsx` (`initialState` + `TOGGLE_PROTECTION_LEG`), `src/components/config/{Sidebar,ChildrenSection,index}.js` (sidebar integration), `src/content/panelInfo.js` (explainer), `src/components/shared/AboutModal.jsx` (§7 update), `docs/{PROGRESS.md,TASK_LOG.md}`.
+- **Verification**: `npx vitest run` 109/109 across 12 suites passing; `npm run build` clean.
+
+
 

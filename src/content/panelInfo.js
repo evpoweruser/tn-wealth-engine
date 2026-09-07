@@ -271,6 +271,25 @@ export const PANEL_INFO = {
     ],
     howToRead: 'Fix the top red bar’s underlying input first, then re-run — the ranking updates live.',
   },
+
+  protection: {
+    title: 'Family Protection & Term Cover',
+    assumptions: [
+      'Statutory & voluntary legs: FBF (₹1.5L), Family Security Fund (₹5L), Doctors Corpus Fund (₹1Cr).',
+      'Term gap target defaults to 12× annual emoluments (editable target multiple).',
+      'Term insurance is excluded from existing liquid asset pool by construction to prevent double-counting.',
+    ],
+    says: [
+      'Itemizes existing liquid pool (Gratuity + CPS + SIP + active non-term protection legs) against target cover.',
+      'Displays protection gap and provides indicative 2026 market annual premium estimates by age band.',
+      'Checks whether monthly term premium fits comfortably within your monthly surplus.',
+    ],
+    doesntSay: [
+      'Indicative premiums are market range estimates for healthy non-smokers, not binding quotes.',
+      '12× income is a rule of thumb — families with heavy milestone goals or loans may require higher cover.',
+    ],
+    howToRead: 'Check if existing statutory legs cover your target; if a gap remains, click + Add Suggested Term Cover and verify surplus feasibility.',
+  },
 };
 
 /** Ordered panel ids (stable for tests and future indexes). */
