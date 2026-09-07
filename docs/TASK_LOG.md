@@ -380,5 +380,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   node end-to-end repro with production-shaped state: +2 college stepper applies
   (18→20) and moves survival 10%→12%. `npm run build` clean.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`as6wy2v0j-…`), aliased to apex;
+  apex serves `index-DJ9x_UYA.js` (matches local build), HTTP 200.
 
 
