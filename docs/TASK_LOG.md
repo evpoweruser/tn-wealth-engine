@@ -447,6 +447,8 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 119/119 across 13 suites; `npm run lint` 0 errors,
   17 warnings; `npm run build` clean, precache 31, Family lazy chunk.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`dbegwnk5q-…`), aliased to apex;
+  apex serves `index-CZK9KG_n.js` + Family chunk with SurvivorCard live, HTTP 200.
 
 ## [2026-09-07] Family Protection Stack & Term-Cover Gap Planner
 - **Goal**: Statutory & voluntary protection legs (FBF ₹1.5L, Family Security Fund ₹5L, Doctors Corpus Fund ₹1Cr, Term cover) + 12× annual income term gap planner with age-band premium estimator & surplus feasibility check.
