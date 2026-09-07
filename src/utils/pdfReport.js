@@ -441,6 +441,7 @@ export async function generateWealthReport({ state, derivedState, results, onSta
         ['Real Terminal Bequest (P50)', `Median legacy corpus at age ${state.lifeAge} (today's money)`, fmtCrRs(results.bequestP50 || 0)],
         ['Real Terminal Bequest (P10)', `Downside 10th percentile legacy at age ${state.lifeAge}`, fmtCrRs(results.bequestP10 || 0)],
         ['Lifetime Real Tax Burden', 'FY26-27 New Regime pension tax + goals LTCG (today\'s money)', fmtCrRs(results.taxRealP50 || 0)],
+        ['Spouse family pension (TAPS)', '60% of pension per G.O.Ms.No.07, DA-indexed, market-proof', state.retireMode === 'taps' && results.mid?.familyPension ? `${fmtINR(Math.round(results.mid.familyPension))} /mo` : 'No family pension under lump-sum CPS'],
         ['Stress: Early Market Crash', 'Years 0-1: SIP return -30%, Living inflation 8%', 'Windowed accumulation shock'],
         ['Stress: Stagflation', 'Years 0-2: SIP return -4%, All inflation +3%', 'Windowed accumulation shock'],
         ['Stress: Lost Decade', 'Years 0-9: SIP return -5%, Composite inflation +1%', 'Decade accumulation shock'],

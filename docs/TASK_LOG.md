@@ -383,4 +383,26 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`as6wy2v0j-…`), aliased to apex;
   apex serves `index-DJ9x_UYA.js` (matches local build), HTTP 200.
 
+## [2026-09-07] Inheritance + spouse cover (ADR-010)
+- **Goal**: Bequest P10 reads ₹0 everywhere (correct: all regimes exhaust ≥10%) —
+  show median too, define inheritance honestly, surface TAPS family pension.
+- **Research**: TAPS family pension = 60% of last pension drawn, DA at par
+  (G.O.Ms.No.07 09-01-2026; News18/GKToday/govtschemes/usthadian; pre-2003 TN rules:
+  enhanced 50% × 7yrs/till 65). CPS lump-sum: none.
+- **Files modified**: `src/engine/simulation.js` (liquid-only bequest, exact;
+  `FAMILY_PENSION_FRACTION`, `familyPension` in runPath + MC mid), `src/engine/
+  index.js` (barrel), `src/hooks/useSimulation.js` + `src/workers/mcWorker.js`
+  (mid passthrough), `src/components/dashboard/StressPanel.jsx` (BEQUEST P50 column,
+  P10 depleted tooltip, spouse-cover line), `src/components/dashboard/StressLabView.jsx`
+  (props), `src/content/panelInfo.js` (robustness/stress entries),
+  `src/utils/pdfReport.js` (Page-4 spouse row), `src/components/shared/AboutModal.jsx`
+  (§7 family pension & inheritance), `src/engine/__tests__/{simulation-wiring,
+  stress.test.js}` (annuity exclusion, 60% math, P50 passthrough),
+  `docs/{PROGRESS.md,TASK_LOG.md,DECISIONS.md}`.
+- **Verification**: `npx vitest run` 88/88 across 10 suites; `npm run lint` 0 errors,
+  16 warnings; `npm run build` clean.
+- **Known display shift**: CPS+annuity Real Bequest drops (overstatement removed) —
+  called out, not a regression.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 

@@ -66,6 +66,11 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
   assumptions / says / doesn’t-say / how-to-read) + shared `InfoButton` modal;
   wired into every Plan + Lab panel header (incl. slim headers for grid-only panels;
   StressPanel badge corrected 4→5 regimes).
+- [x] **Inheritance + spouse cover (2026-09-07, ADR-010)** — bequest is liquid-only
+  terminal (annuity excluded; TAPS identical, CPS+annuity drops to truth); TAPS family
+  pension 60%-of-pension per G.O.Ms.No.07 returned by engine; stress table gains
+  BEQUEST P50 + P10 depleted hints + spouse-cover line; PDF Page-4 spouse row;
+  About tab §7 (family pension & inheritance, gratuity note, verify-with-Treasury).
 
 - [x] **Withdrawal-year taxation (2026-09-07, ADR-008)** — goal LTCG split into net
   withdrawals + year-keyed tax map (exact-year deduction/deflation, totals identical
@@ -129,8 +134,8 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 85/85 passing as of 2026-09-07 — 10 suites: tax 9,
-  narrative 4, wiring 19, stress 26, solver 4, sensitivity 8, goals 3, score 6,
+- Unit tests: `npm test` (vitest; 88/88 passing as of 2026-09-07 — 10 suites: tax 9,
+  narrative 4, wiring 22, stress 27, solver 4, sensitivity 8, goals 3, score 6,
   validation 4, panelInfo 2)
 - Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
 - Build: `npm run build` (vite + PWA precache 24 entries, passing as of 2026-09-07;

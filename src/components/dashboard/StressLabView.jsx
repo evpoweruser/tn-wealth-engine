@@ -79,6 +79,8 @@ const StressLabView = ({
           stressOn={stressOn}
           selectedId={stressOverlayId}
           onToggleOverlay={onToggleStressOverlay}
+          spouseCover={results?.mid?.familyPension || 0}
+          mode={state.retireMode || 'taps'}
         />
       </PanelErrorBoundary>
       <PanelErrorBoundary panelName="Sensitivity">

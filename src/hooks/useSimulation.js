@@ -57,6 +57,7 @@ export function useSimulation(state, derivedState) {
             annuityCorpus: res.annuityCorpus,
             monthlyPension: res.monthlyPension,
             tapsPension: res.tapsPension,
+            familyPension: res.familyPension || 0,
             liquidStart: res.liquidStart,
             totalWealthAtRetire: res.totalWealthAtRetire,
             realWealthAtRetire: res.realWealthAtRetire,

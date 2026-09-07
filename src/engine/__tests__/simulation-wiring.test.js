@@ -248,3 +248,33 @@ describe('runPath drawdown postRet overlay', () => {
     });
   });
 });
+
+describe('runPath inheritance (bequest) and spouse cover (family pension)', () => {
+  it('bequest is liquid-only: matches terminal liquid, not total value', () => {
+    const res = runWithOverlay(null);
+    const termRec = res.records[res.records.length - 1];
+    // TAPS: total == liquid (no annuity slice) — identical either way.
+    expect(res.bequestNominal).toBeCloseTo(termRec.liquid * 1e7, 4);
+    expect(res.bequestNominal).toBeCloseTo(termRec.tot * 1e7, 4);
+  });
+
+  it('excludes the annuity corpus in CPS mode (annuity dies with the annuitant)', () => {
+    const cpsParams = { ...params, annPct: 40, annYield: 0.07 };
+    const res = runPath(cpsParams, 'cps', cRate, sXirr, infL, infM, infE, infC, {});
+    expect(res.annuityCorpus).toBeGreaterThan(0);
+    const termRec = res.records[res.records.length - 1];
+    expect(res.bequestNominal).toBeCloseTo(termRec.liquid * 1e7, 4);
+    // …and strictly below the old total-value figure that included it.
+    expect(res.bequestNominal).toBeLessThan(termRec.tot * 1e7);
+  });
+
+  it('family pension is 60% of pension in TAPS, zero in CPS', async () => {
+    const { FAMILY_PENSION_FRACTION } = await import('../simulation.js');
+    expect(FAMILY_PENSION_FRACTION).toBeCloseTo(0.6, 10);
+    const taps = runWithOverlay(null);
+    expect(taps.familyPension).toBeCloseTo(taps.tapsPension * 0.6, 6);
+    expect(taps.familyPension).toBeGreaterThan(0);
+    const cps = runPath(params, 'cps', cRate, sXirr, infL, infM, infE, infC, {});
+    expect(cps.familyPension).toBe(0);
+  });
+});

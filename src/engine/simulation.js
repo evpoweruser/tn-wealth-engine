@@ -51,6 +51,14 @@ function clamp(x, a, b) {
   return Math.max(a, Math.min(b, x));
 }
 
+/**
+ * TAPS family pension = 60% of the pension last drawn, payable to the eligible
+ * spouse/family on the pensioner's death with DA at par (G.O.Ms.No.07, 09-01-2026).
+ * Pure-CPS lump-sum has no family pension in this model (a voluntary annuity
+ * could carry a spouse option — unmodeled, labeled as such in the UI).
+ */
+export const FAMILY_PENSION_FRACTION = 0.6;
+
 // ---------------------------------------------------------------------------
 // runPath
 // ---------------------------------------------------------------------------
@@ -342,10 +350,16 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     });
   }
 
-  // Bequest: terminal record values
-  const termRec = records[records.length - 1];
-  const bequestNominal = termRec ? termRec.tot * 1e7 : 0;
-  const bequestReal    = termRec ? termRec.real * 1e7 : 0;
+  // Bequest: inheritable terminal corpus = LIQUID only. The annuity corpus
+  // dies with the annuitant and is never inherited, so it is excluded
+  // (previously included via totalValue — overstated CPS+annuity bequests).
+  // Exact: terminal liquid rupees deflated by the terminal cumulative index.
+  // TAPS values are bit-identical (annuity slice is zero there).
+  const bequestNominal = liquid;
+  const bequestReal    = liquid / cumInfC;
+
+  // Spouse cover at retirement (monthly nominal ₹; DA-indexed in reality like pension).
+  const familyPension = mode === 'taps' ? tapsP * FAMILY_PENSION_FRACTION : 0;
 
   // NOTE: goal-withdrawal LTCG is no longer midpoint-discounted here — it is
   // deducted year-exact via wTaxDraws in both loops above (plus the terminal
@@ -365,6 +379,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     mode,
     lastEmol: lp.emoluments || 0,
     ltcShockYear,
+    familyPension,
     // Robustness fields
     shortYears,
     firstShortYear,
@@ -485,6 +500,8 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig, wT
       depletedYear: deplYearMed,   // fixed: was hardcoded null
       mode,
       lastEmol: paths[0].lastEmol,
+      // Pay-based → identical across paths; unaffected by market shocks.
+      familyPension: paths[0].familyPension || 0,
     },
     survivePct: (survive / runs) * 100,
     retP10: percentile(retTots, 0.1) * 1e7,

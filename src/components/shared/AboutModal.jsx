@@ -113,6 +113,35 @@ export const AboutModal = ({ isOpen, onClose }) => {
               <b>PWA Offline Mode:</b> You can install this app on your phone or desktop ("Add to Home Screen") and run it offline anytime.
             </p>
           </section>
+
+          {/* Section 7: Family pension & inheritance */}
+          <section className={styles.section}>
+            <h3>7. Family Pension & Inheritance</h3>
+            <div className={styles.grid2}>
+              <div className={styles.card}>
+                <h4>TAPS Family Pension (G.O.Ms.No.07, 09-01-2026)</h4>
+                <ul>
+                  <li><b>60% of pension:</b> on the pensioner's death, the eligible spouse/family receives 60% of the last pension drawn.</li>
+                  <li><b>DA at par:</b> dearness allowance revisions apply to family pensioners exactly like serving employees.</li>
+                  <li><b>Market-proof:</b> it is pay-based, so market crashes in the Stress Lab never touch it — only the corpus legs suffer.</li>
+                  <li><b>Old-rules context:</b> pre-2003 TN pension rules paid enhanced family pension at 50% of emoluments (7 yrs / till 65) and 30% thereafter.</li>
+                </ul>
+              </div>
+              <div className={styles.card}>
+                <h4>What Children Can Inherit (as modelled)</h4>
+                <ul>
+                  <li><b>TAPS:</b> leftover SIP balance + unspent gratuity at age 85, in today's money. The CPS corpus funds the pension promise — not inheritable.</li>
+                  <li><b>CPS:</b> leftover SIP + residual CPS + unspent gratuity. Voluntary annuity money dies with the annuitant — excluded.</li>
+                  <li><b>Depleted paths leave ₹0:</b> that is why downside (P10) bequest columns can read zero while medians stay healthy.</li>
+                  <li><b>Not modelled:</b> exact death year, nominees/succession law, end-of-life bills, inheritance tax, DCRG ceiling (₹25 lakh).</li>
+                </ul>
+              </div>
+            </div>
+            <p style={{ marginTop: '8px' }}>
+              <b>Verify before acting:</b> pension rules are amended by government notification — confirm current
+              rates with the Principal Accountant General / Treasury before retirement decisions.
+            </p>
+          </section>
         </div>
 
         <div className={styles.footer}>

@@ -91,6 +91,24 @@
 - **Do not**: read `postRet` anywhere except the drawdown growth line; do not anchor
   new regimes to year 0 when the risk is boundary-relative.
 
+## ADR-010: Inheritance is liquid-only; spouse cover is 60% of pension
+- **Context**: The stress table's P10 bequest read ₹0 everywhere (correct math — every
+  regime depletes ≥10% of paths), prompting the inheritance question. Audit found the
+  bequest figure *included* the annuity corpus in CPS+annuity mode — money that dies
+  with the annuitant. Separately, TAPS family pension (G.O.Ms.No.07, 09-01-2026) pays
+  the eligible spouse **60% of the pension last drawn** with DA at par (sources:
+  News18 G.O. FAQ, GKToday, govtschemes.in, usthadian; pre-2003 TN rules: enhanced
+  50% of emoluments for 7 yrs/till 65 per tn.gov.in Treasuries).
+- **Decision**: `bequestNominal/bequestReal` = terminal liquid only
+  (`liquid / cumInfC`, exact; TAPS bit-identical, CPS+annuity drops to the truthful
+  value). `runPath` returns `familyPension` = 0.60 × tapsPension in TAPS (DA-indexed
+  in reality, labeled as such), 0 in CPS; pay-based so identical across regimes —
+  shown as a single spouse-cover line, not a column. Stress table shows BEQUEST P50
+  (median, nonzero) beside P10 (₹0 + depleted hint when exhaust ≥ 10%).
+- **Do not**: count annuity corpus as inheritable without annuitant-survivor modeling;
+  do not simulate family pension as a stochastic leg (no mortality distribution —
+  estimator only); DCRG ₹25L ceiling intentionally unmodeled.
+
 ## ADR-008: Withdrawal-year taxation is deducted from the corpus (supersedes ADR-003 display-only)
 - **Context**: Lifetime tax mixed three bills with different timing: annual pension
   income tax (correct as annual), goal-withdrawal LTCG (grossed into withdrawals +

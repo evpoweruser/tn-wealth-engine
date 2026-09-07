@@ -85,6 +85,7 @@ self.onmessage = function(e) {
       annuityCorpus: paths[0].annuityCorpus,
       monthlyPension: paths[0].monthlyPension,
       tapsPension: paths[0].tapsPension,
+      familyPension: paths[0].familyPension || 0,
       liquidStart: percentile(liquidStarts, 0.5),
       totalWealthAtRetire: percentile(totalWealths, 0.5),
       realWealthAtRetire: percentile(realWealths, 0.5),

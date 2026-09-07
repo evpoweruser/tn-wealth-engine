@@ -237,6 +237,7 @@ describe('runStressPanel — aggregation sanity', () => {
       expect(r).toHaveProperty('exhaustPct');
       expect(r).toHaveProperty('shortYrsP50');
       expect(r).toHaveProperty('bequestP10');
+      expect(r).toHaveProperty('bequestP50');
     }
   });
 

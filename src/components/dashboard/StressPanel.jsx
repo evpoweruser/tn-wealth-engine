@@ -1,5 +1,5 @@
 import React from 'react';
-import { fmtCr, fmtPct0 } from '../../utils/format';
+import { fmtCr, fmtPct0, fmt } from '../../utils/format';
 import { InfoButton } from '../shared';
 import styles from './StressPanel.module.css';
 
@@ -10,7 +10,7 @@ import styles from './StressPanel.module.css';
  * Hidden when MC is off or stressOn is false.
  * Clicking a row toggles a deterministic stressed trajectory overlay on WealthChart.
  */
-const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverlay }) => {
+const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverlay, spouseCover, mode }) => {
   if (!mcOn) {
     return (
       <div className={styles.panel}>
@@ -46,19 +46,32 @@ const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverla
         <span className={styles.badge}>5 regimes · reduced paths (≈⌈N/3⌉)</span>
       </div>
 
+      {mode === 'taps' && spouseCover > 0 ? (
+        <div className={styles.callout} style={{ fontStyle: 'normal' }}>
+          👪 Spouse cover: ≈{fmt(spouseCover)}/mo family pension (60% of pension per
+          G.O.Ms.No.07, DA-indexed) — pay-based, unaffected by these market shocks.
+        </div>
+      ) : (
+        <div className={styles.callout} style={{ fontStyle: 'normal' }}>
+          No family pension under lump-sum CPS in this model (a voluntary annuity could
+          carry a spouse option — unmodeled).
+        </div>
+      )}
+
       <div className={styles.tableWrap}>
         <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Regime</th>
-              <th title="% of paths that sustain to plan age (non-depleted)">Holds</th>
-              <th title="Median number of shortfall years across all paths">Short yrs P50</th>
-              <th title="Bequest at 10th-percentile path in today's ₹">Bequest P10</th>
-              <th title="% of paths where corpus depletes before plan age">Exhausts</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stressResults.map(({ regime, holdsPct, shortYrsP50, bequestP10, exhaustPct }) => {
+            <thead>
+              <tr>
+                <th>Regime</th>
+                <th title="% of paths that sustain to plan age (non-depleted)">Holds</th>
+                <th title="Median number of shortfall years across all paths">Short yrs P50</th>
+                <th title="Median inheritable corpus in today's ₹ (liquid only — annuity excluded)">Bequest P50</th>
+                <th title="Bequest at 10th-percentile path in today's ₹ — reads ₹0 whenever ≥10% of paths deplete">Bequest P10</th>
+                <th title="% of paths where corpus depletes before plan age">Exhausts</th>
+              </tr>
+            </thead>
+            <tbody>
+            {stressResults.map(({ regime, holdsPct, shortYrsP50, bequestP10, bequestP50, exhaustPct }) => {
               const holdsColor =
                 holdsPct >= 80 ? 'var(--accent-green)' :
                 holdsPct >= 50 ? 'var(--accent-amber, #f59e0b)' :
@@ -86,7 +99,8 @@ const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverla
                     {fmtPct0(holdsPct)}
                   </td>
                   <td>{Math.round(shortYrsP50)}</td>
-                  <td>{fmtCr(bequestP10)}</td>
+                  <td title="Median inheritable legacy (today's ₹)">{fmtCr(bequestP50 ?? 0)}</td>
+                  <td title={exhaustPct >= 10 ? 'Bottom 10% of paths deplete before plan age — see Exhausts' : 'Bequest at 10th-percentile path in today\'s ₹'}>{fmtCr(bequestP10 ?? 0)}</td>
                   <td style={{ color: exhaustColor, fontWeight: 600 }}>
                     {fmtPct0(exhaustPct)}
                   </td>

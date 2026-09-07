@@ -171,10 +171,11 @@ export const PANEL_INFO = {
     assumptions: [
       'Monte Carlo aggregates over the full path count (seed 42): shortfalls, depletion, terminal bequest, lifetime tax.',
       'Taxes are genuinely deducted from the corpus in-simulation (ADR-008), so odds already reflect the tax drag.',
+      'Bequest counts liquid corpus only — annuity money dies with the annuitant and is excluded.',
     ],
     says: [
       'Never-short: paths never hitting zero. Exhausts: paths depleting before plan age (inverse of survival).',
-      'Real Bequest: terminal corpus in today’s money (P50 median, P10 downside). Lifetime Tax: all taxes paid, real terms.',
+      'Real Bequest: inheritable terminal corpus in today’s money (P50 median, P10 downside). Lifetime Tax: all taxes paid, real terms.',
     ],
     doesntSay: [
       'Percentages are frequencies over simulated paths, not guarantees about your future.',
@@ -241,12 +242,13 @@ export const PANEL_INFO = {
       'Windowed shocks hit only their labeled years; Medical Shock spans the whole horizon.',
     ],
     says: [
-      'Holds % (paths sustaining to plan age), median shortfall years, P10 bequest and exhaust % per regime.',
-      'Click any row to plot its deterministic path on the wealth chart.',
+      'Holds % (paths sustaining to plan age), median shortfall years, median + P10 bequest, and exhaust % per regime.',
+      'Spouse-cover line: TAPS family pension ≈ 60% of pension (G.O.Ms.No.07) — pay-based, shock-proof. Click any row to plot its deterministic path on the wealth chart.',
     ],
     doesntSay: [
       'Reduced paths mean noisier estimates than headline odds — treat 1–2pp gaps as ties.',
       'TAPS pension is pay-based and insulated; these shocks punish the corpus legs only.',
+      'P10 bequest reads ₹0 whenever ≥10% of paths deplete — that is the math working, not missing data.',
     ],
     howToRead: 'Find the lowest Holds row — that regime is your plan’s worst enemy; mitigate it first.',
   },
