@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, GraduationCap, Heart, Award } from 'lucide-react';
 import { useEngine } from '../../context/EngineContext';
+import { InfoButton } from '../shared';
 import { fmtCr, fmtLakh } from '../../utils/format';
 import styles from './MilestoneTimeline.module.css';
 
@@ -25,6 +26,7 @@ const MilestoneTimeline = () => {
         <div className={styles.titleGroup}>
           <Calendar className={styles.icon} size={18} />
           <h3 className={styles.title}>Child Milestone Timeline</h3>
+          <InfoButton id="milestones" />
         </div>
         <span className={styles.countBadge}>{goals.length} Life Goals</span>
       </div>

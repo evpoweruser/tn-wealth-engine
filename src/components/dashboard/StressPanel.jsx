@@ -1,5 +1,6 @@
 import React from 'react';
 import { fmtCr, fmtPct0 } from '../../utils/format';
+import { InfoButton } from '../shared';
 import styles from './StressPanel.module.css';
 
 /**
@@ -30,7 +31,7 @@ const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverla
       <div className={styles.panel}>
         <div className={styles.header}>
           <span className={styles.title}>Stress Regimes</span>
-          <span className={styles.badge}>4 regimes · reduced paths</span>
+          <span className={styles.badge}>5 regimes · reduced paths</span>
         </div>
         <div className={styles.callout}>Running stress analysis…</div>
       </div>
@@ -41,7 +42,8 @@ const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverla
     <div className={styles.panel} data-pdf="stress-panel">
       <div className={styles.header}>
         <span className={styles.title}>Stress Regimes</span>
-        <span className={styles.badge}>4 regimes · reduced paths (≈⌈N/3⌉)</span>
+        <InfoButton id="stress-regimes" />
+        <span className={styles.badge}>5 regimes · reduced paths (≈⌈N/3⌉)</span>
       </div>
 
       <div className={styles.tableWrap}>

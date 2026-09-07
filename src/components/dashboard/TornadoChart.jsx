@@ -1,5 +1,6 @@
 import React from 'react';
 import { fmtCr } from '../../utils/format';
+import { InfoButton } from '../shared';
 import styles from './TornadoChart.module.css';
 
 const fmtSignedCr = (v) => {
@@ -60,6 +61,7 @@ export function TornadoChart({ sensitivityResults, mcOn, sensitivityOn }) {
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <span className={styles.title}>What-If Stress Test</span>
+          <InfoButton id="tornado" />
           <span className={styles.subtitle}>How unexpected life & market events impact your plan</span>
         </div>
         <span className={styles.badge}>

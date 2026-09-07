@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { computeHealthScore, recommendScoreActions } from '../../engine';
+import { InfoButton } from '../shared';
 import styles from './HealthScoreCard.module.css';
 
 const PART_META = [
@@ -75,7 +76,7 @@ const HealthScoreCard = ({ results, isLoading }) => {
       <div className={styles.layout}>
         <div className={styles.gaugeBlock}>
           <Gauge score={score} />
-          <h3 className={styles.title}>TN Wealth Score</h3>
+          <h3 className={styles.title}>TN Wealth Score <InfoButton id="health-score" /></h3>
           <p className={styles.subtitle}>0–100 plan health index</p>
         </div>
         <div className={styles.parts}>

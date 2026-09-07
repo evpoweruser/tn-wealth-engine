@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { RangeInput } from '../shared';
+import { RangeInput, InfoButton } from '../shared';
 import { WHATIF_PRESETS } from '../../engine';
 import { fmtCr } from '../../utils/format';
 import styles from './WhatIfCrashControls.module.css';
@@ -41,7 +41,7 @@ const WhatIfCrashControls = ({ whatIf, impact, onChange, onClear }) => {
     <div className={styles.card} data-pdf="whatif-controls">
       <div className={styles.headerRow}>
         <div>
-          <h3 className={styles.title}>What-if crash</h3>
+          <h3 className={styles.title}>What-if crash <InfoButton id="what-if" /></h3>
           <p className={styles.subtitle}>
             Deterministic single-path shock · amber dashed line · coexists with regime overlay
           </p>

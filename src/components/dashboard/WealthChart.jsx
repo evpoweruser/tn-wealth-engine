@@ -2,6 +2,7 @@ import React from 'react';
 import { ResponsiveContainer, ComposedChart, Area, Line, ReferenceLine, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { useEngine } from '../../context/EngineContext';
 import { fmtLakh } from '../../utils/format';
+import { InfoButton } from '../shared';
 import styles from './WealthChart.module.css';
 
 const shortGoalLabel = (g) => {
@@ -82,7 +83,7 @@ const WealthChart = ({ results, isLoading, stressOverlay, whatIfOverlay }) => {
     <div className={styles.card} data-pdf="wealth-chart">
       <div className={styles.headerRow}>
         <div>
-          <h3 className={styles.title}>Accumulation & Drawdown Horizon</h3>
+          <h3 className={styles.title}>Accumulation & Drawdown Horizon <InfoButton id="wealth-chart" /></h3>
           <p className={styles.subtitle}>Median path{state.mcOn ? ' with P10–P90 confidence band' : ''} · ₹ Cr</p>
         </div>
         <div className={styles.legendBadges}>

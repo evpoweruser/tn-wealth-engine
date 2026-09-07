@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, ReferenceLine, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useEngine } from '../../context/EngineContext';
+import { InfoButton } from '../shared';
 import styles from './FeasibilityChart.module.css';
 
 const inrShort = (v) => {
@@ -39,7 +40,7 @@ const FeasibilityChart = ({ results, isLoading }) => {
 
   return (
     <div className={styles.card} data-pdf="feasibility-chart">
-      <h3 className={styles.title}>SIP vs Surplus</h3>
+      <h3 className={styles.title}>SIP vs Surplus <InfoButton id="feasibility" /></h3>
       <p className={styles.subtitle}>Stacked monthly commitment vs available surplus</p>
       <div className={styles.legend}>
         <span className={styles.legendItem}><i style={{ background: 'var(--accent-blue)' }} /> Base SIP</span>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { fmtCr } from '../../utils/format';
+import { InfoButton } from '../shared';
 import styles from './BucketBar.module.css';
 
 /**
@@ -38,7 +39,7 @@ const BucketBar = ({ results, isLoading }) => {
     <div className={styles.card}>
       <div className={styles.headerRow}>
         <div>
-          <h3 className={styles.title}>Retirement Bucket Allocation</h3>
+          <h3 className={styles.title}>Retirement Bucket Allocation <InfoButton id="buckets" /></h3>
           <p className={styles.subtitle}>How the liquid corpus maps to time horizons · {fmtCr(liquid)}</p>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { Badge } from '../shared';
+import { Badge, InfoButton } from '../shared';
 import { fmt } from '../../utils/format';
 import styles from './GoalsTable.module.css';
 
@@ -11,7 +11,7 @@ const GoalsTable = () => {
   if (goals.length === 0) {
     return (
       <div className={styles.card}>
-        <h3 className={styles.title}>Milestone Goals</h3>
+        <h3 className={styles.title}>Milestone Goals <InfoButton id="goals-table" /></h3>
         <p className={styles.empty}>No child goals configured.</p>
       </div>
     );

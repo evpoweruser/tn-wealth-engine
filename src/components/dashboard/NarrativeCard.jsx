@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Sparkles, CheckCircle2, AlertTriangle, Info } from 'lucide-react';
 import { useEngine } from '../../context/EngineContext';
 import { generateNarrative } from '../../utils/narrative';
+import { InfoButton } from '../shared';
 import styles from './NarrativeCard.module.css';
 
 const NarrativeCard = ({ results, isLoading, stressResults, sensitivityResults }) => {
@@ -37,6 +38,7 @@ const NarrativeCard = ({ results, isLoading, stressResults, sensitivityResults }
         <div className={styles.titleGroup}>
           <Sparkles className={styles.icon} size={18} />
           <h3 className={styles.title}>Reading the Result</h3>
+          <InfoButton id="narrative" />
         </div>
         <span className={`${styles.badge} ${isHealthy ? styles.badgeSuccess : isWarning ? styles.badgeWarning : styles.badgeInfo}`}>
           {isHealthy ? (

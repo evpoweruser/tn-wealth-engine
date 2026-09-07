@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { solveTargetSurvival, evaluateGoalTradeoff, buildSimParams, computeWithdrawals, computeWithdrawalTaxes } from '../../engine';
 import { formatIndianRupeeWords } from '../../utils/format';
+import { InfoButton } from '../shared';
 import styles from './GoalOptimizerPanel.module.css';
 
 export const GoalOptimizerPanel = () => {
@@ -141,7 +142,7 @@ export const GoalOptimizerPanel = () => {
         <div className={styles.titleGroup}>
           <span className={styles.icon}>⚡</span>
           <div>
-            <div className={styles.title}>Smart Goal Optimizer & Reverse Solver</div>
+            <div className={styles.title}>Smart Goal Optimizer & Reverse Solver <InfoButton id="optimizer" /></div>
             <div className={styles.subTitle}>
               Automated reverse solver & drag-and-drop goal tradeoff matrix
             </div>

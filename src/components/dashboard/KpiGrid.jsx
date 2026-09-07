@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { KpiCard } from '../shared';
+import { KpiCard, InfoButton } from '../shared';
 import { fmtCr, fmt } from '../../utils/format';
 import styles from './KpiGrid.module.css';
 
@@ -53,7 +53,12 @@ const KpiGrid = ({ results, isLoading }) => {
   const surviveSubtitle = state.mcOn ? 'Runs sustain to plan age' : (mode === 'taps' ? 'TAPS + Liquid' : 'CPS Lump-sum');
 
   return (
-    <div className={styles.grid}>
+    <>
+      <div className={styles.sectionHead}>
+        <span>Key indicators</span>
+        <InfoButton id="kpi" />
+      </div>
+      <div className={styles.grid}>
       <KpiCard
         title="Wealth at Retire"
         value={wealthAtRetire}
@@ -85,7 +90,8 @@ const KpiGrid = ({ results, isLoading }) => {
         countTo={state.mcOn ? (survivePct ?? 0) : null}
         countFormat={(v) => `${Math.round(v)}%`}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

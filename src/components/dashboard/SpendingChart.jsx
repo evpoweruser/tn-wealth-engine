@@ -1,5 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { InfoButton } from '../shared';
 import styles from './SpendingChart.module.css';
 
 /**
@@ -27,7 +28,7 @@ const SpendingChart = ({ results, isLoading }) => {
     <div className={styles.card} data-pdf="spending-chart">
       <div className={styles.headerRow}>
         <div>
-          <h3 className={styles.title}>Retirement Spending Breakdown</h3>
+          <h3 className={styles.title}>Retirement Spending Breakdown <InfoButton id="spending" /></h3>
           <p className={styles.subtitle}>
             Monthly spend, nominal ₹ · healthcare is {medShareEnd}% by age {last.age}
           </p>

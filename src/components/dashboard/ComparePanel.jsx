@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { runPath } from '../../engine';
 import { fmt, fmtCr } from '../../utils/format';
+import { InfoButton } from '../shared';
 import styles from './ComparePanel.module.css';
 
 const ComparePanel = ({ isLoading }) => {
@@ -55,7 +56,12 @@ const ComparePanel = ({ isLoading }) => {
   const { tapsRes, cpsRes } = comparison;
 
   return (
-    <div className={styles.grid}>
+    <>
+      <div className={styles.sectionHead}>
+        <span>TAPS vs CPS</span>
+        <InfoButton id="compare" />
+      </div>
+      <div className={styles.grid}>
       <div className={styles.card}>
         <h3 className={styles.title}>TAPS — Assured Pension</h3>
         <div className={styles.subtitle}>50% of last Basic + DA</div>
@@ -83,7 +89,8 @@ const ComparePanel = ({ isLoading }) => {
         </div>
         <div className={styles.note}>No mandatory annuity rule.</div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

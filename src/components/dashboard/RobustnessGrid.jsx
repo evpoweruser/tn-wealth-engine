@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { KpiCard } from '../shared';
+import { KpiCard, InfoButton } from '../shared';
 import { fmtCr, fmtPct0 } from '../../utils/format';
 import styles from './RobustnessGrid.module.css';
 
@@ -78,7 +78,12 @@ const RobustnessGrid = ({ results, isLoading }) => {
     : 'Pension tax + goals LTCG, real ₹ · FY26-27 new regime · informational';
 
   return (
-    <div className={styles.grid}>
+    <>
+      <div className={styles.sectionHead}>
+        <span>Robustness odds</span>
+        <InfoButton id="robustness" />
+      </div>
+      <div className={styles.grid}>
       <KpiCard
         title="Never-short"
         value={neverShortVal}
@@ -110,7 +115,8 @@ const RobustnessGrid = ({ results, isLoading }) => {
         countTo={tax}
         countFormat={(v) => fmtCr(v)}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

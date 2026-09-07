@@ -349,4 +349,19 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`1nd290fhu-…`), aliased to apex;
   apex serves `index-CjeoZc0e.js` + Lab chunk with "Final corpus"/`fallPct` live, HTTP 200.
 
+## [2026-09-07] Panel ⓘ explainers (assumptions / says / doesn’t-say / how-to-read)
+- **Goal**: ⓘ symbol by every Plan + Lab panel title opening a shared modal with a
+  4-section explainer written against current engine behavior.
+- **Files created**: `src/content/panelInfo.js` (15 entries), `src/content/__tests__/
+  panelInfo.test.js` (shape + id-coverage tests), `src/components/shared/
+  {PanelInfoModal.jsx,PanelInfoModal.module.css}` (`InfoButton`, local modal state,
+  Esc/overlay close, dialog semantics).
+- **Files modified**: `src/components/shared/index.js` (barrel), all 15 panel files
+  (button in headers; slim `sectionHead` rows added for grid-only Kpi/Robustness/
+  Compare + CSS), `docs/{PROGRESS.md,TASK_LOG.md}`.
+- **Drive-by fix**: StressPanel badges corrected 4→5 regimes (retire_crash).
+- **Verification**: `npx vitest run` 84/84 across 10 suites; `npm run lint` 0 errors
+  (fixed hooks-order error in new modal), 16 warnings; `npm run build` clean.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 
