@@ -307,3 +307,81 @@
   padding: 12px;
   text-align: center;
 }
+
+/* ---- College stream planner ---- */
+.streamGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .streamGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.streamCard {
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.streamCard:hover {
+  border-color: var(--accent-blue, #38bdf8);
+}
+
+.activeStreamCard {
+  border-color: var(--accent-blue, #38bdf8);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.streamName {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.streamEx {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.streamMeta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-blue, #38bdf8);
+  margin-top: 6px;
+}
+
+.overrideRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.overrideInput {
+  width: 160px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-input, transparent);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.datasetNote {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 10px;
+  text-align: center;
+}

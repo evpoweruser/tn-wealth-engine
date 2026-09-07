@@ -62,6 +62,10 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 - [x] **What-if terminal fall readout (2026-09-07)** — `terminalFallPct` compares the
   shocked terminal corpus vs the median plan at the last common year; shown in the
   chart legend badge and the controls card as final-corpus ₹ + % fall.
+- [x] **College Stream Planner (2026-09-07)** — replaced the confusing stepper matrix:
+  curated Arts/Engineering/Medical/Management dataset (indicative 2026 TN costs +
+  fee trends) with exact per-course-year projection, required-SIP math, live survival
+  impact via the existing tradeoff engine, quote override, and one-click Apply.
 - [x] **Panel ⓘ explainers (2026-09-07)** — `src/content/panelInfo.js` map (15 panels ×
   assumptions / says / doesn’t-say / how-to-read) + shared `InfoButton` modal;
   wired into every Plan + Lab panel header (incl. slim headers for grid-only panels;
@@ -134,9 +138,9 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 88/88 passing as of 2026-09-07 — 10 suites: tax 9,
-  narrative 4, wiring 22, stress 27, solver 4, sensitivity 8, goals 3, score 6,
-  validation 4, panelInfo 2)
+- Unit tests: `npm test` (vitest; 95/95 passing as of 2026-09-07 — 11 suites: tax 9,
+  narrative 4, wiring 22, stress 26, solver 4, sensitivity 8, goals 3, score 6,
+  validation 4, panelInfo 2, streams 7)
 - Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
 - Build: `npm run build` (vite + PWA precache 24 entries, passing as of 2026-09-07;
   Recharts panels + StressLabView code-split — lazy chunks, main ~1.28 MB)

@@ -185,18 +185,20 @@ export const PANEL_INFO = {
   },
 
   optimizer: {
-    title: 'Goal optimizer & reverse solver',
+    title: 'Goal optimizer & stream planner',
     assumptions: [
-      'Bisection search (≤12 iterations, 250 paths each, seed 42) plus a 1,000-path verification run.',
-      'Solves one variable at a time (SIP step-up, monthly SIP, or retirement spend); tradeoff matrix runs 500 paths per scenario.',
+      'Reverse solver: bisection search (≤12 iterations, 250 paths each plus a 1,000-path verification, seed 42).',
+      'Solves one variable at a time (SIP step-up, monthly SIP, or retirement spend).',
+      'Stream costs are indicative 2026 TN private-college estimates grown by stream fee trends — override with actual quotes.',
     ],
     says: [
       'The exact input value needed to hit 90/95/99% survival, with current-vs-solved comparison and one-click Apply.',
-      'Tradeoff steppers preview how deferring or trimming goals moves survival before you commit.',
+      'Per stream: projected total at college entry, required monthly SIP from now, and live plan-survival impact.',
     ],
     doesntSay: [
       'It cannot invent money: infeasible targets return the boundary value, not a miracle.',
-      'It never touches asset allocation, returns, or inflation — only the three solved variables and goal timing/size.',
+      'It never touches asset allocation, returns, or inflation — only the solved variables and goal costs.',
+      'Stream figures are estimates, not quotes — verify against actual college fee structures.',
     ],
     howToRead: 'Solve first for the cheapest lever, Apply it, then re-run the Lab to confirm the risk picture improved.',
   },

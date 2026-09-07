@@ -14,3 +14,4 @@ export { runSensitivity, SENSITIVITY_SHOCKS } from './sensitivity.js';
 export { buildSimParams } from './params.js';
 export { solveTargetSurvival, evaluateGoalTradeoff } from './solver.js';
 export { computeHealthScore, computeSrrResilience, computeTaxEfficiency, recommendScoreActions } from './score.js';
+export { STREAMS, projectStreamCost, streamSipRequired, buildStreamScenario } from './streams.js';

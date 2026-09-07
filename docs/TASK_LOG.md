@@ -407,4 +407,19 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`aqiihziid-…`), aliased to apex;
   apex serves `index-CZGYsdt8.js` (matches local build), HTTP 200.
 
+## [2026-09-07] College Stream Planner replaces tradeoff matrix
+- **Goal**: Stepper matrix confusing/unnecessary — answer "what will each stream cost
+  at entry, and can the plan afford it?" instead.
+- **Files created**: `src/engine/streams.js` (STREAMS dataset + projector + SIP math +
+  apply-mapping), `src/engine/__tests__/streams.test.js` (7 tests).
+- **Files modified**: `src/components/dashboard/GoalOptimizerPanel.jsx` (Stream Planner
+  tab: child pills, stream cards, quote override, projection + live impact + Apply;
+  ~150 lines of stepper code deleted), `src/components/dashboard/
+  GoalOptimizerPanel.module.css` (stream styles), `src/content/panelInfo.js`
+  (optimizer entry rewritten), `src/engine/index.js` (barrel), `docs/{PROGRESS.md,
+  TASK_LOG.md}`.
+- **Verification**: `npx vitest run` 95/95 across 11 suites; `npm run lint` 0 errors,
+  16 warnings; `npm run build` clean; zero leftover stepper references (grep).
+- **Git commit**: (see `git log`; pushed + deployed).
+
 
