@@ -315,5 +315,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   16 warnings; `npm run build` clean, precache 24, new StressLabView lazy chunk,
   main ~1.28 MB.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`67mlw88c1-…`), aliased to apex;
+  apex serves `index-Cz7_Oa0r.js` (matches local build, `retire_crash` live), HTTP 200.
 
 
