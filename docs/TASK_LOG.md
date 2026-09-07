@@ -346,5 +346,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 82/82 across 9 suites; `npm run lint` 0 errors,
   16 warnings; `npm run build` clean, precache 24.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`1nd290fhu-…`), aliased to apex;
+  apex serves `index-CjeoZc0e.js` + Lab chunk with "Final corpus"/`fallPct` live, HTTP 200.
 
 
