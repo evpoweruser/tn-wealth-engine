@@ -71,10 +71,14 @@ export const GoalOptimizerPanel = () => {
 
   // Evaluate Tradeoffs Live
   const tradeoffModifications = useMemo(() => {
-    return Object.entries(tradeoffs).map(([childId, shifts]) => ({
-      childId,
-      ...shifts,
-    }));
+    // Drop all-zero shift sets (touched-then-reverted steppers) so the
+    // impact card only appears for genuine modifications.
+    return Object.entries(tradeoffs)
+      .filter(([, shifts]) => Object.values(shifts || {}).some((v) => v !== 0))
+      .map(([childId, shifts]) => ({
+        childId,
+        ...shifts,
+      }));
   }, [tradeoffs]);
 
   const tradeoffResult = useMemo(() => {
@@ -304,7 +308,7 @@ export const GoalOptimizerPanel = () => {
             </div>
           )}
 
-          {tradeoffResult && (
+          {tradeoffResult && tradeoffModifications.length > 0 && (
             <div className={styles.impactBadgeCard}>
               <div>
                 <div className={styles.impactTitle}>Goal Adjustment Impact</div>
@@ -322,6 +326,11 @@ export const GoalOptimizerPanel = () => {
               >
                 Apply Tradeoffs to Plan
               </button>
+            </div>
+          )}
+          {state.children?.length > 0 && tradeoffModifications.length === 0 && (
+            <div className={styles.noChildrenNotice}>
+              Adjust an age or cost above to preview the live survival impact of that change.
             </div>
           )}
         </div>

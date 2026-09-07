@@ -136,7 +136,9 @@ export function evaluateGoalTradeoff({ simParams, mode = 'taps', inflation, chil
 
   // Apply goal modifications
   const modifiedChildren = (children || []).map((child) => {
-    const mod = goalModifications.find((m) => m.childId === child.id);
+    // NB: panel state keys are strings (Object.entries) while stored child ids
+    // may be numbers — compare stringified so stepper edits always match.
+    const mod = goalModifications.find((m) => String(m.childId) === String(child.id));
     if (!mod) return child;
 
     const newChild = { ...child };

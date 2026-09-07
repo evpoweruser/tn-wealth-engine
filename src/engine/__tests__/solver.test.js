@@ -93,5 +93,22 @@ describe('solver module', () => {
       expect(result.modifiedChildren[0].cAge).toBe(20);
       expect(result.modifiedChildren[0].mCost).toBe(1000000);
     });
+
+    it('matches modifications when panel state keys are strings but child ids are numbers', () => {
+      // Production shape: initialState children have numeric ids while
+      // Object.entries tradeoffs keys are strings — strict === missed them,
+      // so stepper edits silently did nothing (+0% forever).
+      const numericKids = [{ ...mockState.children[0], id: 1 }];
+      const result = evaluateGoalTradeoff({
+        simParams: mockParams,
+        mode: 'taps',
+        inflation: mockInflation,
+        children: numericKids,
+        goalModifications: [
+          { childId: '1', cAgeShift: 2 }, // string key, numeric child id
+        ],
+      });
+      expect(result.modifiedChildren[0].cAge).toBe(20);
+    });
   });
 });

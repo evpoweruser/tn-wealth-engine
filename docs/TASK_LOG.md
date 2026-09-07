@@ -366,4 +366,19 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`iqulgb988-…`), aliased to apex;
   apex serves `index-DzR_HWin.js` (matches local build), HTTP 200.
 
+## [2026-09-07] Fix tradeoff steppers silently discarded (string/number id mismatch)
+- **Goal**: Tradeoff tab stuck at +0% — stepper edits never reached the engine.
+- **Root cause**: panel builds `{ childId }` via `Object.entries` (string keys, e.g.
+  `'1'`) but stored child ids are numbers (`1`); strict `===` in `evaluateGoalTradeoff`
+  never matched, so every child returned unmodified. String-id mocks hid it.
+- **Files modified**: `src/engine/solver.js` (stringified comparison + comment),
+  `src/components/dashboard/GoalOptimizerPanel.jsx` (impact card only for genuine
+  modifications — all-zero sets filtered; hint text when untouched),
+  `src/engine/__tests__/solver.test.js` (numeric-id regression test),
+  `docs/{PROGRESS.md,TASK_LOG.md}`.
+- **Verification**: `npx vitest run` 85/85; `npm run lint` 0 errors, 16 warnings;
+  node end-to-end repro with production-shaped state: +2 college stepper applies
+  (18→20) and moves survival 10%→12%. `npm run build` clean.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 
