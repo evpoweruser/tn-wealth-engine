@@ -26,6 +26,69 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 - [ ] **Headline + PDF**: KpiGrid/ComparePanel private-mode cards, PDF private section,
   narrative support, `buildSimParams` new fields, tests (accumulation math, 60/40 split).
 
+## 👪 Planned: Family Tab (everything children + survivor cover)
+
+View shell + content move:
+- [ ] **Family view shell** — third header tab (Plan | Family | Stress Lab), persisted
+  `tn_view`, lazy-loaded chunk; `Dashboard.jsx` switch; sidebar drops ChildrenSection
+  (→5 sections) with a "N goals →" Family link for discoverability.
+- [ ] **Move family content** — child input cards, MilestoneTimeline, GoalsTable,
+  Stream Planner (extracted standalone from GoalOptimizerPanel; Reverse Solver stays
+  in Lab), FeasibilityChart. PDF print root is view-independent — export unaffected.
+
+Survivor calculator ("if I die in service", death-year slider across service years):
+- [ ] **Engine** — `projectEmolumentsAtYear` (same stepping as `projectLastPay`;
+  pinned ≡ lastPay at rYr), new `src/engine/survivor.js`, `familyPension` passthrough
+  (already in runPath/MC mid). Balances at death year read from median records.
+- [ ] **Logic** — spouse two-phase pension: enhanced 50% of emoluments × 7 yrs, then
+  normal 60%-of-notional-pension (0.6 × 50% emoluments), DA-indexed, labeled. DCRG
+  gratuity by service slab (<1y 2×, 1–5y 6×, 5–11y 12×, 11–20y 20×, 20+y ½-month per
+  6 months up to 33× monthly emoluments, ₹25L cap) — slabs re-verified at build.
+  Lump stack = gratuity + SIP/CPS balances at death year + protection legs below.
+  Children-inherit pool = full lump stack. No mortality weighting ("if", not "when").
+- [ ] **Assumptions (locked)** — TAPS family pension 60% of last pension drawn per
+  G.O.Ms.No.07 09-01-2026 (DA at par; sources: News18 G.O. FAQ, GKToday,
+  govtschemes.in, usthadian). Pre-2003 TN rules context: enhanced 50% × 7yrs/till 65
+  (tn.gov.in Treasuries). CPS lump-sum: no family pension (annuity spouse option
+  unmodeled). Nominees/succession law, end-of-life bills, inheritance tax: unmodeled.
+  DCRG ₹25L ceiling noted.
+
+Protection legs (all toggles + term amount live in the Family tab Protection section):
+- [ ] **Family Benefit Fund — flat ₹1.5L** (Treasuries karuvoolam; incl ₹5k funeral
+  advance within it). Toggle `fbfOn`, default on.
+- [ ] **Family Security Fund — flat ₹5L** (2021 revision, ₹110/mo subscription).
+  Toggle `securityOn`, default on. Separate leg from FBF (different scheme/G.O.).
+- [ ] **Doctors Corpus Fund — flat ₹1Cr** (TNGDA voluntary scheme, ₹500/mo; reported
+  2024 on-duty payouts, G.O. Oct 2021). Toggle `dcfOn`, default on. Labeled:
+  members-only, duty-death basis, figure fund-dependent — confirm current.
+- [ ] **Term cover — user amount, default ₹0 (none held)**. Pure private-policy money:
+  needs in-force policy; independent payer/trigger from DCF (contractual sum vs
+  pooled fund). No premium modeling.
+- [ ] **Engine** — `PROTECTION_LEGS` table (amounts + qualifiers + sources) +
+  `protectionLump()` itemized math; survivor result gains legs, protection total,
+  family-pool total. State via existing validation/clamp pattern.
+
+Term-cover gap planner (no term held → plan the purchase):
+- [ ] **Logic** — suggested target = 12 × annual income (prefilled from emoluments,
+  multiple editable); pool = gratuity + SIP/CPS-to-date + FBF/Security/DCF (term
+  excluded by construction); gap = max(0, target − pool); CTA sets `termAmt`.
+- [ ] **Premium estimator** — indicative annual premium by age band (30–34 / 35–39 /
+  40–44 / 45–49 / 50+, healthy-non-smoker market ranges, verified at build),
+  always overridable; feasibility check vs monthly surplus. Informational only —
+  no simulation drag. Labeled "get real quotes", never presented as quotes.
+- [ ] **Assumptions (locked)** — 12× is a rule of thumb, not advice; goals-heavy
+  families may need more (multiple is editable, pool math stays visible).
+
+Docs/tests/ship:
+- [ ] **Docs** — ADR-011 (stack + every source incl. TNGDA/DCF links), About §7
+  extension (+Security Fund, DCF, term rows), panelInfo survivor entry,
+  content-shape test coverage for new copy.
+- [ ] **Tests** — emoluments-at-Y ≡ lastPay at rYr; slab boundaries; phase-1→phase-2
+  math; leg toggles; gap math (covered/zero/shortfall); premium band boundaries +
+  monotonicity; prefill from emoluments. Existing suites untouched (additive only).
+- [ ] **Verify + ship** — full `vitest`/lint/build, three-tab click-through, PDF from
+  each view, commit/push/deploy + live check.
+
 ## 🎨 Future Visual Appeal & UI/UX Enhancement Roadmap
 
 ### 1. Card & Dashboard Micro-Aesthetics
