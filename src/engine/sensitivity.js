@@ -17,7 +17,14 @@ export const SENSITIVITY_SHOCKS = [
   {
     id: 'live_extend',
     label: 'Live +5y',
+    friendlyLabel: 'Live 5 years longer',
     desc: 'Retirement horizon extended by 5 years',
+    friendlyDesc: 'What if you need money until age 90?',
+    suggestion: {
+      icon: '🕐',
+      headline: 'Build a bigger longevity buffer',
+      body: 'Consider increasing your SIP or reducing planned retirement spend to ensure your money outlasts you.',
+    },
     apply: (params, inflation) => ({
       params: { ...params, endYr: params.endYr + 5 },
       inflation: { ...inflation },
@@ -26,7 +33,14 @@ export const SENSITIVITY_SHOCKS = [
   {
     id: 'medical_up',
     label: 'Medical +2pp',
+    friendlyLabel: 'Healthcare costs surge',
     desc: 'Medical inflation +2 percentage points',
+    friendlyDesc: 'Medical expenses rise 2% faster than expected',
+    suggestion: {
+      icon: '🏥',
+      headline: 'Get a super top-up health insurance',
+      body: 'A ₹25–50 Lakh super top-up costs just ₹5k–12k/yr and shields your corpus from medical inflation.',
+    },
     apply: (params, inflation) => ({
       params: { ...params },
       inflation: {
@@ -39,7 +53,14 @@ export const SENSITIVITY_SHOCKS = [
   {
     id: 'equity_down',
     label: 'Equity −2pp',
+    friendlyLabel: 'Market returns drop',
     desc: 'SIP equity return −2 percentage points',
+    friendlyDesc: 'Your investments earn 2% less per year',
+    suggestion: {
+      icon: '📉',
+      headline: 'Diversify across asset classes',
+      body: 'Consider adding debt funds, NPS Tier-1, or PPF for stability. Avoid concentrating more than 70% in equity.',
+    },
     apply: (params, inflation) => ({
       params: { ...params, sipXirr: Math.max(0, params.sipXirr - 0.02) },
       inflation: { ...inflation },
@@ -48,7 +69,14 @@ export const SENSITIVITY_SHOCKS = [
   {
     id: 'inflation_up',
     label: 'Inflation +1pp',
+    friendlyLabel: 'Everything costs more',
     desc: 'Composite inflation +1 percentage point',
+    friendlyDesc: 'Prices rise 1% faster across the board',
+    suggestion: {
+      icon: '💰',
+      headline: 'Add inflation-protected instruments',
+      body: 'Lock a portion of your corpus in RBI Floating Rate Bonds, PPF, or Sovereign Gold Bonds to hedge against rising prices.',
+    },
     apply: (params, inflation) => ({
       params: { ...params },
       inflation: {
@@ -62,13 +90,21 @@ export const SENSITIVITY_SHOCKS = [
   {
     id: 'cover_halved',
     label: 'Cover halved',
+    friendlyLabel: 'You invest half as much',
     desc: 'Monthly SIP contribution halved',
+    friendlyDesc: 'Your monthly investment drops by 50%',
+    suggestion: {
+      icon: '📊',
+      headline: 'Automate your SIP via bank mandate',
+      body: 'Set up auto-debit so your SIP continues uninterrupted. Even a 10% annual step-up compounds massively over decades.',
+    },
     apply: (params, inflation) => ({
       params: { ...params, sipMo: params.sipMo / 2 },
       inflation: { ...inflation },
     }),
   },
 ];
+
 
 /**
  * Run one-factor sensitivity sweep across all 5 shocks.
@@ -110,7 +146,10 @@ export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) 
     return {
       id: shock.id,
       label: shock.label,
+      friendlyLabel: shock.friendlyLabel,
       desc: shock.desc,
+      friendlyDesc: shock.friendlyDesc,
+      suggestion: shock.suggestion,
       baseHolds,
       shockedHolds,
       delta, // in percentage points

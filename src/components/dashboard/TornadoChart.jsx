@@ -14,10 +14,13 @@ export function TornadoChart({ sensitivityResults, mcOn, sensitivityOn }) {
     return (
       <div className={styles.panel}>
         <div className={styles.header}>
-          <span className={styles.title}>Sensitivity Tornado — What Breaks It</span>
+          <div className={styles.titleGroup}>
+            <span className={styles.title}>What-If Stress Test</span>
+            <span className={styles.subtitle}>How unexpected life & market events impact your financial plan</span>
+          </div>
         </div>
         <div className={styles.callout}>
-          Monte Carlo simulation is disabled. Turn on Monte Carlo in settings to view sensitivity tornado.
+          Monte Carlo simulation is disabled. Turn on Monte Carlo in settings to view what-if stress tests.
         </div>
       </div>
     );
@@ -31,26 +34,36 @@ export function TornadoChart({ sensitivityResults, mcOn, sensitivityOn }) {
     return (
       <div className={styles.panel}>
         <div className={styles.header}>
-          <span className={styles.title}>Sensitivity Tornado — What Breaks It</span>
+          <div className={styles.titleGroup}>
+            <span className={styles.title}>What-If Stress Test</span>
+            <span className={styles.subtitle}>How unexpected life & market events impact your financial plan</span>
+          </div>
         </div>
-        <div className={styles.callout}>Calculating 1-factor sensitivity sweep…</div>
+        <div className={styles.callout}>Running stress test scenarios…</div>
       </div>
     );
   }
 
-  const { baseHolds, paths, shocks } = sensitivityResults;
+  const { baseHolds, shocks } = sensitivityResults;
 
   // Symmetric diverging scale (min 5 pp so tiny deltas stay visible)
   const maxAbsDelta = Math.max(5, ...shocks.map((s) => Math.abs(s.delta)));
+
+  // Filter damaging shocks (delta < -1%) for suggestions
+  const damagingShocks = shocks
+    .filter((s) => s.delta < -1)
+    .sort((a, b) => a.delta - b.delta)
+    .slice(0, 3);
 
   return (
     <div className={styles.panel} data-pdf="sensitivity">
       <div className={styles.header}>
         <div className={styles.titleGroup}>
-          <span className={styles.title}>Sensitivity Tornado — What Breaks It</span>
+          <span className={styles.title}>What-If Stress Test</span>
+          <span className={styles.subtitle}>How unexpected life & market events impact your plan</span>
         </div>
         <span className={styles.badge}>
-          Baseline Holds: {baseHolds.toFixed(1)}% · {paths} reduced paths
+          Baseline: {baseHolds.toFixed(0)}% Plan Success
         </span>
       </div>
 
@@ -66,20 +79,23 @@ export function TornadoChart({ sensitivityResults, mcOn, sensitivityOn }) {
           const shockBq = shock.bequestP50 ?? 0;
           const bqDelta = shockBq - baseBq;
 
+          const displayLabel = shock.friendlyLabel || shock.label;
+          const displayDesc = shock.friendlyDesc || shock.desc;
+
           return (
             <div key={shock.id} className={styles.row}>
               <div className={styles.factorMeta}>
-                <span className={styles.rankChip} title={`Vulnerability rank #${rank + 1}`}>
+                <span className={styles.rankChip} title={`Risk ranking #${rank + 1}`}>
                   #{rank + 1}
                 </span>
                 <span className={styles.factorText}>
-                  <span className={styles.factorLabel}>{shock.label}</span>
-                  <span className={styles.factorDesc}>{shock.desc}</span>
+                  <span className={styles.factorLabel}>{displayLabel}</span>
+                  <span className={styles.factorDesc}>{displayDesc}</span>
                 </span>
               </div>
 
               <div className={styles.divergeTrack}>
-                <div className={styles.centerLine} title={`Baseline holds ${baseHolds.toFixed(1)}%`} />
+                <div className={styles.centerLine} title={`Baseline plan success: ${baseHolds.toFixed(1)}%`} />
                 {isNegative && (
                   <div
                     className={`${styles.barHalf} ${styles.barNegative}`}
@@ -93,41 +109,40 @@ export function TornadoChart({ sensitivityResults, mcOn, sensitivityOn }) {
                   />
                 )}
                 {!isNegative && !isPositive && <div className={styles.zeroTick} />}
-                <span className={styles.axisEnd} style={{ left: 2 }}>−{maxAbsDelta.toFixed(0)}</span>
-                <span className={styles.axisEnd} style={{ right: 2 }}>+{maxAbsDelta.toFixed(0)}</span>
+                <span className={styles.axisEnd} style={{ left: 6 }}>← Hurts plan</span>
+                <span className={styles.axisEnd} style={{ right: 6 }}>Helps plan →</span>
 
                 <div className={styles.impactCard} role="tooltip">
-                  <div className={styles.impactTitle}>{shock.label}</div>
+                  <div className={styles.impactTitle}>{displayLabel}</div>
                   <div className={styles.impactRow}>
-                    <span>Plan holds</span>
+                    <span>Plan success rate</span>
                     <b>{baseHolds.toFixed(1)}% → {shock.shockedHolds.toFixed(1)}%</b>
                   </div>
                   <div className={styles.impactRow}>
-                    <span>Hold reduction</span>
+                    <span>Impact on success</span>
                     <b className={isNegative ? styles.neg : isPositive ? styles.pos : styles.zero}>
-                      {isNegative ? '−' : isPositive ? '+' : ''}{absDelta.toFixed(1)} pp
+                      {isNegative ? '−' : isPositive ? '+' : ''}{absDelta.toFixed(1)}%
                     </b>
                   </div>
                   <div className={styles.impactRow}>
-                    <span>Median bequest</span>
+                    <span>Estimated leftover wealth</span>
                     <b>{fmtCr(baseBq)} → {fmtCr(shockBq)}</b>
                   </div>
                   <div className={styles.impactRow}>
-                    <span>Bequest impact</span>
+                    <span>Wealth change</span>
                     <b className={bqDelta < -0.005 ? styles.neg : bqDelta > 0.005 ? styles.pos : styles.zero}>
                       {fmtSignedCr(bqDelta)}
                     </b>
                   </div>
-                  <div className={styles.impactNote}>{paths} paths · CRN seed-matched</div>
                 </div>
               </div>
 
               <div className={styles.deltaPill}>
                 <span className={`${styles.deltaVal} ${isNegative ? styles.neg : isPositive ? styles.pos : styles.zero}`}>
-                  {isNegative ? '−' : isPositive ? '+' : ''}{absDelta.toFixed(1)} pp
+                  {isNegative ? '−' : isPositive ? '+' : ''}{absDelta.toFixed(1)}%
                 </span>
                 <span className={styles.holdsVal}>
-                  Holds: {shock.shockedHolds.toFixed(1)}%
+                  Success: {shock.shockedHolds.toFixed(0)}%
                 </span>
               </div>
             </div>
@@ -136,10 +151,56 @@ export function TornadoChart({ sensitivityResults, mcOn, sensitivityOn }) {
       </div>
 
       <div className={styles.footnote}>
-        💡 <strong>Interpretation:</strong> Re-runs Monte Carlo at {paths} paths while shocking one factor at a time. Bars diverge from the center baseline — left (red) hurts plan holds, right (green) helps. Hover any bar for exact holds + bequest impact. Longer bars pinpoint primary vulnerabilities.
+        💡 <strong>How to read this chart:</strong> Center vertical line represents your current plan baseline ({baseHolds.toFixed(0)}% success). 🔴 <strong>Red bars (left)</strong> show how much a scenario reduces your plan's success rate. 🟢 <strong>Green bars (right)</strong> show potential upside. Hover over any bar to see detailed impact on your wealth.
+      </div>
+
+      {/* Smart Suggestions Section */}
+      <div className={styles.suggestionsSection}>
+        <div className={styles.suggestionsHeader}>
+          💡 Smart Action Plan — Protect Against Your Top Risks
+        </div>
+        <div className={styles.suggestionsGrid}>
+          {damagingShocks.length > 0 ? (
+            damagingShocks.map((shock) => {
+              const isSevere = shock.delta < -10;
+              const sug = shock.suggestion || {
+                icon: '⚠️',
+                headline: `Address risk: ${shock.friendlyLabel || shock.label}`,
+                body: 'Review your financial buffers and SIP allocations for this scenario.',
+              };
+
+              return (
+                <div
+                  key={shock.id}
+                  className={`${styles.suggestionCard} ${isSevere ? styles.severe : ''}`}
+                >
+                  <div className={styles.suggestionIcon}>{sug.icon}</div>
+                  <div className={styles.suggestionContent}>
+                    <div className={styles.suggestionHeadline}>{sug.headline}</div>
+                    <div className={styles.suggestionBody}>{sug.body}</div>
+                    <div className={`${styles.suggestionTag} ${isSevere ? styles.severe : ''}`}>
+                      Drops plan success by {Math.abs(shock.delta).toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className={`${styles.suggestionCard} ${styles.resilient}`}>
+              <div className={styles.suggestionIcon}>🛡️</div>
+              <div className={styles.suggestionContent}>
+                <div className={styles.suggestionHeadline}>Your plan is highly resilient!</div>
+                <div className={styles.suggestionBody}>
+                  None of the stress test scenarios caused a major drop in plan success. Your current savings rate and asset allocation provide robust protection.
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 export default TornadoChart;
+
