@@ -424,6 +424,30 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`918df68cx-…`), aliased to apex;
   apex serves `index-BqNduFn5.js` (matches local build), HTTP 200.
 
+## [2026-09-07] Family tab build (shell + content move + survivor calculator)
+- **Goal**: Finish the 👪 todo: third tab with everything family + death-in-service
+  survivor math + seven-leg protection pool.
+- **Files created**: `src/engine/survivor.js` (DCRG slabs, two-phase pension,
+  `survivorBenefit`), `src/engine/__tests__/survivor.test.js` (10 tests),
+  `src/components/dashboard/{FamilyView,StreamPlanner,SurvivorCard}.jsx` (+ Survivor CSS),
+  `docs/FUTURE_PLAN.md` (P0/P1/P2 + deferred, sequencing guard).
+- **Files modified**: `src/engine/career.js` (extracted month-stepper shared by
+  `projectLastPay`/`projectEmolumentsAtYear`), `src/engine/index.js` (barrel),
+  `src/components/dashboard/GoalOptimizerPanel.jsx` (solver-only; stream code moved
+  verbatim), `src/components/dashboard/{PlanView,Dashboard}.jsx` (family branch),
+  `src/App.jsx` (Family tab button + sidebar navigate prop), `src/components/config/
+  {Sidebar.jsx,Sidebar.module.css}` (ChildrenSection moved out, 6 sections, goals→ link),
+  `src/content/{panelInfo.js,__tests__/panelInfo.test.js}` (stream-planner + survivor
+  entries), `src/components/shared/AboutModal.jsx` (survivor cross-link),
+  `docs/{PROGRESS.md (todo checked, counts 119, status),README.md (plan link),TASK_LOG.md}`.
+- **Corrections during build**: DCRG slab doc fixed (verified §45(1)(b): 5–20y flat 12×,
+  not 11–20y/20×); legacy December-stepping quirk found (rollover side effect —
+  year-end pinned to November to match "last drawn"); `GoalOptimizerPanel` extra
+  `</div>` from tab removal.
+- **Verification**: `npx vitest run` 119/119 across 13 suites; `npm run lint` 0 errors,
+  17 warnings; `npm run build` clean, precache 31, Family lazy chunk.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 ## [2026-09-07] Family Protection Stack & Term-Cover Gap Planner
 - **Goal**: Statutory & voluntary protection legs (FBF ₹1.5L, Family Security Fund ₹5L, Doctors Corpus Fund ₹1Cr, Term cover) + 12× annual income term gap planner with age-band premium estimator & surplus feasibility check.
 - **Files created**: `src/engine/protection.js` (`PROTECTION_LEGS`, `protectionLump`, `suggestTermTarget`, `protectionGap`, `estimateTermPremium`, `premiumFeasible`), `src/engine/__tests__/protection.test.js` (14 tests), `src/components/config/ProtectionSection.jsx` (+ CSS module).

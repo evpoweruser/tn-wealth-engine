@@ -10,7 +10,7 @@ import Sidebar from './components/config/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
 import styles from './App.module.css';
 import { generateWealthReport } from './utils/pdfReport';
-import { Info, FileSpreadsheet, FileDown, RotateCcw, Sun, Moon, Landmark, LayoutDashboard, FlaskConical } from 'lucide-react';
+import { Info, FileSpreadsheet, FileDown, RotateCcw, Sun, Moon, Landmark, LayoutDashboard, FlaskConical, Baby } from 'lucide-react';
 
 // Print-only chart instances for PDF export (lazy — shares the module cache
 // with the dashboard code-split chunks, so no extra main-bundle weight).
@@ -221,6 +221,16 @@ function App() {
               <span className={styles.btnLabel}>Plan</span>
             </button>
             <button
+              className={`${styles.actionBtn} ${view === 'family' ? styles.activeViewBtn : ''}`}
+              onClick={() => handleView('family')}
+              title="Family — children goals, stream costs and survivor cover"
+              aria-label="Family view"
+              aria-pressed={view === 'family'}
+            >
+              <Baby size={14} />
+              <span className={styles.btnLabel}>Family</span>
+            </button>
+            <button
               className={`${styles.actionBtn} ${view === 'lab' ? styles.activeViewBtn : ''}`}
               onClick={() => handleView('lab')}
               title="Stress Lab — crash-test the plan"
@@ -255,7 +265,7 @@ function App() {
 
         {/* Sidebar - Configuration */}
         <div className={styles.sidebar}>
-          <Sidebar />
+          <Sidebar onGoFamily={() => handleView('family')} />
         </div>
 
         {/* Main - Dashboard */}

@@ -290,6 +290,42 @@ export const PANEL_INFO = {
     ],
     howToRead: 'Check if existing statutory legs cover your target; if a gap remains, click + Add Suggested Term Cover and verify surplus feasibility.',
   },
+
+  'stream-planner': {
+    title: 'College Stream Planner',
+    assumptions: [
+      'Indicative 2026 TN private-college costs grown by stream fee trends (Arts ~6%, Engineering ~8%, Medical ~9%, Management ~7%).',
+      'Impact preview runs the standard 2×500-path tradeoff scenario for the projected cost.',
+    ],
+    says: [
+      'Projected total at college entry, entry-year annual fee, required monthly SIP from now, and live plan-survival impact.',
+      'One-click Apply writes the projected cost into the child’s college goal.',
+    ],
+    doesntSay: [
+      'Figures are estimates, not quotes — government-quota/NRI/management seats differ wildly; override with actuals.',
+      'Trends compound; a 1pp error over 15 years moves Medical totals by lakhs.',
+    ],
+    howToRead: 'Compare streams on one child first, then Apply the realistic one and re-check survival.',
+  },
+
+  survivor: {
+    title: 'If I die in service',
+    assumptions: [
+      'Death-year pay stepped with the same rules as the pension projection; balances read from the median path.',
+      'Spouse: enhanced 50% of emoluments × 7 yrs, then 60%-of-notional pension (G.O.Ms.No.07), DA-indexed.',
+      'DCRG gratuity by TN §45(1)(b) slabs, ₹25L cap; protection legs per your sidebar toggles.',
+    ],
+    says: [
+      'Monthly spouse income in both phases, the full lump stack itemized, and the children-inherit pool total.',
+      'Move the death-year slider to see how later death (higher pay, bigger corpus) changes the picture.',
+    ],
+    doesntSay: [
+      'No mortality weighting — every year shown is equally hypothetical ("if", not "when").',
+      'Nominees/succession law, end-of-life bills, and inheritance tax are unmodeled.',
+      'DCF assumes a contributing member and duty death; confirm the current figure.',
+    ],
+    howToRead: 'Check the worst year (early service, small corpus): if the pool covers goals + spouse needs, protection is adequate.',
+  },
 };
 
 /** Ordered panel ids (stable for tests and future indexes). */

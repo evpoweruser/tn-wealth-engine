@@ -7,9 +7,15 @@ import { fmtCr, fmt } from '../../utils/format';
 
 // The Stress Lab (risk workbench) loads on demand — keeps the initial bundle lean.
 const StressLabView = lazy(() => import('./StressLabView'));
+// Same for the Family tab (children + survivor planning).
+const FamilyView = lazy(() => import('./FamilyView'));
 
 const LabFallback = () => (
   <div className={styles.chartFallback} aria-busy="true">Loading Stress Lab…</div>
+);
+
+const FamilyFallback = () => (
+  <div className={styles.chartFallback} aria-busy="true">Loading Family…</div>
 );
 
 const schemeLabel = (mode) => {
@@ -50,7 +56,8 @@ const SummaryStrip = ({ results, isLoading }) => {
 
 /**
  * Dashboard — thin view switch. PlanView is the default headline dashboard;
- * StressLabView is the risk workbench (lazy-loaded).
+ * FamilyView is the children + survivor tab; StressLabView is the risk
+ * workbench (both lazy-loaded).
  */
 const Dashboard = ({
   view,
@@ -68,6 +75,16 @@ const Dashboard = ({
   onWhatIfChange,
   onClearWhatIf,
 }) => {
+  if (view === 'family') {
+    return (
+      <PanelErrorBoundary panelName="Family">
+        <Suspense fallback={<FamilyFallback />}>
+          <FamilyView results={results} isLoading={isLoading} />
+        </Suspense>
+      </PanelErrorBoundary>
+    );
+  }
+
   if (view === 'lab') {
     return (
       <PanelErrorBoundary panelName="Stress Lab">

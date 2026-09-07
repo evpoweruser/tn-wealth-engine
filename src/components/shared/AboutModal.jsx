@@ -150,6 +150,10 @@ export const AboutModal = ({ isOpen, onClose }) => {
               <b>Verify before acting:</b> pension rules are amended by government notification — confirm current
               rates with the Principal Accountant General / Treasury before retirement decisions.
             </p>
+            <p style={{ marginTop: '8px' }}>
+              <b>Family tab:</b> the "If I die in service" card applies these same rules to any service
+              year you pick — spouse pension phases, DCRG slab gratuity, and the full lump stack above.
+            </p>
           </section>
         </div>
 

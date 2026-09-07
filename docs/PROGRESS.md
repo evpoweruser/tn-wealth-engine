@@ -1,12 +1,12 @@
 # Project Progress & Roadmap
 
 Last Updated: 2026-09-07
-Current Status: Tornado redesign (layman labels, opaque tooltips, smart action plan)
-shipped 2026-09-07; all roadmap UI + LTC + Wealth Score + hardening done; see TASK_LOG.
-Open: private-sector EPF/NPS mode. Idea backlog: Dual-PAN tax, multi-currency NRI mode.
+Current Status: Family tab shipped (shell + content move + survivor calculator);
+ranked future work in `docs/FUTURE_PLAN.md`. Open idea backlog: Dual-PAN tax (P1 in plan).
 
 This file is the single source of truth for project state. Deep technical specs live in
 `docs/WALKTHROUGH.md` and `docs/ROBUSTNESS_AND_STRESS_PANEL.md` — linked, not duplicated.
+Ranked future work lives in `docs/FUTURE_PLAN.md` (correctness sweep → features → deferred).
 Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-archive: `docs/DECISIONS.md`.
 
 ## Immediate Next Tasks (from 2026-09-06 code review — highest priority first)
@@ -29,24 +29,25 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 ## 👪 Planned: Family Tab (everything children + survivor cover)
 
 View shell + content move:
-- [ ] **Family view shell** — third header tab (Plan | Family | Stress Lab), persisted
+- [x] **Family view shell** — third header tab (Plan | Family | Stress Lab), persisted
   `tn_view`, lazy-loaded chunk; `Dashboard.jsx` switch; sidebar drops ChildrenSection
-  (→5 sections) with a "N goals →" Family link for discoverability.
-- [ ] **Move family content** — child input cards, MilestoneTimeline, GoalsTable,
+  (→6 sections) with a "N goals →" Family link for discoverability.
+- [x] **Move family content** — child input cards, MilestoneTimeline, GoalsTable,
   Stream Planner (extracted standalone from GoalOptimizerPanel; Reverse Solver stays
   in Lab), FeasibilityChart. PDF print root is view-independent — export unaffected.
 
 Survivor calculator ("if I die in service", death-year slider across service years):
-- [ ] **Engine** — `projectEmolumentsAtYear` (same stepping as `projectLastPay`;
+- [x] **Engine** — `projectEmolumentsAtYear` (same stepping as `projectLastPay`;
   pinned ≡ lastPay at rYr), new `src/engine/survivor.js`, `familyPension` passthrough
   (already in runPath/MC mid). Balances at death year read from median records.
-- [ ] **Logic** — spouse two-phase pension: enhanced 50% of emoluments × 7 yrs, then
+- [x] **Logic** — spouse two-phase pension: enhanced 50% of emoluments × 7 yrs, then
   normal 60%-of-notional-pension (0.6 × 50% emoluments), DA-indexed, labeled. DCRG
-  gratuity by service slab (<1y 2×, 1–5y 6×, 5–11y 12×, 11–20y 20×, 20+y ½-month per
-  6 months up to 33× monthly emoluments, ₹25L cap) — slabs re-verified at build.
+  gratuity by TN §45(1)(b) slabs, verified at build (<1y 2×, 1–5y 6×, 5–20y 12×,
+  20+y ½-month per 6 months up to 33×, ₹25L TAPS cap) — supersedes the draft
+  11–20y/20× split, which the verified rule does not contain.
   Lump stack = gratuity + SIP/CPS balances at death year + protection legs below.
   Children-inherit pool = full lump stack. No mortality weighting ("if", not "when").
-- [ ] **Assumptions (locked)** — TAPS family pension 60% of last pension drawn per
+- [x] **Assumptions (locked)** — TAPS family pension 60% of last pension drawn per
   G.O.Ms.No.07 09-01-2026 (DA at par; sources: News18 G.O. FAQ, GKToday,
   govtschemes.in, usthadian). Pre-2003 TN rules context: enhanced 50% × 7yrs/till 65
   (tn.gov.in Treasuries). CPS lump-sum: no family pension (annuity spouse option
@@ -66,9 +67,9 @@ Term-cover gap planner (no term held → plan the purchase):
 - [x] **Assumptions (locked)** — 12× is a rule of thumb, not advice.
 
 Docs/tests/ship:
-- [x] **Docs** — ADR-011, About §7 extension, panelInfo protection entry, shape test coverage.
-- [x] **Tests** — leg toggles, gap math, premium band boundaries, prefill from emoluments.
-- [x] **Verify + ship** — full `vitest`/lint/build, commit/push/deploy.
+- [x] **Docs** — ADR-011 (+survivor amendment scope in TASK_LOG), About §7 extension (+survivor cross-link), panelInfo survivor + stream-planner entries, shape test coverage.
+- [x] **Tests** — leg toggles, gap math, premium band boundaries, prefill from emoluments; emoluments-at-Y pin, verified DCRG slabs, phase math.
+- [x] **Verify + ship** — full `vitest`/lint/build, three-tab click-through, PDF from each view, commit/push/deploy.
 
 ## 🎨 Future Visual Appeal & UI/UX Enhancement Roadmap
 
@@ -182,9 +183,9 @@ Docs/tests/ship:
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 95/95 passing as of 2026-09-07 — 11 suites: tax 9,
+- Unit tests: `npm test` (vitest; 119/119 passing as of 2026-09-07 — 13 suites: tax 9,
   narrative 4, wiring 22, stress 26, solver 4, sensitivity 8, goals 3, score 6,
-  validation 4, panelInfo 2, streams 7)
-- Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
-- Build: `npm run build` (vite + PWA precache 24 entries, passing as of 2026-09-07;
-  Recharts panels + StressLabView code-split — lazy chunks, main ~1.28 MB)
+  validation 4, panelInfo 2, streams 7, protection 14, survivor 10)
+- Lint: `npm run lint` (oxlint; 0 errors, 17 warnings as of 2026-09-07 — all pre-existing class)
+- Build: `npm run build` (vite + PWA precache 31 entries, passing as of 2026-09-07;
+  Plan/Lab/Family lazy chunks, main ~1.26 MB)

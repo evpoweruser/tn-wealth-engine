@@ -137,6 +137,7 @@ npm run preview
 
 - [Architectural Decision Records (DECISIONS.md)](docs/DECISIONS.md)
 - [Project Progress & Roadmap (PROGRESS.md)](docs/PROGRESS.md)
+- [Future Feature & Correctness Plan (FUTURE_PLAN.md)](docs/FUTURE_PLAN.md)
 - [Task Execution Log (TASK_LOG.md)](docs/TASK_LOG.md)
 - [Full Walkthrough & Fix Log (WALKTHROUGH.md)](docs/WALKTHROUGH.md)
 - [Robustness & Stress Panel Engine Specs (ROBUSTNESS_AND_STRESS_PANEL.md)](docs/ROBUSTNESS_AND_STRESS_PANEL.md)

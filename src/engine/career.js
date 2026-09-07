@@ -5,8 +5,33 @@
  */
 
 export function projectLastPay(config) {
+  const dor = new Date(config.dor);
+  return stepTo(config, dor.getFullYear(), dor.getMonth());
+}
+
+/**
+ * Project monthly emoluments (basic + DA) for any calendar year in service.
+ * Uses the exact same stepping as projectLastPay — at the retirement year the
+ * result is bit-identical to projectLastPay().emoluments (pinned by test).
+ * Year-end is November (month 10): the legacy loop applies the next year's
+ * increment when rolling out of December, so December would overstate by one
+ * increment. November matches "last drawn" semantics.
+ *
+ * @param {object} config - Same config as projectLastPay
+ * @param {number} year - Calendar year (clamped to [doj year, dor year])
+ * @returns {{ basic:number, da:number, emoluments:number, serviceYears:number }}
+ */
+export function projectEmolumentsAtYear(config, year) {
   const doj = new Date(config.doj);
   const dor = new Date(config.dor);
+  const y = Math.max(doj.getFullYear(), Math.min(dor.getFullYear(), Math.floor(year)));
+  const out = stepTo(config, y, 10);
+  return { ...out, serviceYears: y - doj.getFullYear() };
+}
+
+/** Month-stepping core shared by projectLastPay and projectEmolumentsAtYear. */
+function stepTo(config, eY, eM) {
+  const doj = new Date(config.doj);
   let basic = config.startBasic || 56100;
   let da = (config.daPct || 60) / 100;
   const mdYear = config.mdYear || 2026;
@@ -22,8 +47,6 @@ export function projectLastPay(config) {
 
   let y = doj.getFullYear();
   let m = doj.getMonth();
-  const eY = dor.getFullYear();
-  const eM = dor.getMonth();
 
   while (y < eY || (y === eY && m <= eM)) {
     if (y === mdYear && m === 6) {

@@ -19,6 +19,8 @@ const REFERENCED_IDS = [
   'stress-regimes',
   'tornado',
   'protection',
+  'stream-planner',
+  'survivor',
 ];
 
 describe('panel explainer content', () => {
