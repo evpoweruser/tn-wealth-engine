@@ -404,5 +404,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Known display shift**: CPS+annuity Real Bequest drops (overstatement removed) —
   called out, not a regression.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`aqiihziid-…`), aliased to apex;
+  apex serves `index-CZGYsdt8.js` (matches local build), HTTP 200.
 
 
