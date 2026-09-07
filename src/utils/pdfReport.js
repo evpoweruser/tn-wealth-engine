@@ -45,7 +45,10 @@ const schemeLabel = (mode) => {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function captureNode(selector) {
-  const el = document.querySelector(`[data-pdf="${selector}"]`);
+  // Prefer the hidden print-root instance (fully painted, all views at once),
+  // fall back to the visible dashboard node.
+  const el = document.querySelector(`[data-pdf-print="${selector}"]`)
+    || document.querySelector(`[data-pdf="${selector}"]`);
   if (!el) return null;
   const canvas = await html2canvas(el, {
     scale: 2,
@@ -56,8 +59,21 @@ async function captureNode(selector) {
   return canvas.toDataURL('image/png');
 }
 
+/** Wait for the hidden print-root charts to mount (lazy chunks may still load). */
+async function waitForPrintNodes(onStage, timeoutMs = 9000) {
+  const start = Date.now();
+  for (;;) {
+    const w = document.querySelector('[data-pdf-print="wealth-chart"]');
+    const f = document.querySelector('[data-pdf-print="feasibility-chart"]');
+    if (w && f) return true;
+    if (Date.now() - start > timeoutMs) return false;
+    onStage?.('Loading charts for print...');
+    await sleep(150);
+  }
+}
+
 /** Force light theme during capture so CSS-var charts print on white. */
-async function captureChartsLight(onStage, onRequireView) {
+async function captureChartsLight(onStage) {
   const root = document.documentElement;
   const prev = root.dataset.theme;
   try {
@@ -65,22 +81,13 @@ async function captureChartsLight(onStage, onRequireView) {
     root.dataset.theme = 'light';
     // let CSS vars + recharts repaint
     await sleep(300);
-    // Wealth chart lives in the Stress Lab view — mount it first when the
-    // caller provides a view switcher; missing nodes yield null (skipped).
-    if (onRequireView) {
-      onStage?.('Opening Stress Lab for chart capture...');
-      await onRequireView('lab');
-      await sleep(300);
-    }
+    // Both export charts mount simultaneously in the hidden print root —
+    // no view switching needed. Then settle so Recharts entry animations finish.
+    await waitForPrintNodes(onStage);
+    await sleep(1700);
     onStage?.('Capturing wealth chart...');
     const wealthImg = await captureNode('wealth-chart');
-    if (onRequireView) {
-      onStage?.('Capturing SIP chart...');
-      await onRequireView('plan');
-      await sleep(300);
-    } else {
-      onStage?.('Capturing SIP chart...');
-    }
+    onStage?.('Capturing SIP chart...');
     const feasImg = await captureNode('feasibility-chart');
     return { wealthImg, feasImg };
   } finally {
@@ -265,12 +272,12 @@ function buildComparison(state, derivedState) {
   }
 }
 
-export async function generateWealthReport({ state, derivedState, results, onStage, onRequireView }) {
+export async function generateWealthReport({ state, derivedState, results, onStage }) {
   if (!results?.mid?.records?.length) throw new Error('No simulation results to export yet.');
   const genDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
   onStage?.('Preparing charts for print...');
-  const { wealthImg, feasImg } = await captureChartsLight(onStage, onRequireView);
+  const { wealthImg, feasImg } = await captureChartsLight(onStage);
 
   onStage?.('Building report...');
   const doc = new jsPDF('p', 'mm', 'a4');

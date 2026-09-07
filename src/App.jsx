@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, Suspense, lazy } from 'react';
 import { useEngine } from './context/EngineContext';
 import { useTheme } from './context/ThemeContext';
 import { useSimulation } from './hooks/useSimulation';
@@ -11,6 +11,11 @@ import Dashboard from './components/dashboard/Dashboard';
 import styles from './App.module.css';
 import { generateWealthReport } from './utils/pdfReport';
 import { Info, FileSpreadsheet, FileDown, RotateCcw, Sun, Moon, Landmark, LayoutDashboard, FlaskConical } from 'lucide-react';
+
+// Print-only chart instances for PDF export (lazy — shares the module cache
+// with the dashboard code-split chunks, so no extra main-bundle weight).
+const PrintWealthChart = lazy(() => import('./components/dashboard/WealthChart'));
+const PrintFeasibilityChart = lazy(() => import('./components/dashboard/FeasibilityChart'));
 
 /**
  * Run one deterministic path with a per-year overlay and return a
@@ -95,8 +100,7 @@ function App() {
     }
   }, [whatIf, simParamsForStress, derivedState, state.retireMode]);
 
-  // Plan | Stress Lab view (persisted). The PDF export temporarily switches
-  // views via onRequireView so off-screen charts can be captured.
+  // Plan | Stress Lab view (persisted).
   const [view, setView] = useState(() => {
     try {
       return window.localStorage.getItem('tn_view') || 'plan';
@@ -112,11 +116,6 @@ function App() {
     // Start at the top of the newly shown view.
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   }, []);
-  const requireView = useCallback(async (v) => {
-    handleView(v);
-    // Let React commit + paint before html2canvas captures.
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-  }, [handleView]);
 
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfStage, setPdfStage] = useState('');
@@ -140,26 +139,25 @@ function App() {
       alert('Simulation is still preparing. Try again in a moment.');
       return;
     }
-    const prevView = view;
     setPdfLoading(true);
     setPdfStage('Preparing report...');
     try {
+      // The hidden print root (rendered below while pdfLoading) mounts both
+      // charts simultaneously, so no view switching is needed for capture.
       await generateWealthReport({
         state,
         derivedState,
         results,
         onStage: (msg) => setPdfStage(msg),
-        onRequireView: requireView,
       });
     } catch (err) {
       console.error('PDF error:', err);
       alert('PDF generation failed. Check console for details.');
     } finally {
-      if (prevView !== view) handleView(prevView);
       setPdfLoading(false);
       setPdfStage('');
     }
-  }, [state, derivedState, results, view, requireView, handleView]);
+  }, [state, derivedState, results]);
 
   const handleReset = useCallback(() => {
     if (window.confirm('Reset all settings to defaults?')) {
@@ -173,6 +171,26 @@ function App() {
       <PdfOverlay visible={pdfLoading} message={pdfStage} />
       <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
       {isLoading && <div className={styles.loading}>⟳ Simulating…</div>}
+      {/* Hidden print root: mounts both export charts simultaneously
+          (off-screen, fixed width) so html2canvas captures them regardless
+          of the active view. Rendered only during PDF export. */}
+      {pdfLoading && (
+        <div aria-hidden="true" className={styles.printRoot}>
+          <Suspense fallback={null}>
+            <div data-pdf-print="wealth-chart">
+              <PrintWealthChart
+                results={results}
+                isLoading={false}
+                stressOverlay={stressOverlay}
+                whatIfOverlay={whatIfOverlay}
+              />
+            </div>
+            <div data-pdf-print="feasibility-chart">
+              <PrintFeasibilityChart results={results} isLoading={false} />
+            </div>
+          </Suspense>
+        </div>
+      )}
 
       <div className={styles.app}>
         {/* Header */}

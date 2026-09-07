@@ -318,4 +318,17 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`67mlw88c1-…`), aliased to apex;
   apex serves `index-Cz7_Oa0r.js` (matches local build, `retire_crash` live), HTTP 200.
 
+## [2026-09-07] Fix PDF export: hidden print root replaces view-switching
+- **Goal**: View-switch capture was racy (lazy chunk + Recharts animations outlasted
+  the double-rAF wait) — export both views' charts simultaneously instead.
+- **Files modified**: `src/App.jsx` (hidden off-screen `.printRoot` with lazy
+  WealthChart + FeasibilityChart incl. active overlays, rendered while exporting;
+  view-switch/`onRequireView` machinery removed), `src/App.module.css` (print-root
+  styles), `src/utils/pdfReport.js` (`captureNode` prefers `data-pdf-print` nodes,
+  poll-for-mount up to 9s + 1.7s animation settle, `onRequireView` removed).
+- **Verification**: `npx vitest run` 80/80; `npm run lint` 0 errors, 16 warnings;
+  `npm run build` clean, precache 24. Headless PDF pixels can't be verified here —
+  user to confirm one export from each view.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 
