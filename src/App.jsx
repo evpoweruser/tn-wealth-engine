@@ -4,13 +4,35 @@ import { useTheme } from './context/ThemeContext';
 import { useSimulation } from './hooks/useSimulation';
 import { useStressPanel } from './hooks/useStressPanel';
 import { useSensitivity } from './hooks/useSensitivity';
-import { buildSimParams, computeWithdrawals, computeWithdrawalTaxes, runPath, applyRegimeOverlay } from './engine/index.js';
+import { buildSimParams, computeWithdrawals, computeWithdrawalTaxes, runPath, applyRegimeOverlay, applyWhatIfCrash } from './engine/index.js';
 import { PdfOverlay, AboutModal } from './components/shared';
 import Sidebar from './components/config/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
 import styles from './App.module.css';
 import { generateWealthReport } from './utils/pdfReport';
-import { Info, FileSpreadsheet, FileDown, RotateCcw, Sun, Moon, Landmark } from 'lucide-react';
+import { Info, FileSpreadsheet, FileDown, RotateCcw, Sun, Moon, Landmark, LayoutDashboard, FlaskConical } from 'lucide-react';
+
+/**
+ * Run one deterministic path with a per-year overlay and return a
+ * year-keyed trajectory series for chart overlays. Shared by the regime
+ * overlay and the what-if crash overlay (same overlay path, no MC sampling).
+ */
+function computeOverlaySeries(simParams, mode, inflationData, goals, overlayFn, key) {
+  const res = runPath(
+    simParams,
+    mode,
+    simParams.cpsRate,
+    simParams.sipXirr,
+    inflationData.infLiving,
+    inflationData.infMed,
+    inflationData.infEdu,
+    inflationData.infComposite,
+    computeWithdrawals(goals || []),
+    overlayFn,
+    computeWithdrawalTaxes(goals || [])
+  );
+  return res.records.map((r) => ({ yr: r.yr, [key]: r.tot }));
+}
 
 function App() {
   const { state, dispatch, derivedState } = useEngine();
@@ -37,28 +59,64 @@ function App() {
     try {
       const { inflationData, goals } = derivedState;
       const mode = state.retireMode || 'taps';
-      const res = runPath(
-        simParamsForStress,
-        mode,
-        simParamsForStress.cpsRate,
-        simParamsForStress.sipXirr,
-        inflationData.infLiving,
-        inflationData.infMed,
-        inflationData.infEdu,
-        inflationData.infComposite,
-        computeWithdrawals(goals || []),
+      const series = computeOverlaySeries(
+        simParamsForStress, mode, inflationData, goals,
         (rates, yearIdx) => applyRegimeOverlay({ ...rates }, yearIdx, stressOverlayId),
-        computeWithdrawalTaxes(goals || [])
+        'stressTot'
       );
-      return {
-        id: stressOverlayId,
-        series: res.records.map((r) => ({ yr: r.yr, stressTot: r.tot })),
-      };
+      return { id: stressOverlayId, series };
     } catch (err) {
       console.error('Stress overlay error:', err);
       return null;
     }
   }, [stressOverlayId, simParamsForStress, derivedState, state.retireMode]);
+
+  // Interactive what-if crash: user-picked calendar year + depth → amber dashed
+  // trajectory. Coexists with the regime overlay (distinct color + legend).
+  const [whatIf, setWhatIf] = useState(null); // { crashYear, depth } | null
+  const whatIfOverlay = useMemo(() => {
+    if (!whatIf || !simParamsForStress || !derivedState) return null;
+    try {
+      const { inflationData, goals, baseYear } = derivedState;
+      const mode = state.retireMode || 'taps';
+      const crashIdx = whatIf.crashYear - baseYear;
+      const series = computeOverlaySeries(
+        simParamsForStress, mode, inflationData, goals,
+        (rates, yearIdx) => applyWhatIfCrash(rates, yearIdx, { crashIdx, depth: whatIf.depth }),
+        'whatIfTot'
+      );
+      return {
+        label: `−${Math.round(whatIf.depth * 100)}% @ ${whatIf.crashYear}`,
+        series,
+      };
+    } catch (err) {
+      console.error('What-if overlay error:', err);
+      return null;
+    }
+  }, [whatIf, simParamsForStress, derivedState, state.retireMode]);
+
+  // Plan | Stress Lab view (persisted). The PDF export temporarily switches
+  // views via onRequireView so off-screen charts can be captured.
+  const [view, setView] = useState(() => {
+    try {
+      return window.localStorage.getItem('tn_view') || 'plan';
+    } catch {
+      return 'plan';
+    }
+  });
+  const handleView = useCallback((v) => {
+    setView(v);
+    try {
+      window.localStorage.setItem('tn_view', v);
+    } catch { /* private-mode storage: view preference stays session-only */ }
+    // Start at the top of the newly shown view.
+    requestAnimationFrame(() => window.scrollTo({ top: 0 }));
+  }, []);
+  const requireView = useCallback(async (v) => {
+    handleView(v);
+    // Let React commit + paint before html2canvas captures.
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  }, [handleView]);
 
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfStage, setPdfStage] = useState('');
@@ -82,6 +140,7 @@ function App() {
       alert('Simulation is still preparing. Try again in a moment.');
       return;
     }
+    const prevView = view;
     setPdfLoading(true);
     setPdfStage('Preparing report...');
     try {
@@ -90,15 +149,17 @@ function App() {
         derivedState,
         results,
         onStage: (msg) => setPdfStage(msg),
+        onRequireView: requireView,
       });
     } catch (err) {
       console.error('PDF error:', err);
       alert('PDF generation failed. Check console for details.');
     } finally {
+      if (prevView !== view) handleView(prevView);
       setPdfLoading(false);
       setPdfStage('');
     }
-  }, [state, derivedState, results]);
+  }, [state, derivedState, results, view, requireView, handleView]);
 
   const handleReset = useCallback(() => {
     if (window.confirm('Reset all settings to defaults?')) {
@@ -124,6 +185,26 @@ function App() {
             </div>
           </div>
           <div className={styles.actions}>
+            <button
+              className={`${styles.actionBtn} ${view === 'plan' ? styles.activeViewBtn : ''}`}
+              onClick={() => handleView('plan')}
+              title="Headline plan dashboard"
+              aria-label="Plan view"
+              aria-pressed={view === 'plan'}
+            >
+              <LayoutDashboard size={14} />
+              <span className={styles.btnLabel}>Plan</span>
+            </button>
+            <button
+              className={`${styles.actionBtn} ${view === 'lab' ? styles.activeViewBtn : ''}`}
+              onClick={() => handleView('lab')}
+              title="Stress Lab — crash-test the plan"
+              aria-label="Stress Lab view"
+              aria-pressed={view === 'lab'}
+            >
+              <FlaskConical size={14} />
+              <span className={styles.btnLabel}>Stress Lab</span>
+            </button>
             <button className={styles.actionBtn} onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} aria-label="Toggle theme">
               {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
               <span className={styles.btnLabel}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
@@ -155,6 +236,7 @@ function App() {
         {/* Main - Dashboard */}
         <div className={styles.main} data-pdf="dashboard">
           <Dashboard
+            view={view}
             results={results}
             isLoading={isLoading}
             stressResults={stressResults}
@@ -164,6 +246,10 @@ function App() {
             stressOverlay={stressOverlay}
             stressOverlayId={stressOverlayId}
             onToggleStressOverlay={(id) => setStressOverlayId((prev) => (prev === id ? null : id))}
+            whatIf={whatIf}
+            whatIfOverlay={whatIfOverlay}
+            onWhatIfChange={setWhatIf}
+            onClearWhatIf={() => setWhatIf(null)}
           />
         </div>
       </div>

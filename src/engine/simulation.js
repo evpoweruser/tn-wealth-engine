@@ -71,6 +71,8 @@ function clamp(x, a, b) {
  *   Called at the start of each accumulation and drawdown year. yearIdx is the
  *   absolute year index (0-based from the base year): accumulation year i,
  *   drawdown year accYears + j. Return rates are used for that year only.
+ *   In drawdown years the overlay may additionally return `postRet` to scale
+ *   post-retirement corpus growth (absent/NaN → base params.postRetRate).
  * @param {object} [wTaxDraws]   Year-keyed capital-gains tax map for goal
  *   withdrawals (pairs 1:1 with wDraws years). Deducted from balances in the
  *   withdrawal year with exact-year deflation into taxReal.
@@ -232,14 +234,22 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
 
     // Apply per-year overlay (same absolute yearIdx timeline as accumulation:
     // accYears + j). Windowed regimes self-disable past their window; all-years
-    // regimes (e.g. medical_shock) bite here. Only inflation components apply
-    // in drawdown — SIP/CPS balances are fixed at retirement.
+    // regimes (e.g. medical_shock) bite here. Inflation components always apply;
+    // SIP/CPS balances are fixed at retirement, so sXirr/cRate are inert here —
+    // but an overlay MAY scale post-retirement growth via `postRet` (used by
+    // retirement-anchored crash regimes so the corpus keeps bleeding).
     let yInfL = infL;
     let yInfM = infM;
     let yInfC = infC;
+    let yPostRet = params.postRetRate;
     if (yearlyOverlay) {
       const ov = yearlyOverlay({ sXirr, cRate, infL, infM, infE, infC }, elapsed);
       yInfL = ov.infL; yInfM = ov.infM; yInfC = ov.infC;
+      // postRet may be a number (absolute rate) or a directive resolved here
+      // against the base rate ('halve' | 'quarter'). Absent/invalid → base.
+      if (ov.postRet === 'halve') yPostRet = Math.max(0, params.postRetRate / 2);
+      else if (ov.postRet === 'quarter') yPostRet = Math.max(0, params.postRetRate / 4);
+      else if (ov.postRet != null && Number.isFinite(ov.postRet)) yPostRet = Math.max(0, ov.postRet);
     }
 
     cumInfL *= (1 + yInfL);
@@ -269,7 +279,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     const netDrawdown = Math.max(0, monthlyExp - pension + yearTaxNominal / 12);
 
     for (let mm = 0; mm < 12; mm++) {
-      liquid = liquid * (1 + params.postRetRate / 12) - netDrawdown;
+      liquid = liquid * (1 + yPostRet / 12) - netDrawdown;
       if (liquid <= 0) {
         liquid = 0;
         if (!depletedYear) depletedYear = yr;

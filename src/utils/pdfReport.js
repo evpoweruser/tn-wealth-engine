@@ -57,7 +57,7 @@ async function captureNode(selector) {
 }
 
 /** Force light theme during capture so CSS-var charts print on white. */
-async function captureChartsLight(onStage) {
+async function captureChartsLight(onStage, onRequireView) {
   const root = document.documentElement;
   const prev = root.dataset.theme;
   try {
@@ -65,9 +65,22 @@ async function captureChartsLight(onStage) {
     root.dataset.theme = 'light';
     // let CSS vars + recharts repaint
     await sleep(300);
+    // Wealth chart lives in the Stress Lab view — mount it first when the
+    // caller provides a view switcher; missing nodes yield null (skipped).
+    if (onRequireView) {
+      onStage?.('Opening Stress Lab for chart capture...');
+      await onRequireView('lab');
+      await sleep(300);
+    }
     onStage?.('Capturing wealth chart...');
     const wealthImg = await captureNode('wealth-chart');
-    onStage?.('Capturing SIP chart...');
+    if (onRequireView) {
+      onStage?.('Capturing SIP chart...');
+      await onRequireView('plan');
+      await sleep(300);
+    } else {
+      onStage?.('Capturing SIP chart...');
+    }
     const feasImg = await captureNode('feasibility-chart');
     return { wealthImg, feasImg };
   } finally {
@@ -252,12 +265,12 @@ function buildComparison(state, derivedState) {
   }
 }
 
-export async function generateWealthReport({ state, derivedState, results, onStage }) {
+export async function generateWealthReport({ state, derivedState, results, onStage, onRequireView }) {
   if (!results?.mid?.records?.length) throw new Error('No simulation results to export yet.');
   const genDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
   onStage?.('Preparing charts for print...');
-  const { wealthImg, feasImg } = await captureChartsLight(onStage);
+  const { wealthImg, feasImg } = await captureChartsLight(onStage, onRequireView);
 
   onStage?.('Building report...');
   const doc = new jsPDF('p', 'mm', 'a4');
@@ -424,6 +437,7 @@ export async function generateWealthReport({ state, derivedState, results, onSta
         ['Stress: Early Market Crash', 'Years 0-1: SIP return -30%, Living inflation 8%', 'Windowed accumulation shock'],
         ['Stress: Stagflation', 'Years 0-2: SIP return -4%, All inflation +3%', 'Windowed accumulation shock'],
         ['Stress: Lost Decade', 'Years 0-9: SIP return -5%, Composite inflation +1%', 'Decade accumulation shock'],
+        ['Stress: Retirement Crash', 'rYr-1 to rYr+1: SIP -30%/-12%, post-ret growth halved, inflation +2pp', 'Retirement-boundary shock (corpus legs; TAPS pension insulated)'],
       ],
     });
     y = doc.lastAutoTable.finalY + 6;

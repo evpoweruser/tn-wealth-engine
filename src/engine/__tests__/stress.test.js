@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyRegimeOverlay, REGIMES, runStressPanel } from '../stress.js';
+import { applyRegimeOverlay, applyWhatIfCrash, WHATIF_PRESETS, REGIMES, runStressPanel } from '../stress.js';
 
 // ── applyRegimeOverlay tests ─────────────────────────────────────────────────
 
@@ -86,8 +86,8 @@ describe('applyRegimeOverlay — medical_shock', () => {
 // ── REGIMES descriptor tests ─────────────────────────────────────────────────
 
 describe('REGIMES descriptors', () => {
-  it('exports exactly 4 regimes', () => {
-    expect(REGIMES).toHaveLength(4);
+  it('exports exactly 5 regimes', () => {
+    expect(REGIMES).toHaveLength(5);
   });
 
   it('each regime has id, label, blurb', () => {
@@ -104,6 +104,71 @@ describe('REGIMES descriptors', () => {
     expect(ids).toContain('stagflation');
     expect(ids).toContain('lost_decade');
     expect(ids).toContain('medical_shock');
+    expect(ids).toContain('retire_crash');
+  });
+});
+
+describe('retire_crash anchor-relative window', () => {
+  const baseP = { sXirr: 0.10, cRate: 0.071, infL: 0.045, infM: 0.07, infE: 0.08, infC: 0.05 };
+  const anchor = 20; // accYears
+
+  it('fires exactly at anchor−1, anchor, anchor+1 (+fading anchor+2)', () => {
+    const pre = applyRegimeOverlay(baseP, anchor - 2, 'retire_crash', anchor);
+    expect(pre.sXirr).toBeCloseTo(baseP.sXirr, 10);
+    expect(pre).not.toHaveProperty('postRet');
+
+    const y0 = applyRegimeOverlay(baseP, anchor - 1, 'retire_crash', anchor);
+    expect(y0.sXirr).toBeCloseTo(-0.30, 10);
+    expect(y0.infL).toBeCloseTo(baseP.infL + 0.02, 10);
+
+    const y1 = applyRegimeOverlay(baseP, anchor, 'retire_crash', anchor);
+    expect(y1.sXirr).toBeCloseTo(-0.12, 10);
+
+    const y2 = applyRegimeOverlay(baseP, anchor + 1, 'retire_crash', anchor);
+    expect(y2.sXirr).toBeCloseTo(baseP.sXirr, 10); // sXirr untouched (inert downstream)
+    expect(y2.postRet).toBe('halve');
+
+    const y3 = applyRegimeOverlay(baseP, anchor + 2, 'retire_crash', anchor);
+    expect(y3.postRet).toBe('quarter');
+
+    const post = applyRegimeOverlay(baseP, anchor + 3, 'retire_crash', anchor);
+    expect(post).toEqual(baseP);
+  });
+
+  it('moves with the anchor (retirement year), not year 0', () => {
+    const other = applyRegimeOverlay(baseP, 30, 'retire_crash', 31);
+    expect(other.sXirr).toBeCloseTo(-0.30, 10);
+    const sameIdxOtherAnchor = applyRegimeOverlay(baseP, 30, 'retire_crash', 20);
+    expect(sameIdxOtherAnchor.sXirr).toBeCloseTo(baseP.sXirr, 10);
+  });
+});
+
+describe('applyWhatIfCrash interactive overlay', () => {
+  const baseP = { sXirr: 0.10, cRate: 0.071, infL: 0.045, infM: 0.07, infE: 0.08, infC: 0.05 };
+
+  it('fires at crashIdx with the picked depth, echoes at +1, identity elsewhere', () => {
+    const hit = applyWhatIfCrash(baseP, 15, { crashIdx: 15, depth: 0.37 });
+    expect(hit.sXirr).toBeCloseTo(-0.37, 10);
+    expect(hit.infL).toBeCloseTo(baseP.infL + 0.02, 10);
+    expect(hit.postRet).toBe('halve');
+
+    const echo = applyWhatIfCrash(baseP, 16, { crashIdx: 15, depth: 0.37 });
+    expect(echo.sXirr).toBeCloseTo(Math.max(-0.10, 0.10 - 0.185), 10);
+
+    expect(applyWhatIfCrash(baseP, 14, { crashIdx: 15, depth: 0.37 })).toEqual(baseP);
+    expect(applyWhatIfCrash(baseP, 17, { crashIdx: 15, depth: 0.37 })).toEqual(baseP);
+  });
+
+  it('clamps depth to 5–60%', () => {
+    expect(applyWhatIfCrash(baseP, 5, { crashIdx: 5, depth: 0.99 }).sXirr).toBeCloseTo(-0.60, 10);
+    expect(applyWhatIfCrash(baseP, 5, { crashIdx: 5, depth: 0.01 }).sXirr).toBeCloseTo(-0.05, 10);
+  });
+
+  it('ships historical presets as depths', () => {
+    const byId = Object.fromEntries(WHATIF_PRESETS.map((p) => [p.id, p.depth]));
+    expect(byId.gfc2008).toBeCloseTo(0.37, 10);
+    expect(byId.covid).toBeCloseTo(0.23, 10);
+    expect(byId.dotcom).toBeCloseTo(0.20, 10);
   });
 });
 
@@ -121,14 +186,14 @@ const SYNTHETIC_PARAMS = {
 };
 
 describe('runStressPanel — aggregation sanity', () => {
-  it('returns an array of 4 regime results', () => {
+  it('returns an array of 5 regime results', () => {
     const results = runStressPanel(
       SYNTHETIC_PARAMS, 'taps',
       { infLiving: 0.045, infMed: 0.07, infEdu: 0.08, infComposite: 0.05 },
       {},
       { paths: 50, mcMode: 'A', rngSeed: 42 }
     );
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(5);
   });
 
   it('each result has required keys', () => {

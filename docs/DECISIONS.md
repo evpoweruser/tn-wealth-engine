@@ -77,6 +77,20 @@
 - **Do not**: add unguarded engine calls in render-path `useMemo`s; return null or
   catch to the boundary.
 
+## ADR-009: Anchor-relative regimes + postRet in the overlay contract
+- **Context**: All stress windows were anchored to accumulation year 0, leaving the
+  retirement boundary (peak corpus, no recovery runway) untestable. Additionally,
+  overlay `sXirr` is inert in drawdown years (growth uses `postRetRate`), so a crash
+  spanning retirement would silently stop biting exactly when it hurts most.
+- **Decision**: `applyRegimeOverlay` takes optional `anchorIdx` (retirement = accYears;
+  existing regimes ignore it); the overlay return may carry `postRet` (number or
+  'halve'/'quarter' directive) which `runPath` resolves against `params.postRetRate`
+  in the drawdown monthly loop. Absent/invalid → base rate (bit-identical legacy).
+  `retire_crash` uses both: window anchor−1…anchor+1 + fading anchor+2, SIP −30%/−12%,
+  halved/quartered growth, +2pp inflation.
+- **Do not**: read `postRet` anywhere except the drawdown growth line; do not anchor
+  new regimes to year 0 when the risk is boundary-relative.
+
 ## ADR-008: Withdrawal-year taxation is deducted from the corpus (supersedes ADR-003 display-only)
 - **Context**: Lifetime tax mixed three bills with different timing: annual pension
   income tax (correct as annual), goal-withdrawal LTCG (grossed into withdrawals +

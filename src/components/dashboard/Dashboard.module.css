@@ -68,3 +68,19 @@
   padding: 24px 0;
   text-align: center;
 }
+
+.labHeader {
+  margin: 4px 0 4px;
+}
+
+.labTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.labSubtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}

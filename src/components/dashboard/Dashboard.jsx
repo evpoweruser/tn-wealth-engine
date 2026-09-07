@@ -1,27 +1,15 @@
 import React, { Suspense, lazy } from 'react';
 import { useEngine } from '../../context/EngineContext';
-import KpiGrid from './KpiGrid';
-import RobustnessGrid from './RobustnessGrid';
-import NarrativeCard from './NarrativeCard';
-import StressPanel from './StressPanel';
-import MilestoneTimeline from './MilestoneTimeline';
-import { GoalOptimizerPanel } from './GoalOptimizerPanel';
-import GoalsTable from './GoalsTable';
-import ComparePanel from './ComparePanel';
-import HealthScoreCard from './HealthScoreCard';
-import SpendingChart from './SpendingChart';
-import BucketBar from './BucketBar';
+import PlanView from './PlanView';
 import PanelErrorBoundary from '../shared/PanelErrorBoundary';
 import styles from './Dashboard.module.css';
 import { fmtCr, fmt } from '../../utils/format';
 
-// Recharts-heavy panels are code-split so the main bundle stays lean.
-const WealthChart = lazy(() => import('./WealthChart'));
-const TornadoChart = lazy(() => import('./TornadoChart'));
-const FeasibilityChart = lazy(() => import('./FeasibilityChart'));
+// The Stress Lab (risk workbench) loads on demand — keeps the initial bundle lean.
+const StressLabView = lazy(() => import('./StressLabView'));
 
-const ChartFallback = () => (
-  <div className={styles.chartFallback} aria-busy="true">Loading chart…</div>
+const LabFallback = () => (
+  <div className={styles.chartFallback} aria-busy="true">Loading Stress Lab…</div>
 );
 
 const schemeLabel = (mode) => {
@@ -60,72 +48,60 @@ const SummaryStrip = ({ results, isLoading }) => {
   );
 };
 
-const Dashboard = ({ results, isLoading, stressResults, stressOn, sensitivityResults, sensitivityOn, stressOverlay, stressOverlayId, onToggleStressOverlay }) => {
-  const { state } = useEngine();
-  const mcOn = state.mcOn ?? true;
+/**
+ * Dashboard — thin view switch. PlanView is the default headline dashboard;
+ * StressLabView is the risk workbench (lazy-loaded).
+ */
+const Dashboard = ({
+  view,
+  results,
+  isLoading,
+  stressResults,
+  stressOn,
+  sensitivityResults,
+  sensitivityOn,
+  stressOverlay,
+  stressOverlayId,
+  onToggleStressOverlay,
+  whatIf,
+  whatIfOverlay,
+  onWhatIfChange,
+  onClearWhatIf,
+}) => {
+  if (view === 'lab') {
+    return (
+      <PanelErrorBoundary panelName="Stress Lab">
+        <Suspense fallback={<LabFallback />}>
+          <StressLabView
+            results={results}
+            isLoading={isLoading}
+            stressResults={stressResults}
+            stressOn={stressOn}
+            sensitivityResults={sensitivityResults}
+            sensitivityOn={sensitivityOn}
+            stressOverlay={stressOverlay}
+            stressOverlayId={stressOverlayId}
+            onToggleStressOverlay={onToggleStressOverlay}
+            whatIf={whatIf}
+            whatIfOverlay={whatIfOverlay}
+            onWhatIfChange={onWhatIfChange}
+            onClearWhatIf={onClearWhatIf}
+          />
+        </Suspense>
+      </PanelErrorBoundary>
+    );
+  }
+
   return (
-    <div className={styles.container}>
-      <SummaryStrip results={results} isLoading={isLoading} />
-      <PanelErrorBoundary panelName="Comparison">
-        <ComparePanel isLoading={isLoading} />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Key indicators">
-        <KpiGrid results={results} isLoading={isLoading} />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Reading the result">
-        <NarrativeCard
-          results={results}
-          isLoading={isLoading}
-          stressResults={stressOn ? stressResults : null}
-          sensitivityResults={sensitivityOn ? sensitivityResults : null}
-        />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Robustness">
-        <RobustnessGrid results={results} isLoading={isLoading} />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Wealth score">
-        <HealthScoreCard results={results} isLoading={isLoading} />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Goal optimizer">
-        <GoalOptimizerPanel />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Wealth chart">
-        <Suspense fallback={<ChartFallback />}>
-          <WealthChart results={results} isLoading={isLoading} stressOverlay={stressOverlay} />
-        </Suspense>
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Milestones">
-        <MilestoneTimeline />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Stress regimes">
-        <StressPanel
-          stressResults={stressResults}
-          mcOn={mcOn}
-          stressOn={stressOn}
-          selectedId={stressOverlayId}
-          onToggleOverlay={onToggleStressOverlay}
-        />
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Sensitivity">
-        <Suspense fallback={<ChartFallback />}>
-          <TornadoChart sensitivityResults={sensitivityResults} mcOn={mcOn} sensitivityOn={sensitivityOn} />
-        </Suspense>
-      </PanelErrorBoundary>
-      <PanelErrorBoundary panelName="Spending & buckets">
-        <SpendingChart results={results} isLoading={isLoading} />
-        <BucketBar results={results} isLoading={isLoading} />
-      </PanelErrorBoundary>
-      <div className={styles.row}>
-        <PanelErrorBoundary panelName="Feasibility">
-          <Suspense fallback={<ChartFallback />}>
-            <FeasibilityChart results={results} isLoading={isLoading} />
-          </Suspense>
-        </PanelErrorBoundary>
-        <PanelErrorBoundary panelName="Goals">
-          <GoalsTable />
-        </PanelErrorBoundary>
-      </div>
-    </div>
+    <PlanView
+      results={results}
+      isLoading={isLoading}
+      SummaryStrip={SummaryStrip}
+      stressResults={stressResults}
+      stressOn={stressOn}
+      sensitivityResults={sensitivityResults}
+      sensitivityOn={sensitivityOn}
+    />
   );
 };
 

@@ -53,6 +53,13 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Completed Features
 
+- [x] **Stress Lab view + what-if crash + retirement crash (2026-09-07, ADR-009)** —
+  header Plan/Stress-Lab tabs (persisted, lazy-loaded Lab chunk); Lab hosts robustness,
+  optimizer, wealth chart, what-if controls, regimes, tornado; interactive crash
+  simulator (year + 10–50% depth sliders, 2008/COVID/dot-com presets, amber dashed
+  line coexisting with regime overlay); `retire_crash` regime (rYr−1…rYr+1 + fading
+  year, post-ret growth halved); PDF export auto-switches views for chart capture.
+
 - [x] **Withdrawal-year taxation (2026-09-07, ADR-008)** — goal LTCG split into net
   withdrawals + year-keyed tax map (exact-year deduction/deflation, totals identical
   to legacy gross); terminal SIP-liquidation LTCG at retirement (60% gains, CPS/gratuity
@@ -115,9 +122,9 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 72/72 passing as of 2026-09-07 — 9 suites: tax 9,
-  narrative 4, wiring 16, stress 19, solver 3, sensitivity 8, goals 3, score 6,
+- Unit tests: `npm test` (vitest; 80/80 passing as of 2026-09-07 — 9 suites: tax 9,
+  narrative 4, wiring 19, stress 24, solver 3, sensitivity 8, goals 3, score 6,
   validation 4)
 - Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
-- Build: `npm run build` (vite + PWA precache 22 entries, passing as of 2026-09-07;
-  Recharts panels code-split — Wealth/Tornado/Feasibility lazy chunks, main ~1.29 MB)
+- Build: `npm run build` (vite + PWA precache 24 entries, passing as of 2026-09-07;
+  Recharts panels + StressLabView code-split — lazy chunks, main ~1.28 MB)

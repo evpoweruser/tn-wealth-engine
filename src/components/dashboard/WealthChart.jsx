@@ -23,6 +23,12 @@ const CustomTooltip = ({ active, payload, goals }) => {
         </p>
         <p className={styles.tooltipRow}><span>Total wealth</span><b>₹{data.tot.toFixed(2)} Cr</b></p>
         <p className={styles.tooltipRow}><span>Liquid portfolio</span><b>₹{data.liquid.toFixed(2)} Cr</b></p>
+        {data.stressTot != null && (
+          <p className={styles.tooltipRow}><span>Stress path</span><b>₹{data.stressTot.toFixed(2)} Cr</b></p>
+        )}
+        {data.whatIfTot != null && (
+          <p className={styles.tooltipRow}><span>What-if path</span><b>₹{data.whatIfTot.toFixed(2)} Cr</b></p>
+        )}
 
         {yearGoals.length > 0 && (
           <div className={styles.goalTag}>
@@ -39,17 +45,21 @@ const CustomTooltip = ({ active, payload, goals }) => {
   return null;
 };
 
-const WealthChart = ({ results, isLoading, stressOverlay }) => {
+const WealthChart = ({ results, isLoading, stressOverlay, whatIfOverlay }) => {
   const { state, derivedState } = useEngine();
 
   if (isLoading || !results || !results.mid) {
     return <div className={styles.card}><div className={styles.loading}>Simulating portfolio paths...</div></div>;
   }
 
-  // Merge the selected deterministic stress trajectory (if any) by year.
+  // Merge deterministic overlay trajectories (regime + what-if) by year.
   const stressByYear = {};
   if (stressOverlay?.series) {
     stressOverlay.series.forEach((p) => { stressByYear[p.yr] = p.stressTot; });
+  }
+  const whatIfByYear = {};
+  if (whatIfOverlay?.series) {
+    whatIfOverlay.series.forEach((p) => { whatIfByYear[p.yr] = p.whatIfTot; });
   }
 
   const chartData = results.mid.records.map((m, i) => ({
@@ -62,6 +72,7 @@ const WealthChart = ({ results, isLoading, stressOverlay }) => {
     totLow: results.low?.records?.[i]?.tot ?? m.tot,
     totHigh: results.high?.records?.[i]?.tot ?? m.tot,
     ...(stressOverlay ? { stressTot: stressByYear[m.yr] ?? null } : {}),
+    ...(whatIfOverlay ? { whatIfTot: whatIfByYear[m.yr] ?? null } : {}),
   }));
 
   const retireYear = chartData.find(d => d.phase === 'draw')?.yr;
@@ -92,6 +103,11 @@ const WealthChart = ({ results, isLoading, stressOverlay }) => {
           {stressOverlay && (
             <span className={styles.badgeItem}>
               <span className={styles.dot} style={{ background: 'var(--accent-red)' }}></span> Stress: {stressOverlay.id}
+            </span>
+          )}
+          {whatIfOverlay && (
+            <span className={styles.badgeItem}>
+              <span className={styles.dot} style={{ background: 'var(--accent-amber, #f59e0b)' }}></span> What-if: {whatIfOverlay.label}
             </span>
           )}
           {goals.length > 0 && (
@@ -138,6 +154,18 @@ const WealthChart = ({ results, isLoading, stressOverlay }) => {
                 stroke="var(--accent-red)"
                 strokeWidth={1.75}
                 strokeDasharray="6 4"
+                dot={false}
+                connectNulls
+              />
+            )}
+            {whatIfOverlay && (
+              <Line
+                type="monotone"
+                dataKey="whatIfTot"
+                name={`What-if: ${whatIfOverlay.label}`}
+                stroke="var(--accent-amber, #f59e0b)"
+                strokeWidth={1.75}
+                strokeDasharray="2 3"
                 dot={false}
                 connectNulls
               />

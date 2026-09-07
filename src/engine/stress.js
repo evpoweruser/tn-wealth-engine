@@ -1,8 +1,9 @@
 /**
  * Stress-test engine for TN Wealth Engine.
  *
- * Applies 4 orthogonal regime overlays on top of the selected MC mode
- * and returns per-regime robustness stats.
+ * Applies 5 orthogonal regime overlays on top of the selected MC mode
+ * and returns per-regime robustness stats, plus the interactive
+ * what-if crash overlay (applyWhatIfCrash).
  *
  * Overlay logic is a pure function (applyRegimeOverlay) so it can be
  * unit-tested independently from the simulator.
@@ -37,6 +38,21 @@ export const REGIMES = [
     label: 'Medical-cost Shock',
     blurb: 'Medical inflation +2 pp all years (no hospital model)',
   },
+  {
+    id: 'retire_crash',
+    label: 'Retirement Crash',
+    blurb: 'rYr−1…rYr+1 (+fading yr): SIP −30% / −12%, post-ret growth halved, inflation +2 pp',
+  },
+];
+
+/**
+ * Crash presets for the interactive what-if overlay (depths as decimals).
+ * Year stays user-picked; these only set the first-year depth.
+ */
+export const WHATIF_PRESETS = [
+  { id: 'gfc2008', label: '2008', depth: 0.37 },
+  { id: 'covid', label: 'COVID', depth: 0.23 },
+  { id: 'dotcom', label: 'Dot-com', depth: 0.20 },
 ];
 
 /**
@@ -44,11 +60,14 @@ export const REGIMES = [
  * Returns a new params-like object with modified XIRR / rates / inflation.
  *
  * @param {{sXirr:number, cRate:number, infL:number, infM:number, infE:number, infC:number}} p
- * @param {number} yearIdx  0-based accumulation year index (for time-limited overlays)
+ * @param {number} yearIdx  0-based absolute year index (accumulation i, drawdown accYears + j)
  * @param {string} regimeId  One of the REGIMES[].id values
- * @returns {{sXirr:number, cRate:number, infL:number, infM:number, infE:number, infC:number}}
+ * @param {number} [anchorIdx=0]  Retirement-boundary index (accYears) for
+ *   retirement-anchored regimes (retire_crash); ignored by the others
+ * @returns {{sXirr:number, cRate:number, infL:number, infM:number, infE:number, infC:number, postRet?:number}}
+ *   May include `postRet` to scale drawdown growth (see runPath).
  */
-export function applyRegimeOverlay(p, yearIdx, regimeId) {
+export function applyRegimeOverlay(p, yearIdx, regimeId, anchorIdx = 0) {
   let { sXirr, cRate, infL, infM, infE, infC } = p;
 
   switch (regimeId) {
@@ -84,6 +103,27 @@ export function applyRegimeOverlay(p, yearIdx, regimeId) {
       infC = infC + 0.006;
       break;
 
+    case 'retire_crash': {
+      // Retirement-boundary crash, anchored at anchorIdx (= accYears):
+      // d=-1 last accumulation year, d=0 retirement year, d=+1 first drawdown year.
+      const d = yearIdx - anchorIdx;
+      if (d === -1) {
+        sXirr = -0.30;
+        infL = infL + 0.02; infC = infC + 0.02;
+      } else if (d === 0) {
+        sXirr = -0.12;
+        infL = infL + 0.02; infC = infC + 0.02;
+      } else if (d === 1) {
+        // sXirr is inert in drawdown (growth uses postRet) — bleed via growth + inflation.
+        infL = infL + 0.02; infC = infC + 0.02;
+        return { sXirr, cRate, infL, infM, infE, infC, postRet: 'halve' };
+      } else if (d === 2) {
+        // Fading aftershock: quarter-pace growth for one more year.
+        return { sXirr, cRate, infL, infM, infE, infC, postRet: 'quarter' };
+      }
+      break;
+    }
+
     default:
       break;
   }
@@ -92,7 +132,38 @@ export function applyRegimeOverlay(p, yearIdx, regimeId) {
 }
 
 /**
- * Run all 4 stress regimes using reduced paths.
+ * Interactive what-if crash overlay (user-picked year + depth).
+ * Pure function — same overlay contract as applyRegimeOverlay.
+ *
+ * @param {{sXirr:number, cRate:number, infL:number, infM:number, infE:number, infC:number}} p
+ * @param {number} yearIdx  Absolute year index
+ * @param {{ crashIdx:number, depth:number }} spec  depth as decimal (0.37 = −37%)
+ * @returns same shape as input (may include `postRet` directive — see below)
+ *
+ * NOTE: drawdown `postRet` directives ('halve' — growth halves while the shock
+ * window covers a drawdown year) are symbolic; runPath resolves them against
+ * params.postRetRate. This keeps overlays pure and independent of params.
+ */
+export function applyWhatIfCrash(p, yearIdx, { crashIdx, depth }) {
+  const d = Math.max(0.05, Math.min(0.6, depth || 0));
+  let { sXirr, cRate, infL, infM, infE, infC } = p;
+
+  if (yearIdx === crashIdx) {
+    sXirr = -d;
+    infL = infL + 0.02; infC = infC + 0.02;
+  } else if (yearIdx === crashIdx + 1) {
+    // Echo year (mirrors early_crash shape): half depth, mild inflation.
+    sXirr = Math.max(-0.10, p.sXirr - d / 2);
+    infL = infL + 0.01; infC = infC + 0.01;
+  } else {
+    return { sXirr, cRate, infL, infM, infE, infC };
+  }
+  // If the crash year falls in drawdown, sXirr is inert there — bleed via growth.
+  return { sXirr, cRate, infL, infM, infE, infC, postRet: 'halve' };
+}
+
+/**
+ * Run all 5 stress regimes using reduced paths.
  *
  * @param {object}   params       Simulation params (same shape as runMonteCarlo)
  * @param {string}   mode         'taps' | 'cps' | 'compare'
@@ -114,6 +185,10 @@ export function runStressPanel(params, mode, inflation, withdrawals, opts = {}) 
     wTaxDraws = null,
     sampleParams,
   } = opts;
+
+  // Retirement-boundary anchor for retirement-anchored regimes
+  // (accumulation loop runs i=0..accYears, so rYr is at index accYears).
+  const anchorIdx = Math.max(0, (params.rYr ?? 0) - (params.bYr ?? 0));
 
   return REGIMES.map((regime) => {
     const results = [];
@@ -170,12 +245,14 @@ export function runStressPanel(params, mode, inflation, withdrawals, opts = {}) 
       // Per-year overlay: applies the regime only during its labeled window.
       // applyRegimeOverlay already gates on yearIdx so post-window years
       // return rates unchanged — no more whole-horizon application.
+      // anchorIdx positions retirement-anchored regimes (retire_crash).
       const yearlyOverlay = (rates, yearIdx) =>
         applyRegimeOverlay(
           // Merge the sampled MC base rates with the overlay (not raw params)
           { ...baseRates },
           yearIdx,
-          regime.id
+          regime.id,
+          anchorIdx
         );
 
       const res = runPath(

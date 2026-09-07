@@ -296,4 +296,24 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`apuxij5bo-…`), aliased to apex;
   apex serves `index-DvbKPb4R.js` (matches local build), HTTP 200.
 
+## [2026-09-07] Stress Lab view + what-if crash + retire_crash regime (ADR-009)
+- **Goal**: Separate risk workbench (tabs, no router), interactive crash simulator,
+  retirement-boundary crash regime with drawdown bleed, PDF-safe export.
+- **Files created**: `src/components/dashboard/{PlanView,StressLabView,WhatIfCrashControls}.jsx`
+  (+ WhatIf CSS), `src/components/dashboard/Dashboard.jsx` rewritten as thin switch.
+- **Files modified**: `src/engine/stress.js` (REGIMES + `retire_crash` + `anchorIdx` +
+  `applyWhatIfCrash` + `WHATIF_PRESETS`), `src/engine/simulation.js` (`postRet`
+  overlay resolution in drawdown loop + JSDoc), `src/engine/index.js` (barrel),
+  `src/App.jsx` (persisted view tabs, `whatIf` state, shared deterministic overlay
+  helper, `onRequireView`), `src/components/dashboard/WealthChart.jsx` (amber
+  what-if line + legend + tooltip rows), `src/components/dashboard/StressPanel.jsx`
+  (TAPS-insulation footnote), `src/utils/pdfReport.js` (view-switch capture +
+  retire_crash Page-4 row), `src/App.module.css` + `Dashboard.module.css` styles,
+  `src/engine/__tests__/{stress (5→24 tests),simulation-wiring}`
+  (anchor/what-if/postRet suites), `docs/{PROGRESS.md,TASK_LOG.md,DECISIONS.md}`.
+- **Verification**: `npx vitest run` 80/80 across 9 suites; `npm run lint` 0 errors,
+  16 warnings; `npm run build` clean, precache 24, new StressLabView lazy chunk,
+  main ~1.28 MB.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 

@@ -96,6 +96,12 @@
   color: var(--accent-red);
 }
 
+.activeViewBtn {
+  border-color: var(--accent-blue, #38bdf8);
+  color: var(--accent-blue, #38bdf8);
+  background: rgba(56, 189, 248, 0.10);
+}
+
 .sidebar {
   min-height: 0;
   align-self: start;

@@ -98,6 +98,7 @@ const StressPanel = ({ stressResults, mcOn, stressOn, selectedId, onToggleOverla
       <div className={styles.footnote}>
         Stress overlaid on selected MC mode · Reduced paths per regime ·
         Holds = non-depleted share (funded-ratio deferred) · FY26-27 tax basis ·
+        TAPS pension is pay-based, so crashes hit the corpus legs, not the pension ·
         Click a row to overlay its path on the wealth chart{selectedId ? ' (click again to clear)' : ''}.
       </div>
     </div>

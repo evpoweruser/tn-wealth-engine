@@ -216,3 +216,35 @@ describe('runPath withdrawal-year taxation', () => {
     expect(drawRec.liquid * 1e7).toBeCloseTo(expected, 2);
   });
 });
+
+describe('runPath drawdown postRet overlay', () => {
+  it('halves drawdown growth while the directive covers a drawdown year', () => {
+    const base = runWithOverlay(null);
+    const halved = runWithOverlay(() => ({ sXirr, cRate, infL, infM, infE, infC, postRet: 'halve' }));
+    const baseDraw = base.records.filter((r) => r.phase === 'draw');
+    const halvDraw = halved.records.filter((r) => r.phase === 'draw');
+    expect(halvDraw.length).toBe(baseDraw.length);
+    // Every drawdown year grows slower → terminal liquid strictly lower.
+    expect(halvDraw[halvDraw.length - 1].liquid).toBeLessThan(baseDraw[baseDraw.length - 1].liquid);
+  });
+
+  it('numeric postRet override pins the exact rate', () => {
+    const zero = runWithOverlay(() => ({ sXirr, cRate, infL, infM, infE, infC, postRet: 0 }));
+    const base = runWithOverlay(null);
+    const zDraw = zero.records.filter((r) => r.phase === 'draw');
+    const bDraw = base.records.filter((r) => r.phase === 'draw');
+    expect(zDraw[zDraw.length - 1].liquid).toBeLessThan(bDraw[bDraw.length - 1].liquid);
+  });
+
+  it('absent/invalid postRet ≡ current behavior (bit-identical)', () => {
+    const base = runWithOverlay(null);
+    const plain = runWithOverlay((rates) => ({ ...rates }));
+    const garbage = runWithOverlay((rates) => ({ ...rates, postRet: 'bogus' }));
+    [plain, garbage].forEach((run) => {
+      expect(run.records.length).toBe(base.records.length);
+      run.records.forEach((r, i) => {
+        expect(r.tot).toBeCloseTo(base.records[i].tot, 12);
+      });
+    });
+  });
+});
