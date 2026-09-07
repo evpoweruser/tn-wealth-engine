@@ -1,8 +1,9 @@
 # Project Progress & Roadmap
 
 Last Updated: 2026-09-07
-Current Status: All roadmap UI + LTC + Wealth Score + hardening shipped 2026-09-07;
-see TASK_LOG. Open idea backlog: Dual-PAN tax, multi-currency NRI mode.
+Current Status: Tornado redesign (layman labels, opaque tooltips, smart action plan)
+shipped 2026-09-07; all roadmap UI + LTC + Wealth Score + hardening done; see TASK_LOG.
+Open: private-sector EPF/NPS mode. Idea backlog: Dual-PAN tax, multi-currency NRI mode.
 
 This file is the single source of truth for project state. Deep technical specs live in
 `docs/WALKTHROUGH.md` and `docs/ROBUSTNESS_AND_STRESS_PANEL.md` — linked, not duplicated.
@@ -56,6 +57,9 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
   center-axis bars (damage left/red, benefit right/green, symmetric scale), rank
   badges, hover impact cards (holds Δpp + median-bequest Δ₹), axis end labels;
   engine adds `baseBequestP50`/`bequestP50` per shock (`sensitivity.js` + tests).
+- [x] **Tornado redesign follow-up (2026-09-07, `43eaa76`)** — layman-friendly labels
+  (`friendlyLabel`/`friendlyDesc`) + per-shock smart action-plan suggestions
+  (`suggestion` {icon, headline, body}); verified live on apex.
 
 - [x] **Smart Goal Optimizer & Reverse Solver (2026-09-07)** — `src/engine/solver.js` (bisection solver for 90/95/99% survival rate + goal tradeoff evaluator) + `GoalOptimizerPanel.jsx` (interactive solver UI & tradeoff matrix) + 3 unit tests (`solver.test.js`).
 - [x] **Dead-code cleanup (2026-09-06)** — deleted unreferenced `src/assets/{react,vite}.svg`,

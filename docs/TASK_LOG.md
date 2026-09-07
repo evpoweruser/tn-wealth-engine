@@ -259,4 +259,16 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`cbgptb1mi-…`), aliased to apex;
   apex serves `index-DfImbPh4.js` containing `baseBequestP50` (tornado payload live).
 
+## [2026-09-07] Verify + deploy tornado redesign (`43eaa76`)
+- **Goal**: Check the layman-labels/opaque-tooltips/action-plan redesign works —
+  it was committed + pushed but never deployed (apex still served the older bundle).
+- **Verification**: `npx vitest run` 65/65; `npm run lint` 0 errors, 16 warnings;
+  `npm run build` clean (`index-DtG9h_ne.js`, precache 22); engine↔component field
+  check (`friendlyLabel`/`friendlyDesc`/`suggestion` present on all 5 shocks and
+  consumed by `TornadoChart.jsx`).
+- **Deploy**: `npx vercel --prod` → Production READY (`laos0jiu1-…`); apex serves
+  `index-DtG9h_ne.js` with redesign markers (`friendlyLabel` ×7, "Live 5 years
+  longer", "super top-up" ×2), HTTP 200.
+- **Git commit**: (see `git log`; docs-only, pushed).
+
 
