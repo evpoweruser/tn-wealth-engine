@@ -123,3 +123,13 @@
   Shared `estimateWithdrawalLtcg` + constants in `goals.js` prevent fraction drift.
 - **Do not**: reintroduce midpoint/lump discounting for goal taxes; do not apply the
   terminal tax to CPS balances or gratuity without a new ADR (exempt treatment assumed).
+
+## ADR-011: Family Protection Stack & Term-Cover Gap Planner
+- **Context**: Users need clarity on statutory benefits (Family Benefit Fund, Family Security Fund, Doctors Corpus Fund) vs private term insurance, and how to calculate any shortfall without double-counting existing assets.
+- **Decision**:
+  1. `protection.js` itemizes protection legs and calculates `poolWithoutTerm` (Gratuity + CPS + SIP + FBF + Security + DCF) which explicitly excludes term insurance.
+  2. Recommends a 12× annual emoluments target cover (prefilled, editable multiple).
+  3. Provides an age-band lookup table (30–34: ₹10k/Cr, 35–39: ₹14k/Cr, 40–44: ₹20k/Cr, 45–49: ₹30k/Cr, 50+: ₹45k/Cr) for healthy non-smokers to estimate annual premium and evaluate affordability vs `mSurplus`.
+- **Rationale**: Statutory legs are fixed, while term cover is contractual private insurance. Isolating the existing liquid pool prevents double-counting when recommending term cover purchases.
+- **Do not**: include term cover in the baseline existing pool when calculating protection gaps; do not present indicative premium rates as binding quotes.
+
