@@ -182,3 +182,5 @@ export const StreamPlanner = () => {
     </div>
   );
 };
+
+export default StreamPlanner;

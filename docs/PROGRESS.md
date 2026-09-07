@@ -183,9 +183,9 @@ Docs/tests/ship:
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 119/119 passing as of 2026-09-07 — 13 suites: tax 9,
+- Unit tests: `npm test` (vitest; 121/121 passing as of 2026-09-07 — 14 suites: tax 9,
   narrative 4, wiring 22, stress 26, solver 4, sensitivity 8, goals 3, score 6,
-  validation 4, panelInfo 2, streams 7, protection 14, survivor 10)
+  validation 4, panelInfo 2, streams 7, protection 14, survivor 10, stream-planner 2)
 - Lint: `npm run lint` (oxlint; 0 errors, 17 warnings as of 2026-09-07 — all pre-existing class)
 - Build: `npm run build` (vite + PWA precache 31 entries, passing as of 2026-09-07;
   Plan/Lab/Family lazy chunks, main ~1.26 MB)

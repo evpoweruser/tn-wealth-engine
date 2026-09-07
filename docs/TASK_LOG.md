@@ -450,6 +450,18 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`dbegwnk5q-…`), aliased to apex;
   apex serves `index-CZK9KG_n.js` + Family chunk with SurvivorCard live, HTTP 200.
 
+## [2026-09-07] Fix Stream Planner white-screen (missing lazy default export)
+- **Goal**: Family tab Stream Planner crashed with minified React error #306.
+- **Root cause**: extraction kept only the named export, but `FamilyView` loads it via
+  `React.lazy`, which requires a default export — resolution failed on mount. Proven by
+  elimination: named-import SSR render passes, so the component itself is sound.
+- **Files modified**: `src/components/dashboard/StreamPlanner.jsx` (added default export).
+- **Files created**: `src/components/dashboard/__tests__/stream-planner.test.jsx`
+  (lazy-contract + SSR render regression tests).
+- **Verification**: `npx vitest run` 121/121 across 14 suites; `npm run lint` 0 errors,
+  17 warnings; `npm run build` clean.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 ## [2026-09-07] Family Protection Stack & Term-Cover Gap Planner
 - **Goal**: Statutory & voluntary protection legs (FBF ₹1.5L, Family Security Fund ₹5L, Doctors Corpus Fund ₹1Cr, Term cover) + 12× annual income term gap planner with age-band premium estimator & surplus feasibility check.
 - **Files created**: `src/engine/protection.js` (`PROTECTION_LEGS`, `protectionLump`, `suggestTermTarget`, `protectionGap`, `estimateTermPremium`, `premiumFeasible`), `src/engine/__tests__/protection.test.js` (14 tests), `src/components/config/ProtectionSection.jsx` (+ CSS module).
