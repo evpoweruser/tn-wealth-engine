@@ -108,6 +108,9 @@ const WealthChart = ({ results, isLoading, stressOverlay, whatIfOverlay }) => {
           {whatIfOverlay && (
             <span className={styles.badgeItem}>
               <span className={styles.dot} style={{ background: 'var(--accent-amber, #f59e0b)' }}></span> What-if: {whatIfOverlay.label}
+              {whatIfOverlay.fallPct != null && (
+                <b>&nbsp;→ final {whatIfOverlay.fallPct <= 0 ? '' : '+'}{whatIfOverlay.fallPct.toFixed(1)}%</b>
+              )}
             </span>
           )}
           {goals.length > 0 && (

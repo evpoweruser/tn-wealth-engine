@@ -67,6 +67,7 @@ const StressLabView = ({
       <PanelErrorBoundary panelName="What-if crash">
         <WhatIfCrashControls
           whatIf={whatIf}
+          impact={whatIfOverlay}
           onChange={onWhatIfChange}
           onClear={onClearWhatIf}
         />

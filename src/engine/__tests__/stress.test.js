@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyRegimeOverlay, applyWhatIfCrash, WHATIF_PRESETS, REGIMES, runStressPanel } from '../stress.js';
+import { applyRegimeOverlay, applyWhatIfCrash, terminalFallPct, WHATIF_PRESETS, REGIMES, runStressPanel } from '../stress.js';
 
 // ── applyRegimeOverlay tests ─────────────────────────────────────────────────
 
@@ -169,6 +169,34 @@ describe('applyWhatIfCrash interactive overlay', () => {
     expect(byId.gfc2008).toBeCloseTo(0.37, 10);
     expect(byId.covid).toBeCloseTo(0.23, 10);
     expect(byId.dotcom).toBeCloseTo(0.20, 10);
+  });
+});
+
+describe('terminalFallPct', () => {
+  const base = [
+    { yr: 2044, tot: 10 },
+    { yr: 2045, tot: 11 },
+    { yr: 2046, tot: 12 },
+  ];
+
+  it('compares the last common year as a percent fall', () => {
+    const shock = [
+      { yr: 2044, whatIfTot: 10 },
+      { yr: 2045, whatIfTot: 9 },
+      { yr: 2046, whatIfTot: 8 },
+    ];
+    const { fallPct, baseTerm, shockTerm } = terminalFallPct(base, shock, 'whatIfTot');
+    expect(baseTerm).toBe(12);
+    expect(shockTerm).toBe(8);
+    expect(fallPct).toBeCloseTo(-33.333, 2);
+  });
+
+  it('ignores non-overlapping years and nulls gracefully', () => {
+    expect(terminalFallPct([], [{ yr: 2044, whatIfTot: 1 }], 'whatIfTot').fallPct).toBeNull();
+    expect(terminalFallPct(base, [], 'whatIfTot').fallPct).toBeNull();
+    expect(terminalFallPct([{ yr: 2044, tot: 0 }], [{ yr: 2044, whatIfTot: 0 }], 'whatIfTot').fallPct).toBeNull();
+    const partial = terminalFallPct(base, [{ yr: 2099, whatIfTot: 5 }], 'whatIfTot');
+    expect(partial.fallPct).toBeNull();
   });
 });
 

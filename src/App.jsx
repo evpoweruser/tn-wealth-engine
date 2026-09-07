@@ -4,7 +4,7 @@ import { useTheme } from './context/ThemeContext';
 import { useSimulation } from './hooks/useSimulation';
 import { useStressPanel } from './hooks/useStressPanel';
 import { useSensitivity } from './hooks/useSensitivity';
-import { buildSimParams, computeWithdrawals, computeWithdrawalTaxes, runPath, applyRegimeOverlay, applyWhatIfCrash } from './engine/index.js';
+import { buildSimParams, computeWithdrawals, computeWithdrawalTaxes, runPath, applyRegimeOverlay, applyWhatIfCrash, terminalFallPct } from './engine/index.js';
 import { PdfOverlay, AboutModal } from './components/shared';
 import Sidebar from './components/config/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
@@ -90,15 +90,22 @@ function App() {
         (rates, yearIdx) => applyWhatIfCrash(rates, yearIdx, { crashIdx, depth: whatIf.depth }),
         'whatIfTot'
       );
+      // Terminal fall vs the displayed median plan (last common year).
+      const { fallPct, baseTerm, shockTerm } = terminalFallPct(
+        results?.mid?.records || [], series, 'whatIfTot'
+      );
       return {
         label: `−${Math.round(whatIf.depth * 100)}% @ ${whatIf.crashYear}`,
         series,
+        fallPct,
+        baseTerm,
+        shockTerm,
       };
     } catch (err) {
       console.error('What-if overlay error:', err);
       return null;
     }
-  }, [whatIf, simParamsForStress, derivedState, state.retireMode]);
+  }, [whatIf, simParamsForStress, derivedState, state.retireMode, results]);
 
   // Plan | Stress Lab view (persisted).
   const [view, setView] = useState(() => {

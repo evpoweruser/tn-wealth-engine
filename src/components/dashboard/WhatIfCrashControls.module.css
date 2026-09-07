@@ -104,3 +104,20 @@
   border-color: var(--accent-amber, #f59e0b);
   background: rgba(245, 158, 11, 0.10);
 }
+
+.impactLine {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.impactLine b {
+  color: var(--text-primary);
+}
+
+.fallPct {
+  font-weight: 700;
+  color: var(--accent-red);
+}

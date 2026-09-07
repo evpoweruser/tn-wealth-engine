@@ -333,4 +333,18 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Deploy**: `npx vercel --prod` → Production READY (`r71l0nc7q-…`), aliased to apex;
   apex serves `index-CfwUhG7H.js` (matches local build), HTTP 200.
 
+## [2026-09-07] What-if terminal fall readout
+- **Goal**: User report — what-if line hugs the median (esp. late-horizon crashes),
+  impact invisible. Verified by repro: engine falls are real (e.g. −68% for a −30%
+  crash at rYr−1, −7% late-drawdown). Fix = explicit readout, not engine change.
+- **Files modified**: `src/engine/stress.js` (new `terminalFallPct`, barrel export),
+  `src/App.jsx` (fall/base/shock terminal in `whatIfOverlay`), `src/components/
+  dashboard/WealthChart.jsx` (legend badge shows final %), `src/components/dashboard/
+  {StressLabView,WhatIfCrashControls}.jsx` + CSS (controls card shows final-corpus ₹
+  + % fall vs plan), `src/engine/__tests__/stress.test.js` (2 new tests),
+  `docs/{PROGRESS.md,TASK_LOG.md}`.
+- **Verification**: `npx vitest run` 82/82 across 9 suites; `npm run lint` 0 errors,
+  16 warnings; `npm run build` clean, precache 24.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 

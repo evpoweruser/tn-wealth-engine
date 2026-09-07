@@ -132,6 +132,36 @@ export function applyRegimeOverlay(p, yearIdx, regimeId, anchorIdx = 0) {
 }
 
 /**
+ * Terminal fall of a shocked trajectory vs a baseline, in percent.
+ * Matches by calendar year on the overlapping tail and compares the last
+ * common point (typically the terminal corpus): (shock − base) / base × 100.
+ *
+ * @param {Array<{yr:number, tot:number}>} baseRecords - Baseline records
+ * @param {Array<{yr:number}>} shockSeries - Shocked series with a numeric value under valueKey
+ * @param {string} [valueKey='tot'] - Key holding the shocked total per year
+ * @returns {{ fallPct:number|null, baseTerm:number|null, shockTerm:number|null }}
+ */
+export function terminalFallPct(baseRecords, shockSeries, valueKey = 'tot') {
+  if (!baseRecords?.length || !shockSeries?.length) {
+    return { fallPct: null, baseTerm: null, shockTerm: null };
+  }
+  const baseByYear = new Map(baseRecords.map((r) => [r.yr, r.tot]));
+  let baseTerm = null;
+  let shockTerm = null;
+  for (const p of shockSeries) {
+    const b = baseByYear.get(p.yr);
+    if (b != null && p[valueKey] != null) {
+      baseTerm = b;
+      shockTerm = p[valueKey];
+    }
+  }
+  if (baseTerm == null || shockTerm == null || baseTerm === 0) {
+    return { fallPct: null, baseTerm, shockTerm };
+  }
+  return { fallPct: ((shockTerm - baseTerm) / baseTerm) * 100, baseTerm, shockTerm };
+}
+
+/**
  * Interactive what-if crash overlay (user-picked year + depth).
  * Pure function — same overlay contract as applyRegimeOverlay.
  *

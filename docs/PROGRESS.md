@@ -59,6 +59,9 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
   simulator (year + 10–50% depth sliders, 2008/COVID/dot-com presets, amber dashed
   line coexisting with regime overlay); `retire_crash` regime (rYr−1…rYr+1 + fading
   year, post-ret growth halved); PDF export auto-switches views for chart capture.
+- [x] **What-if terminal fall readout (2026-09-07)** — `terminalFallPct` compares the
+  shocked terminal corpus vs the median plan at the last common year; shown in the
+  chart legend badge and the controls card as final-corpus ₹ + % fall.
 
 - [x] **Withdrawal-year taxation (2026-09-07, ADR-008)** — goal LTCG split into net
   withdrawals + year-keyed tax map (exact-year deduction/deflation, totals identical
@@ -122,8 +125,8 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 80/80 passing as of 2026-09-07 — 9 suites: tax 9,
-  narrative 4, wiring 19, stress 24, solver 3, sensitivity 8, goals 3, score 6,
+- Unit tests: `npm test` (vitest; 82/82 passing as of 2026-09-07 — 9 suites: tax 9,
+  narrative 4, wiring 19, stress 26, solver 3, sensitivity 8, goals 3, score 6,
   validation 4)
 - Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
 - Build: `npm run build` (vite + PWA precache 24 entries, passing as of 2026-09-07;

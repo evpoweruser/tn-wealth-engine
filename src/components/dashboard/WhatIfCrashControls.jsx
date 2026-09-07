@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useEngine } from '../../context/EngineContext';
 import { RangeInput } from '../shared';
 import { WHATIF_PRESETS } from '../../engine';
+import { fmtCr } from '../../utils/format';
 import styles from './WhatIfCrashControls.module.css';
 
 /**
@@ -10,7 +11,7 @@ import styles from './WhatIfCrashControls.module.css';
  * trajectory is plotted over the wealth chart via the overlay path.
  * Works in calendar years; App converts to the engine's absolute year index.
  */
-const WhatIfCrashControls = ({ whatIf, onChange, onClear }) => {
+const WhatIfCrashControls = ({ whatIf, impact, onChange, onClear }) => {
   const { derivedState } = useEngine();
   const [open, setOpen] = useState(false);
 
@@ -90,6 +91,15 @@ const WhatIfCrashControls = ({ whatIf, onChange, onClear }) => {
           </button>
         ))}
       </div>
+
+      {impact?.fallPct != null && impact?.shockTerm != null && (
+        <div className={styles.impactLine} title="Terminal corpus under the shocked path vs the median plan">
+          Final corpus <b>{fmtCr(impact.shockTerm * 1e7)}</b>
+          <span className={styles.fallPct}>
+            &nbsp;({impact.fallPct <= 0 ? '' : '+'}{impact.fallPct.toFixed(1)}% vs plan)
+          </span>
+        </div>
+      )}
     </div>
   );
 };
