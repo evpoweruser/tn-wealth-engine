@@ -97,11 +97,12 @@ export function applyRegimeOverlay(p, yearIdx, regimeId) {
  * @param {object}   params       Simulation params (same shape as runMonteCarlo)
  * @param {string}   mode         'taps' | 'cps' | 'compare'
  * @param {object}   inflation    Base inflation object (infLiving, infMed, infEdu, infComposite)
- * @param {object}   withdrawals  Year-keyed goal withdrawal map
+ * @param {object}   withdrawals  Year-keyed goal withdrawal map (net of LTCG)
  * @param {object}   opts
  * @param {number}   [opts.paths=400]   Paths per regime
  * @param {string}   [opts.mcMode='A']  MC sampling breadth
  * @param {number}   [opts.rngSeed=99]  Separate seed so stress results are independent
+ * @param {object}   [opts.wTaxDraws=null]  Year-keyed goal LTCG map (pairs with withdrawals)
  * @param {Function} [opts.sampleParams]  Optional sampler override (for testing)
  * @returns {Array<{regime, holdsPct, shortYrsP50, bequestP10, exhaustPct}>}
  */
@@ -110,6 +111,7 @@ export function runStressPanel(params, mode, inflation, withdrawals, opts = {}) 
     paths: nPaths = 400,
     mcMode = 'A',
     rngSeed = 99,
+    wTaxDraws = null,
     sampleParams,
   } = opts;
 
@@ -186,7 +188,8 @@ export function runStressPanel(params, mode, inflation, withdrawals, opts = {}) 
         baseRates.infE,
         baseRates.infC,
         withdrawals,
-        yearlyOverlay   // ← proper per-year callback
+        yearlyOverlay,   // ← proper per-year callback
+        wTaxDraws        // ← year-exact goal LTCG pairing
       );
 
       results.push(res);

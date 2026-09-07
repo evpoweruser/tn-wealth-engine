@@ -22,6 +22,24 @@ export function getSipRequired(fv, annualRate, months) {
 }
 
 /**
+ * Shared LTCG assumptions for corpus withdrawals (goals + terminal SIP
+ * liquidation). Single source of truth — goals.js and simulation.js both use
+ * these so the gains fraction can never drift between modules.
+ */
+export const LTCG_GAINS_FRACTION = 0.6; // share of a withdrawal assumed to be gains
+export const LTCG_EXEMPTION = 125000; // annual ₹1.25L LTCG exemption
+export const LTCG_RATE = 0.125; // 12.5% LTCG rate
+
+/**
+ * Estimate capital-gains tax on a nominal withdrawal amount.
+ * @param {number} amount - Nominal withdrawal (₹)
+ * @returns {number} LTCG tax (₹, nominal)
+ */
+export function estimateWithdrawalLtcg(amount) {
+  return Math.max(0, amount * LTCG_GAINS_FRACTION - LTCG_EXEMPTION) * LTCG_RATE;
+}
+
+/**
  * Compute all milestone goals for all children.
  *
  * Each child has 3 milestones: Higher Secondary, College, Marriage.
@@ -52,8 +70,8 @@ export function computeGoals(children, inflation, sipXirr, baseYear) {
       // Future value with inflation
       const netFV = milestone.cost * Math.pow(1 + inflRate, yearsLeft);
 
-      // Estimated LTCG tax (assumes 60% is gains, ₹1.25L exemption, 12.5% rate)
-      const tax = Math.max(0, netFV * 0.6 - 125000) * 0.125;
+      // Estimated LTCG tax via shared assumptions (see LTCG_* above)
+      const tax = estimateWithdrawalLtcg(netFV);
       const grossFV = netFV + tax;
 
       // Required monthly SIP
@@ -81,18 +99,37 @@ export function computeGoals(children, inflation, sipXirr, baseYear) {
 
 /**
  * Compute corpus withdrawals by year from goals funded by corpus.
+ * Amounts are NET of capital-gains tax (see computeWithdrawalTaxes) so the
+ * engine can deduct each goal's tax in its own withdrawal year instead of
+ * lumping it into the withdrawal. netFV + tax === grossFV per goal.
  * @param {Array<Object>} goals - From computeGoals()
- * @param {number} retireYear - Retirement year
- * @returns {Object<number, number>} Year -> total withdrawal amount
+ * @returns {Object<number, number>} Year -> total net withdrawal amount
  */
 export function computeWithdrawals(goals) {
   const withdrawals = {};
   (goals || []).forEach(g => {
     if (g.fund === 'corpus') {
-      withdrawals[g.year] = (withdrawals[g.year] || 0) + g.grossFV;
+      withdrawals[g.year] = (withdrawals[g.year] || 0) + g.netFV;
     }
   });
   return withdrawals;
+}
+
+/**
+ * Compute capital-gains tax due by year on corpus-funded goal withdrawals.
+ * Pairs 1:1 with computeWithdrawals — the engine deducts both in the
+ * withdrawal year (exact timing) instead of midpoint-discounting a lump sum.
+ * @param {Array<Object>} goals - From computeGoals()
+ * @returns {Object<number, number>} Year -> total LTCG tax amount (nominal ₹)
+ */
+export function computeWithdrawalTaxes(goals) {
+  const taxes = {};
+  (goals || []).forEach(g => {
+    if (g.fund === 'corpus' && g.tax > 0) {
+      taxes[g.year] = (taxes[g.year] || 0) + g.tax;
+    }
+  });
+  return taxes;
 }
 
 /**

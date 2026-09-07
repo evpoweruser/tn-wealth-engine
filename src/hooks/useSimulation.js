@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useDebounce } from './useDebounce.js';
-import { runPath, runMonteCarlo, computeWithdrawals, computeDedicatedSIP, buildSimParams } from '../engine/index.js';
+import { runPath, runMonteCarlo, computeWithdrawals, computeWithdrawalTaxes, computeDedicatedSIP, buildSimParams } from '../engine/index.js';
 
 export function useSimulation(state, derivedState) {
   const debouncedState = useDebounce(state, 150);
@@ -17,6 +17,7 @@ export function useSimulation(state, derivedState) {
 
       const mode = debouncedState.retireMode || 'taps';
       const withdrawals = computeWithdrawals(goals || []);
+      const wTaxDraws = computeWithdrawalTaxes(goals || []);
       const dedicatedSIP = computeDedicatedSIP(goals || [], simParams.bYr, simParams.rYr);
 
       const feasibility = {
@@ -43,7 +44,9 @@ export function useSimulation(state, derivedState) {
           inflationData.infMed,
           inflationData.infEdu,
           inflationData.infComposite,
-          withdrawals
+          withdrawals,
+          undefined,
+          wTaxDraws
         );
 
         const detDepleted = !!res.depletedYear;
@@ -89,7 +92,8 @@ export function useSimulation(state, derivedState) {
             runs: Number(debouncedState.mcRuns) || 1000,
             mcMode: debouncedState.mcMode || 'A',
             rngSeed: 42,
-          }
+          },
+          wTaxDraws
         );
 
         return {

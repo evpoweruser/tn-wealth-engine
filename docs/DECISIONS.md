@@ -76,3 +76,18 @@
   the app remains usable when one panel fails.
 - **Do not**: add unguarded engine calls in render-path `useMemo`s; return null or
   catch to the boundary.
+
+## ADR-008: Withdrawal-year taxation is deducted from the corpus (supersedes ADR-003 display-only)
+- **Context**: Lifetime tax mixed three bills with different timing: annual pension
+  income tax (correct as annual), goal-withdrawal LTCG (grossed into withdrawals +
+  midpoint-discounted into display), and terminal liquidation (untaxed). ADR-003's
+  display-only rule hid real liabilities from survival math.
+- **Decision**: (1) Goal withdrawals are booked NET (`computeWithdrawals`) with a paired
+  year-keyed LTCG map (`computeWithdrawalTaxes`); both deducted in the withdrawal year
+  with exact-year deflation — totals identical to the old gross treatment, timing now
+  exact. (2) One-time LTCG on SIP corpus liquidation at retirement (60% gains fraction
+  shared via `LTCG_*` constants; CPS/gratuity untouched). (3) Pension tax acts as a
+  monthly drag (`netDrawdown += tax/12`). All three accumulate nominal + exact-real.
+  Shared `estimateWithdrawalLtcg` + constants in `goals.js` prevent fraction drift.
+- **Do not**: reintroduce midpoint/lump discounting for goal taxes; do not apply the
+  terminal tax to CPS balances or gratuity without a new ADR (exempt treatment assumed).

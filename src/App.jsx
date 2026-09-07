@@ -4,7 +4,7 @@ import { useTheme } from './context/ThemeContext';
 import { useSimulation } from './hooks/useSimulation';
 import { useStressPanel } from './hooks/useStressPanel';
 import { useSensitivity } from './hooks/useSensitivity';
-import { buildSimParams, computeWithdrawals, runPath, applyRegimeOverlay } from './engine/index.js';
+import { buildSimParams, computeWithdrawals, computeWithdrawalTaxes, runPath, applyRegimeOverlay } from './engine/index.js';
 import { PdfOverlay, AboutModal } from './components/shared';
 import Sidebar from './components/config/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
@@ -47,7 +47,8 @@ function App() {
         inflationData.infEdu,
         inflationData.infComposite,
         computeWithdrawals(goals || []),
-        (rates, yearIdx) => applyRegimeOverlay({ ...rates }, yearIdx, stressOverlayId)
+        (rates, yearIdx) => applyRegimeOverlay({ ...rates }, yearIdx, stressOverlayId),
+        computeWithdrawalTaxes(goals || [])
       );
       return {
         id: stressOverlayId,

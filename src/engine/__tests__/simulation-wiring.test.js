@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { runPath } from '../simulation.js';
 import { applyRegimeOverlay } from '../stress.js';
+import { estimateWithdrawalLtcg } from '../goals.js';
+import { pensionTaxForYear } from '../tax.js';
 
 // ── runPath yearlyOverlay wiring tests ────────────────────────────────────────
 // Task: drawdown-loop overlay invocation (docs/PROGRESS.md). The overlay must
@@ -157,5 +159,60 @@ describe('runPath long-term care (LTC) modeling', () => {
     expect(shockRec.age).toBe(75);
     expect(shockRec.ltcShock).toBeCloseTo(500000, 6);
     expect(on.records.filter((r) => r.ltcShock > 0).length).toBe(1);
+  });
+});
+
+describe('runPath withdrawal-year taxation', () => {
+  it('net + tax split matches legacy gross withdrawal on balances, with exact-year tax attribution', () => {
+    const Y = 2030;
+    const net = 500_000;
+    const tax = 75_000;
+    const split = runPath({ ...params }, mode, cRate, sXirr, infL, infM, infE, infC, { [Y]: net }, null, { [Y]: tax });
+    const gross = runPath({ ...params }, mode, cRate, sXirr, infL, infM, infE, infC, { [Y]: net + tax });
+    // Balances bit-identical (net + tax === gross outflow)…
+    expect(split.records.length).toBe(gross.records.length);
+    split.records.forEach((r, i) => {
+      expect(r.tot).toBeCloseTo(gross.records[i].tot, 10);
+      expect(r.liquid).toBeCloseTo(gross.records[i].liquid, 10);
+    });
+    // …but the split run attributes the tax nominally and in real terms.
+    expect(split.taxNominal - gross.taxNominal).toBeCloseTo(tax, 6);
+    expect(split.taxReal).toBeGreaterThan(gross.taxReal);
+  });
+
+  it('deducts terminal SIP liquidation tax once at retirement (SIP only)', () => {
+    const res = runWithOverlay(null);
+    const expectedTax = estimateWithdrawalLtcg(res.finSIP);
+    expect(expectedTax).toBeGreaterThan(0);
+    // liquidStart = residualCPS(0 in taps) + finSIP + gratuity − terminal tax
+    expect(res.liquidStart).toBeCloseTo(res.finSIP + params.gratuity - expectedTax, 4);
+    expect(res.taxNominal).toBeGreaterThanOrEqual(expectedTax);
+  });
+
+  it('applies zero terminal tax when the SIP balance is negligible', () => {
+    const noSip = runPath({ ...params, sipMo: 0 }, mode, cRate, sXirr, infL, infM, infE, infC, {});
+    expect(estimateWithdrawalLtcg(noSip.finSIP)).toBe(0);
+    expect(noSip.liquidStart).toBeCloseTo(noSip.finSIP + params.gratuity, 4);
+  });
+
+  it('pension tax acts as a monthly drag on drawdown liquid', () => {
+    const p = {
+      ...params,
+      bYr: 2026, rYr: 2026, endYr: 2027, // 1 accumulation + 1 drawdown year
+      sipMo: 0, gratuity: 1_000_000, retSpend: 100_000, medShare: 0,
+      postRetRate: 0, cpsBal: 0, cpsAnn: 0,
+      lastPay: { tapsPension: 60_000, emoluments: 0 },
+    };
+    const res = runPath(p, 'taps', cRate, sXirr, infL, infM, infE, infC, {});
+    // TAPS pension is indexed by composite inflation, spend by living inflation:
+    // one drawdown year at infC=infL → pension 60000×1.05, spend 100000×1.045.
+    const indexedPension = 60_000 * (1 + infC);
+    const indexedSpend = 100_000 * (1 + infL);
+    const yearTax = pensionTaxForYear(indexedPension * 12);
+    expect(res.taxNominal).toBeCloseTo(yearTax, 6);
+    // 1e6 liquid − 12 months × (indexed spend − indexed pension + tax/12)
+    const expected = 1_000_000 - 12 * (indexedSpend - indexedPension + yearTax / 12);
+    const drawRec = res.records.find((r) => r.phase === 'draw');
+    expect(drawRec.liquid * 1e7).toBeCloseTo(expected, 2);
   });
 });

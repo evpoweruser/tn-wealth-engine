@@ -53,6 +53,11 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Completed Features
 
+- [x] **Withdrawal-year taxation (2026-09-07, ADR-008)** — goal LTCG split into net
+  withdrawals + year-keyed tax map (exact-year deduction/deflation, totals identical
+  to legacy gross); terminal SIP-liquidation LTCG at retirement (60% gains, CPS/gratuity
+  exempt); pension tax as monthly drawdown drag; midpoint discount removed.
+
 - [x] **Sensitivity tornado visualization upgrade (2026-09-07)** — true diverging
   center-axis bars (damage left/red, benefit right/green, symmetric scale), rank
   badges, hover impact cards (holds Δpp + median-bequest Δ₹), axis end labels;
@@ -110,8 +115,9 @@ Rule: `.agents/rules/tracking.md`. Chronological log: `docs/TASK_LOG.md`. Why-ar
 
 ## Verification Commands
 
-- Unit tests: `npm test` (vitest; 65/65 passing as of 2026-09-07 — 8 suites: tax 9,
-  narrative 4, wiring 12, stress 19, solver 3, sensitivity 8, score 6, validation 4)
+- Unit tests: `npm test` (vitest; 72/72 passing as of 2026-09-07 — 9 suites: tax 9,
+  narrative 4, wiring 16, stress 19, solver 3, sensitivity 8, goals 3, score 6,
+  validation 4)
 - Lint: `npm run lint` (oxlint; 0 errors, 16 warnings as of 2026-09-07 — all pre-existing class)
 - Build: `npm run build` (vite + PWA precache 22 entries, passing as of 2026-09-07;
   Recharts panels code-split — Wealth/Tornado/Feasibility lazy chunks, main ~1.29 MB)

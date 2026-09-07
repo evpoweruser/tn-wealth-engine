@@ -6,7 +6,7 @@
  */
 
 import { runMonteCarlo } from './simulation.js';
-import { computeGoals, computeWithdrawals } from './goals.js';
+import { computeGoals, computeWithdrawals, computeWithdrawalTaxes } from './goals.js';
 
 /**
  * Solve for the parameter value required to achieve target Monte Carlo survival %
@@ -16,7 +16,8 @@ import { computeGoals, computeWithdrawals } from './goals.js';
  *   bYr/rYr/endYr present, rates as decimals. NEVER raw context state.
  * @param {string} [options.mode='taps'] - 'taps' | 'cps' | 'compare'
  * @param {object} options.inflation - Inflation rates object
- * @param {object} [options.withdrawals={}] - Year-keyed goal withdrawals map
+ * @param {object} [options.withdrawals={}] - Year-keyed goal withdrawals map (net of LTCG)
+ * @param {object} [options.wTaxDraws=null] - Year-keyed goal LTCG map
  * @param {number} [options.targetSurvivePct=99] - Target plan survival percentage (e.g. 99)
  * @param {string} [options.solveField='sipStep'] - Field to solve for: 'sipStep' | 'sipMo' | 'retSpend'
  * @param {number} [options.mcRuns=250] - Number of runs per solver iteration
@@ -30,6 +31,7 @@ export function solveTargetSurvival({
   targetSurvivePct = 99,
   solveField = 'sipStep',
   mcRuns = 250,
+  wTaxDraws = null,
 }) {
   const mcConfig = { runs: mcRuns, mcMode: 'A', rngSeed: 42 };
 
@@ -57,7 +59,7 @@ export function solveTargetSurvival({
 
   const evalSurvive = (testVal) => {
     const testParams = { ...params, [solveField]: toEngine(solveField, testVal) };
-    const res = runMonteCarlo(testParams, mode, inflation, withdrawals, mcConfig);
+    const res = runMonteCarlo(testParams, mode, inflation, withdrawals, mcConfig, wTaxDraws);
     return res.survivePct;
   };
 
@@ -96,7 +98,7 @@ export function solveTargetSurvival({
 
   // Final verification with 1,000 runs
   const finalParams = { ...params, [solveField]: toEngine(solveField, bestVal) };
-  const finalMC = runMonteCarlo(finalParams, mode, inflation, withdrawals, { runs: 1000, mcMode: 'A', rngSeed: 42 });
+  const finalMC = runMonteCarlo(finalParams, mode, inflation, withdrawals, { runs: 1000, mcMode: 'A', rngSeed: 42 }, wTaxDraws);
 
   return {
     field: solveField,
@@ -126,10 +128,11 @@ export function solveTargetSurvival({
 export function evaluateGoalTradeoff({ simParams, mode = 'taps', inflation, children = [], goalModifications = [] }) {
   const mcConfig = { runs: 500, mcMode: 'A', rngSeed: 42 };
 
-  // Baseline withdrawals & MC (goals computed with the canonical engine signature)
+  // Baseline withdrawals (+ paired LTCG map) & MC (goals computed with the canonical engine signature)
   const baseGoalData = computeGoals(children, inflation, simParams.sipXirr, simParams.bYr);
   const baseWithdrawals = computeWithdrawals(baseGoalData);
-  const baseMC = runMonteCarlo(simParams, mode, inflation, baseWithdrawals, mcConfig);
+  const baseTaxDraws = computeWithdrawalTaxes(baseGoalData);
+  const baseMC = runMonteCarlo(simParams, mode, inflation, baseWithdrawals, mcConfig, baseTaxDraws);
 
   // Apply goal modifications
   const modifiedChildren = (children || []).map((child) => {
@@ -150,7 +153,8 @@ export function evaluateGoalTradeoff({ simParams, mode = 'taps', inflation, chil
 
   const modGoalData = computeGoals(modifiedChildren, inflation, simParams.sipXirr, simParams.bYr);
   const modWithdrawals = computeWithdrawals(modGoalData);
-  const modMC = runMonteCarlo(simParams, mode, inflation, modWithdrawals, mcConfig);
+  const modTaxDraws = computeWithdrawalTaxes(modGoalData);
+  const modMC = runMonteCarlo(simParams, mode, inflation, modWithdrawals, mcConfig, modTaxDraws);
 
   return {
     baselineSurvivePct: Math.round(baseMC.survivePct),

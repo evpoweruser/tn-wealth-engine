@@ -113,11 +113,12 @@ export const SENSITIVITY_SHOCKS = [
  * @param {object} params       Simulation params
  * @param {string} mode         'taps' | 'cps' | 'compare'
  * @param {object} inflation    Base inflation object
- * @param {object} withdrawals  Year-keyed goal withdrawals
+ * @param {object} withdrawals  Year-keyed goal withdrawals (net of LTCG)
  * @param {object} opts
  * @param {number} [opts.paths=400]   Reduced paths (300-500)
  * @param {string} [opts.mcMode='A']  MC mode
  * @param {number} [opts.rngSeed=77]  RNG seed for reproducibility
+ * @param {object} [opts.wTaxDraws=null]  Year-keyed goal LTCG map
  * @returns {{ baseHolds: number, baseBequestP50: number, paths: number, shocks: Array }}
  *   Each shock: { id, label, desc, baseHolds, shockedHolds, delta,
  *   baseBequestP50, bequestP50 } — bequests are median real ₹ (for ₹ impact cards).
@@ -127,10 +128,11 @@ export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) 
     paths = 400,
     mcMode = 'A',
     rngSeed = 77,
+    wTaxDraws = null,
   } = opts;
 
   const baseConfig = { runs: paths, mcMode, rngSeed };
-  const baseResult = runMonteCarlo(params, mode, inflation, withdrawals, baseConfig);
+  const baseResult = runMonteCarlo(params, mode, inflation, withdrawals, baseConfig, wTaxDraws);
   const baseHolds = baseResult.survivePct;
   const baseBequestP50 = baseResult.bequestP50 ?? 0;
 
@@ -139,7 +141,7 @@ export function runSensitivity(params, mode, inflation, withdrawals, opts = {}) 
     // Use the SAME seed as baseline (Common Random Numbers).
     // This ensures Δpp is purely due to the shock, not sampling noise.
     const shockConfig = { runs: paths, mcMode, rngSeed }; // same seed as base
-    const shockResult = runMonteCarlo(shockedParams, mode, shockedInflation, withdrawals, shockConfig);
+    const shockResult = runMonteCarlo(shockedParams, mode, shockedInflation, withdrawals, shockConfig, wTaxDraws);
     const shockedHolds = shockResult.survivePct;
     const delta = shockedHolds - baseHolds;
 

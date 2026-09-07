@@ -22,7 +22,7 @@
 export function buildSimParams(state, derivedState) {
   if (!state || !derivedState) return null;
 
-  const { baseYear, retireYear, endYear, currentAge, lastPay, goals } = derivedState;
+  const { baseYear, retireYear, endYear, currentAge, lastPay } = derivedState;
 
   const pcBumps = {};
   if (state.payCommissions) {
@@ -55,10 +55,6 @@ export function buildSimParams(state, derivedState) {
     // Long-term care modeling (engine defaults apply unless ltcOn is true).
     ltcOn: state.ltcOn === true,
   };
-
-  // Sum goals LTCG tax for lifetime-tax display (informational; already embedded
-  // in grossFV withdrawals, so this is display-only, not a double-deduction).
-  simParams.goalsLtcgNominal = (goals || []).reduce((sum, g) => sum + (g.tax || 0), 0);
 
   return simParams;
 }

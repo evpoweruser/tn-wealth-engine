@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useDebounce } from './useDebounce.js';
 import { runSensitivity } from '../engine/sensitivity.js';
-import { computeWithdrawals } from '../engine/index.js';
+import { computeWithdrawals, computeWithdrawalTaxes } from '../engine/index.js';
 
 export function useSensitivity(state, derivedState, simParams, sensitivityOn) {
   const debouncedState   = useDebounce(state, 300);
@@ -28,15 +28,16 @@ export function useSensitivity(state, derivedState, simParams, sensitivityOn) {
       // Reduced paths: clamp(round(mcRuns/3), 300, 500)
       const paths = Math.min(500, Math.max(300, Math.round(mcRuns / 3)));
 
-      // Use real goal withdrawals so sensitivity results stay consistent with headline sim
+      // Use real goal withdrawals (+ paired LTCG map) so sensitivity results stay consistent with headline sim
       const withdrawals = computeWithdrawals(debouncedDerived.goals || []);
+      const wTaxDraws = computeWithdrawalTaxes(debouncedDerived.goals || []);
 
       return runSensitivity(
         debouncedParams,
         mode,
         inflationData,
         withdrawals,
-        { paths, mcMode, rngSeed: 77 }
+        { paths, mcMode, rngSeed: 77, wTaxDraws }
       );
     } catch (err) {
       console.error('Sensitivity analysis error:', err);

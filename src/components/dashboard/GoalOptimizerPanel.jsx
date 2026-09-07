@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useEngine } from '../../context/EngineContext';
-import { solveTargetSurvival, evaluateGoalTradeoff, buildSimParams, computeWithdrawals } from '../../engine';
+import { solveTargetSurvival, evaluateGoalTradeoff, buildSimParams, computeWithdrawals, computeWithdrawalTaxes } from '../../engine';
 import { formatIndianRupeeWords } from '../../utils/format';
 import styles from './GoalOptimizerPanel.module.css';
 
@@ -42,6 +42,7 @@ export const GoalOptimizerPanel = () => {
           mode,
           inflation,
           withdrawals: computeWithdrawals(derivedState.goals || []),
+          wTaxDraws: computeWithdrawalTaxes(derivedState.goals || []),
           targetSurvivePct,
           solveField,
           mcRuns: 250,

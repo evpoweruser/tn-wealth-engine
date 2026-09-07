@@ -7,7 +7,7 @@
 export { ASSET_RETURNS, computeBlendedReturn } from './allocation.js';
 export { computeInflation, shockInflation, validateWeights } from './inflation.js';
 export { projectLastPay, buildDetailedCPS } from './career.js';
-export { computeGoals, computeWithdrawals, computeDedicatedSIP, getSipRequired } from './goals.js';
+export { computeGoals, computeWithdrawals, computeWithdrawalTaxes, computeDedicatedSIP, getSipRequired, estimateWithdrawalLtcg, LTCG_GAINS_FRACTION, LTCG_EXEMPTION, LTCG_RATE } from './goals.js';
 export { runPath, runMonteCarlo, randn, percentile } from './simulation.js';
 export { runStressPanel, applyRegimeOverlay, REGIMES } from './stress.js';
 export { runSensitivity, SENSITIVITY_SHOCKS } from './sensitivity.js';

@@ -271,4 +271,27 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   longer", "super top-up" ×2), HTTP 200.
 - **Git commit**: (see `git log`; docs-only, pushed).
 
+## [2026-09-07] Withdrawal-year taxation (deduct-from-liquid, ADR-008)
+- **Goal**: Tax each bill in the year it's due, from the corpus: year-exact goal LTCG,
+  terminal SIP-liquidation LTCG at retirement, pension tax as monthly drawdown drag.
+- **Files created**: `src/engine/__tests__/goals.test.js` (3 tests: LTCG math, net+tax==gross
+  invariant, empty/non-corpus maps).
+- **Files modified**: `src/engine/goals.js` (`computeWithdrawals`→net, new
+  `computeWithdrawalTaxes`/`estimateWithdrawalLtcg`/`LTCG_*` constants, shared by
+  `computeGoals`), `src/engine/simulation.js` (`runPath` `wTaxDraws` param, acc/drawdown
+  pairing, terminal SIP tax, pension drag, midpoint block removed),
+  `src/engine/simulation.js` `runMonteCarlo` passthrough, `src/engine/{stress,
+  sensitivity,solver}.js` forwarding, `src/hooks/{useSimulation,useStressPanel,
+  useSensitivity}.js`, `src/components/dashboard/GoalOptimizerPanel.jsx`, `src/App.jsx`
+  (overlay), `src/workers/mcWorker.js` (parity forward; still unreferenced),
+  `src/engine/params.js` (dropped `goalsLtcgNominal`), `src/engine/index.js` (barrel),
+  `src/engine/__tests__/simulation-wiring.test.js` (4 new tests: split≡gross balances,
+  terminal tax math, zero-SIP case, pension-drag closed form), `docs/{PROGRESS.md,
+  TASK_LOG.md,DECISIONS.md}` (ADR-008).
+- **Verification**: `npx vitest run` 72/72 across 9 suites — no threshold breaks
+  (solver `achieved≥90` etc. hold under the new real drags); `npm run lint` 0 errors,
+  16 warnings; `npm run build` clean. New drags move survival/bequest down slightly
+  by construction (previously ignored bills now modeled) — reviewed, expected.
+- **Git commit**: (see `git log`; pushed + deployed).
+
 

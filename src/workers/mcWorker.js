@@ -6,7 +6,7 @@ function clamp(x, a, b) {
 }
 
 self.onmessage = function(e) {
-  const { params, mode, inflation, withdrawals, mcConfig } = e.data;
+  const { params, mode, inflation, withdrawals, mcConfig, wTaxDraws = null } = e.data;
   const { runs = 1000, mcMode = 'A' } = mcConfig;
   
   const paths = [];
@@ -40,7 +40,7 @@ self.onmessage = function(e) {
       cRate = clamp(params.cpsRate + randn() * 0.008, 0.04, 0.12);
     }
     
-    const res = runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, withdrawals);
+    const res = runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, withdrawals, undefined, wTaxDraws);
     paths.push(res);
     if (!res.depletedYear) survive++;
   }

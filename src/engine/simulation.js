@@ -6,6 +6,7 @@
 
 import { shockInflation } from './inflation.js';
 import { pensionTaxForYear } from './tax.js';
+import { LTCG_GAINS_FRACTION, LTCG_EXEMPTION, LTCG_RATE } from './goals.js';
 
 // ---------------------------------------------------------------------------
 // Seedable RNG — mulberry32 (fast, good statistical quality, ~20 lines)
@@ -64,20 +65,30 @@ function clamp(x, a, b) {
  * @param {number} infM          Medical inflation (decimal)
  * @param {number} infE          Education inflation (decimal)
  * @param {number} infC          Composite inflation (decimal)
- * @param {object} [wDraws]      Year-keyed goal withdrawal map
-  * @param {Function} [yearlyOverlay]  Optional per-year rate modifier:
-  *   (rates: {sXirr, cRate, infL, infM, infE, infC}, yearIdx: number) => same shape.
-  *   Called at the start of each accumulation and drawdown year. yearIdx is the
-  *   absolute year index (0-based from the base year): accumulation year i,
-  *   drawdown year accYears + j. Return rates are used for that year only.
+ * @param {object} [wDraws]      Year-keyed goal withdrawal map (NET of LTCG — see wTaxDraws)
+ * @param {Function} [yearlyOverlay]  Optional per-year rate modifier:
+ *   (rates: {sXirr, cRate, infL, infM, infE, infC}, yearIdx: number) => same shape.
+ *   Called at the start of each accumulation and drawdown year. yearIdx is the
+ *   absolute year index (0-based from the base year): accumulation year i,
+ *   drawdown year accYears + j. Return rates are used for that year only.
+ * @param {object} [wTaxDraws]   Year-keyed capital-gains tax map for goal
+ *   withdrawals (pairs 1:1 with wDraws years). Deducted from balances in the
+ *   withdrawal year with exact-year deflation into taxReal.
  */
-export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, yearlyOverlay) {
+export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDraws, yearlyOverlay, wTaxDraws = null) {
   let cpsAnn = params.cpsAnn;
   let sipMo = params.sipMo;
   let cpsBal = params.cpsBal;
   let sipBal = 0;
   const accYears = Math.max(0, params.rYr - params.bYr);
   const records = [];
+
+  // --- Lifetime-tax accumulators (nominal ₹ + exact-year-deflated real ₹).
+  // Fed by goal-withdrawal LTCG in the accumulation loop, the terminal SIP
+  // liquidation tax at the retirement transition, and pension tax + goal LTCG
+  // in the drawdown loop.
+  let taxNominal = 0;
+  let taxReal    = 0;
 
   // Running cumulative inflation indices (1.0 = base year purchasing power)
   let cumInfL = 1.0;
@@ -132,9 +143,18 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       sipBal = (sipBal + sipMo) * (1 + ySXirr / 12);
     }
 
-    // Withdraw for goals funded from SIP corpus
+    // Withdraw for goals funded from SIP corpus (net amount; the paired
+    // capital-gains tax is deducted separately below for exact-year attribution)
     if (wDraws && wDraws[yr] && wDraws[yr] > 0) {
       sipBal = Math.max(0, sipBal - wDraws[yr]);
+    }
+    // Capital-gains tax on this year's goal withdrawals — deducted from the
+    // corpus in the withdrawal year (not midpoint-discounted).
+    if (wTaxDraws && wTaxDraws[yr] && wTaxDraws[yr] > 0 && sipBal > 0) {
+      const goalTax = Math.min(sipBal, wTaxDraws[yr]);
+      sipBal -= goalTax;
+      taxNominal += goalTax;
+      taxReal += goalTax / cumInfC;
     }
 
     const total = cpsBal + sipBal;
@@ -170,6 +190,19 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   const monthlyPension = mode === 'taps' ? tapsP : cpsPension;
   const residualCPS = mode === 'taps' ? 0 : Math.max(0, finCPS - annuityCorpus);
   let liquid = residualCPS + finSIP + params.gratuity;
+
+  // Terminal capital-gains tax on SIP corpus liquidation at retirement.
+  // Gains fraction mirrors the goals assumption (60% of balance); CPS and
+  // gratuity are untouched. Deducted before the liquidStart snapshot.
+  // (Shared constants live in goals.js LTCG_GAINS_FRACTION / LTCG_*.)
+  const sipGains = finSIP * LTCG_GAINS_FRACTION;
+  const sipTaxable = Math.max(0, sipGains - LTCG_EXEMPTION);
+  const terminalSipTax = sipTaxable * LTCG_RATE;
+  if (terminalSipTax > 0) {
+    liquid = Math.max(0, liquid - terminalSipTax);
+    taxNominal += terminalSipTax;
+    taxReal += terminalSipTax / cumInfCAtRetire;
+  }
   const liquidStart = liquid;
 
   // === DRAWDOWN PHASE ===
@@ -191,9 +224,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   // --- Robustness accumulators ---
   let shortYears = 0;          // count of years where liquid hits 0
   let firstShortYear = null;   // first such year
-  let taxNominal = 0;          // Σ annual pension tax (nominal ₹)
-  let taxReal    = 0;          // Σ annual pension tax deflated to today's ₹ (per-year, exact)
-  let lifetimeMedSpendNominal = 0; // stub – medical spend (future feature)
+  let lifetimeMedSpendNominal = 0; // Σ annual medical spend (nominal ₹)
 
   for (let j = 1; j <= drawdownYears; j++) {
     const yr = params.rYr + j;
@@ -227,14 +258,15 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
     const monthlyExp = medExp + livExp;
     lifetimeMedSpendNominal += medExp * 12;
 
-    const netDrawdown = Math.max(0, monthlyExp - pension);
-
-    // Simplified pension tax: annualise monthly pension for slab lookup
+    // Simplified pension tax: annualise monthly pension for slab lookup.
+    // The tax is a real drag on the corpus (monthly slice of the annual bill).
     const annualPension = pension * 12;
     const yearTaxNominal = pensionTaxForYear(annualPension);
     taxNominal += yearTaxNominal;
     // Per-year deflation (exact): discount each year's tax by exact cumulative inflation
     taxReal += yearTaxNominal / cumInfC;
+
+    const netDrawdown = Math.max(0, monthlyExp - pension + yearTaxNominal / 12);
 
     for (let mm = 0; mm < 12; mm++) {
       liquid = liquid * (1 + params.postRetRate / 12) - netDrawdown;
@@ -245,9 +277,19 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
       }
     }
 
-    // Deduct post-retirement lump-sum milestone goal if due this year
+    // Deduct post-retirement lump-sum milestone goal (net) if due this year,
+    // plus its capital-gains tax — same exact-year pairing as accumulation.
     if (wDraws && wDraws[yr] && wDraws[yr] > 0) {
       liquid = Math.max(0, liquid - wDraws[yr]);
+      if (liquid === 0 && !depletedYear) {
+        depletedYear = yr;
+      }
+    }
+    if (wTaxDraws && wTaxDraws[yr] && wTaxDraws[yr] > 0 && liquid > 0) {
+      const goalTax = Math.min(liquid, wTaxDraws[yr]);
+      liquid -= goalTax;
+      taxNominal += goalTax;
+      taxReal += goalTax / cumInfC;
       if (liquid === 0 && !depletedYear) {
         depletedYear = yr;
       }
@@ -295,12 +337,9 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
   const bequestNominal = termRec ? termRec.tot * 1e7 : 0;
   const bequestReal    = termRec ? termRec.real * 1e7 : 0;
 
-  // Add goals LTCG to real tax (informational — goal tax is already embedded in
-  // grossFV withdrawals, so this is display-only, not a double-deduction).
-  const goalsLtcgNominal = params.goalsLtcgNominal || 0;
-  // Goals LTCG is spread across accumulation years; discount at midpoint
-  const goalsLtcgReal = goalsLtcgNominal / Math.pow(1 + infC, accYears / 2);
-  taxReal += goalsLtcgReal;
+  // NOTE: goal-withdrawal LTCG is no longer midpoint-discounted here — it is
+  // deducted year-exact via wTaxDraws in both loops above (plus the terminal
+  // SIP liquidation tax at the retirement transition).
 
   return {
     records,
@@ -330,7 +369,7 @@ export function runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, wDra
 // ---------------------------------------------------------------------------
 // runMonteCarlo
 // ---------------------------------------------------------------------------
-export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
+export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig, wTaxDraws = null) {
   const { runs = 1000, mcMode = 'A', rngSeed = 42 } = mcConfig;
   const paths = [];
   let survive = 0;
@@ -364,7 +403,7 @@ export function runMonteCarlo(params, mode, inflation, withdrawals, mcConfig) {
       cRate = clamp(params.cpsRate + randnWith(runRng) * 0.008, 0.04, 0.12);
     }
 
-    const res = runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, withdrawals);
+    const res = runPath(params, mode, cRate, sXirr, infL, infM, infE, infC, withdrawals, undefined, wTaxDraws);
     paths.push(res);
     if (!res.depletedYear) survive++;
   }
