@@ -330,5 +330,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
   `npm run build` clean, precache 24. Headless PDF pixels can't be verified here —
   user to confirm one export from each view.
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`r71l0nc7q-…`), aliased to apex;
+  apex serves `index-CfwUhG7H.js` (matches local build), HTTP 200.
 
 
