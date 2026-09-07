@@ -421,5 +421,7 @@ test counts from actual runs, and deploy URLs only when a deploy happened.
 - **Verification**: `npx vitest run` 95/95 across 11 suites; `npm run lint` 0 errors,
   16 warnings; `npm run build` clean; zero leftover stepper references (grep).
 - **Git commit**: (see `git log`; pushed + deployed).
+- **Deploy**: `npx vercel --prod` → Production READY (`918df68cx-…`), aliased to apex;
+  apex serves `index-BqNduFn5.js` (matches local build), HTTP 200.
 
 
